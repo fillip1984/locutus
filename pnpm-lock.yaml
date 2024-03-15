@@ -111,6 +111,9 @@ importers:
       '@acme/tsconfig':
         specifier: workspace:^0.1.0
         version: link:../../tooling/typescript
+      '@acme/validators':
+        specifier: workspace:^0.1.0
+        version: link:../../packages/validators
       '@babel/core':
         specifier: ^7.24.0
         version: 7.24.0

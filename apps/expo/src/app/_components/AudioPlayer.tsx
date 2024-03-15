@@ -1,17 +1,19 @@
 import { Text, View } from "react-native";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 
-export default function AudioPlayer() {
+import type { PlaylistItemType } from "@acme/validators";
+
+export default function AudioPlayer({ media }: { media: PlaylistItemType }) {
   return (
     <View className="flex w-full rounded bg-slate-900">
-      <TrackInfo />
+      <TrackInfo media={media} />
       <TrackProgress />
       <Controls />
     </View>
   );
 }
 
-const TrackInfo = () => {
+const TrackInfo = ({ media }: { media: PlaylistItemType }) => {
   return (
     <View className="flex flex-row items-center gap-4 p-4">
       <View className="flex h-24 w-24 items-center justify-center rounded-lg bg-slate-300">
@@ -19,9 +21,7 @@ const TrackInfo = () => {
       </View>
       <View className="flex gap-2">
         <Text className="font-semibold text-sky-300">Ep. 128</Text>
-        <Text className="font-bold text-slate-300">
-          Scaling CSS at Heroky with Utility Classes
-        </Text>
+        <Text className="font-bold text-slate-300">{media.title}</Text>
         <Text className="text-lg font-extrabold text-white">
           Full Stack Radio
         </Text>
