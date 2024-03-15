@@ -1,4 +1,4 @@
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 
 export default function AudioPlayer() {
@@ -46,17 +46,15 @@ const TrackProgress = () => {
 };
 
 const Controls = () => {
+  // TODO: figure out how to get expo vector to play with nativewind
   return (
-    <View className="flex flex-row justify-evenly rounded-b bg-slate-400 p-2">
+    <View className="flex flex-row justify-evenly rounded-b bg-slate-400 p-4">
       <Ionicons name="bookmark-outline" size={24} color="black" />
       <Ionicons name="play-skip-back-sharp" size={24} color="black" />
-      <Pressable className="rotate-180 -scale-y-100">
-        <Ionicons name="refresh-outline" size={24} color="black" />
-      </Pressable>
+      <FontAwesome6 name="arrow-rotate-left" size={24} color="black" />
       <Ionicons name="play-sharp" size={24} color="black" />
-      <Ionicons name="pause" size={24} color="black" />
+      <Ionicons onp name="pause" size={24} color="black" />
       <FontAwesome6 name="arrow-rotate-right" size={24} color="black" />
-      <Ionicons name="refresh-outline" size={24} color="black" />
       <Ionicons name="play-skip-forward" size={24} color="black" />
     </View>
   );
