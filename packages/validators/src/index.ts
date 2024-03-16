@@ -1,3 +1,4 @@
+import type { Audio } from "expo-av";
 import { z } from "zod";
 
 export const CreatePostSchema = z.object({
@@ -12,3 +13,13 @@ export const PlaylistItem = z.object({
 });
 
 export type PlaylistItemType = z.infer<typeof PlaylistItem>;
+
+export interface PlayerType {
+  playing: boolean;
+  source?: PlaylistItemType;
+  internal?: Audio.Sound;
+  position?: string;
+  percentComplete?: number;
+  duration?: string;
+  durationRemaining?: string;
+}
