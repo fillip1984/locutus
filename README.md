@@ -1,3 +1,3 @@
 # locutus
 
-Audiobook player
+Audiobook player built with react native
