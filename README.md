@@ -6,7 +6,7 @@ Using expo AV for playback... a little archaic but it's getting the job done for
 
 ## UI
 
-![screenshot](Simulator Screenshot - iPhone 12 Pro Max - 2024-03-15 at 22.39.44.png)
+![screenshot](screenshot.png)
 Top shows list of tracks via cards, not spent much time here, when pressed the middle audio player and smaller audio player start and track progress.
 
 Larger audio player is a reproduction of the tailwind [dark mode example](https://tailwindcss.com/#dark-mode)
