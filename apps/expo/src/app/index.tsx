@@ -88,7 +88,6 @@ export default function Index() {
   }, [player.source]);
 
   useEffect(() => {
-    console.log({ playing: player.playing });
     if (player.playing) {
       void player.internal?.playAsync();
     } else {
