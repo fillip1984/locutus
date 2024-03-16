@@ -4,6 +4,15 @@ Audiobook player built with react native. This is a t3 turbo repo with a NextJS 
 
 Using expo AV for playback... a little archaic but it's getting the job done for now.
 
+## UI
+
+![screenshot](/Simulator Screenshot - iPhone 12 Pro Max - 2024-03-15 at 22.39.44.png)
+Top shows list of tracks via cards, not spent much time here, when pressed the middle audio player and smaller audio player start and track progress.
+
+Larger audio player is a reproduction of the tailwind [dark mode example](https://tailwindcss.com/#dark-mode)
+
+The smaller audio player is a reproduction of what you see in Spotify when minimizing the player
+
 ## Current state
 
 I'm learning React Native but so far it's moving along nicely. Have audio files playing, it's glitchy and a work in progress but it demonstrates a number of things:
