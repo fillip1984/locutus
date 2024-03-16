@@ -1,8 +1,14 @@
 import type { Dispatch, SetStateAction } from "react";
 import { Text, View } from "react-native";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
+import { format } from "date-fns";
+import { cssInterop } from "nativewind";
 
 import type { PlayerType, PlaylistItemType } from "@acme/validators";
+
+cssInterop(FontAwesome6, {
+  target: "style",
+});
 
 export default function AudioPlayer({
   player,
@@ -16,7 +22,7 @@ export default function AudioPlayer({
       {player.source && player.internal && (
         <View>
           <TrackInfo media={player.source} />
-          <TrackProgress player={player} setPlayer={setPlayer} />
+          <TrackProgress player={player} />
           <Controls player={player} setPlayer={setPlayer} />
         </View>
       )}
@@ -41,24 +47,34 @@ const TrackInfo = ({ media }: { media: PlaylistItemType }) => {
   );
 };
 
-const TrackProgress = ({
-  player,
-  setPlayer,
-}: {
-  player: PlayerType;
-  setPlayer: Dispatch<SetStateAction<PlayerType>>;
-}) => {
+const TrackProgress = ({ player }: { player: PlayerType }) => {
   return (
     <View className="flex gap-4 p-4">
       <View className="relative">
+        {/* TODO: progress slide is not smooth at all and the knob may overshoot the end */}
         <View
-          className="absolute z-10 h-2 rounded-lg bg-sky-300"
+          className="absolute z-10 h-2 rounded-lg bg-sky-300 transition-all duration-75 ease-in-out"
           style={{ width: `${player.percentComplete ?? 0}%` }}></View>
-        <View className="absolute h-2 w-full rounded-lg bg-slate-500 transition-all duration-75 ease-in-out"></View>
+        <View
+          className="absolute -bottom-[12px] z-20 h-5 w-5 rounded-full bg-sky-300"
+          style={{
+            left: `${
+              player.percentComplete
+                ? player.percentComplete === 100
+                  ? 100
+                  : player.percentComplete - 1
+                : 0
+            }%`,
+          }}></View>
+        <View className="absolute h-2 w-full rounded-lg bg-slate-500"></View>
       </View>
       <View className="flex flex-row justify-between">
-        <Text className="text-sky-300">{player.position}</Text>
-        <Text className="text-slate-300">{player.durationRemaining}</Text>
+        <Text className="text-sky-300">
+          {format(player.positionMillis ?? 0, "mm:ss")}
+        </Text>
+        <Text className="text-slate-300">
+          {format(player.durationRemainingMillis ?? 0, "mm:ss")}
+        </Text>
       </View>
     </View>
   );
@@ -73,10 +89,19 @@ const Controls = ({
 }) => {
   // TODO: figure out how to get expo vector to play with nativewind
   return (
-    <View className="flex flex-row justify-evenly rounded-b bg-slate-400 p-4">
-      <Ionicons name="bookmark-outline" size={24} color="black" />
-      <Ionicons name="play-skip-back-sharp" size={24} color="black" />
-      <FontAwesome6 name="arrow-rotate-left" size={24} color="black" />
+    <View className="flex flex-row items-center justify-evenly rounded-b bg-slate-400 p-1">
+      {/* <Ionicons name="bookmark-outline" size={30} color="black" /> */}
+      <Ionicons name="play-skip-back-sharp" size={30} color="black" />
+      <FontAwesome6
+        onPress={() => {
+          void player.internal?.setPositionAsync(
+            player.positionMillis ? player.positionMillis - 30000 : 0,
+          );
+        }}
+        name="arrow-rotate-left"
+        size={30}
+        color="black"
+      />
       {player.playing ? (
         <Ionicons
           onPress={() =>
@@ -85,7 +110,7 @@ const Controls = ({
             })
           }
           name="pause"
-          size={24}
+          size={40}
           color="black"
         />
       ) : (
@@ -96,12 +121,21 @@ const Controls = ({
             })
           }
           name="play-sharp"
-          size={24}
+          size={40}
           color="black"
         />
       )}
-      <FontAwesome6 name="arrow-rotate-right" size={24} color="black" />
-      <Ionicons name="play-skip-forward" size={24} color="black" />
+      <FontAwesome6
+        onPress={() => {
+          void player.internal?.setPositionAsync(
+            player.positionMillis ? player.positionMillis + 30000 : 0,
+          );
+        }}
+        name="arrow-rotate-right"
+        size={30}
+        color="black"
+      />
+      <Ionicons name="play-skip-forward" size={30} color="black" />
     </View>
   );
 };

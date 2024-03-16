@@ -18,8 +18,8 @@ export interface PlayerType {
   playing: boolean;
   source?: PlaylistItemType;
   internal?: Audio.Sound;
-  position?: string;
+  positionMillis?: number;
   percentComplete?: number;
-  duration?: string;
-  durationRemaining?: string;
+  durationMillis?: number;
+  durationRemainingMillis?: number;
 }

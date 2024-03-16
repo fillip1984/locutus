@@ -1,12 +1,12 @@
 import type { AVPlaybackStatus } from "expo-av";
 import { useEffect, useState } from "react";
 import { Pressable, SafeAreaView, Text, View } from "react-native";
-import { Audio } from "expo-av";
-import { format } from "date-fns";
+import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 
 import type { PlayerType, PlaylistItemType } from "@acme/validators";
 
 import AudioPlayer from "./_components/AudioPlayer";
+import MinimizedAudioPlayer from "./_components/MinimizedAudioPlayer";
 
 export default function Index() {
   const [player, setPlayer] = useState({
@@ -49,66 +49,35 @@ export default function Index() {
     },
   ];
 
-  // const player: PlayerType = {
-  //   playing: false,
-  //   source: undefined,
-  //   internal: undefined,
-  // };
-
-  // useEffect(() => {
-  //   player.source = playlist[0];
-  //   console.log({ player });
-  // }, [playlist]);
-
-  // useEffect(() => {
-  //   const loadPlayerInternals = async () => {
-  //     if (player.source) {
-  //       console.log({ playerBeforeInternals: player });
-  //       const { sound } = await Audio.Sound.createAsync(
-  //         { uri: player.source.link },
-  //         { shouldPlay: false },
-  //       );
-  //       player.internal = sound;
-  //       console.log({ playerAsInternals: player });
-  //     }
-  //   };
-  //   void loadPlayerInternals();
-  // }, [player.source]);
-
   useEffect(() => {
     const loadPlayerInternals = async () => {
       if (player.source) {
+        void Audio.setAudioModeAsync({
+          playsInSilentModeIOS: true,
+          interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+          interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+        });
         const { sound } = await Audio.Sound.createAsync(
           { uri: player.source.link },
           { shouldPlay: player.playing },
         );
+
         player.internal = sound;
         player.internal?.setOnPlaybackStatusUpdate((s: AVPlaybackStatus) => {
           if (s.isLoaded) {
-            // console.log({ s });
             const durationMillis = s.durationMillis ?? 1;
-            const durationRemaining = durationMillis - s.positionMillis;
-            // console.log({
-            //   durationRemaining,
-            //   pos: s.positionMillis,
-            //   posPerc: Math.round((s.positionMillis / s.durationMillis) * 100),
-            // });
+            const durationRemainingMillis = durationMillis - s.positionMillis;
             setPlayer((prev) => {
               return {
                 ...prev,
-                position: format(s.positionMillis, "mm:ss"),
+                positionMillis: s.positionMillis,
                 percentComplete: Math.round(
                   (s.positionMillis / durationMillis) * 100,
                 ),
-                duration: format(durationMillis, "mm:ss"),
-                durationRemaining: format(durationRemaining, "mm:ss"),
+                durationMillis,
+                durationRemainingMillis,
               };
             });
-            // console.log({
-            //   position: format(s.positionMillis, "mm:ss"),
-            //   duration: format(s.durationMillis, "mm:ss"),
-            //   playable_buffered: format(s.playableDurationMillis, "mm:ss"),
-            // });
           }
         });
       }
@@ -123,15 +92,15 @@ export default function Index() {
     if (player.playing) {
       void player.internal?.playAsync();
     } else {
-      void player.internal?.stopAsync();
+      void player.internal?.pauseAsync();
     }
 
     return () => void player.internal?.stopAsync;
   }, [player.playing]);
 
   return (
-    <SafeAreaView>
-      <View className="flex h-screen gap-2">
+    <SafeAreaView className="bg-slate-800">
+      <View className="flex h-screen gap-2 bg-slate-800">
         {playlist.map((media) => (
           <Pressable
             onPress={() =>
@@ -149,6 +118,10 @@ export default function Index() {
 
         {player.source?.title && (
           <AudioPlayer player={player} setPlayer={setPlayer} />
+        )}
+
+        {player.source?.title && (
+          <MinimizedAudioPlayer player={player} setPlayer={setPlayer} />
         )}
       </View>
     </SafeAreaView>
