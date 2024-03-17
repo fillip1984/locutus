@@ -7,9 +7,10 @@ export const CreatePostSchema = z.object({
 });
 
 export const PlaylistItem = z.object({
+  id: z.number().nullish(),
   title: z.string().min(1),
   link: z.string().url(),
-  video: z.boolean(),
+  video: z.boolean().default(false),
 });
 
 export type PlaylistItemType = z.infer<typeof PlaylistItem>;

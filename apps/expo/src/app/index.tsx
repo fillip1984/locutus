@@ -1,53 +1,36 @@
 import type { AVPlaybackStatus } from "expo-av";
 import { useEffect, useState } from "react";
-import { Pressable, SafeAreaView, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
+import { Link } from "expo-router";
 
 import type { PlayerType, PlaylistItemType } from "@acme/validators";
 
+import { readAll, testDB } from "~/utils/DBClient";
 import AudioPlayer from "./_components/AudioPlayer";
 import MinimizedAudioPlayer from "./_components/MinimizedAudioPlayer";
 
 export default function Index() {
+  const [playlist, setPlaylist] = useState<PlaylistItemType[]>([]);
   const [player, setPlayer] = useState({
     playing: false,
     source: undefined,
     internal: undefined,
   } as PlayerType);
-  const playlist: PlaylistItemType[] = [
-    {
-      title: "Comfort Fit - 'Sorry'",
-      link: "https://s3.amazonaws.com/exp-us-standard/audio/playlist-example/Comfort_Fit_-_03_-_Sorry.mp3",
-      video: false,
-    },
-    {
-      title: "Big Buck Bunny",
-      link: "http://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4",
-      video: true,
-    },
-    {
-      title: "Mildred Bailey – “All Of Me”",
-      link: "https://ia800304.us.archive.org/34/items/PaulWhitemanwithMildredBailey/PaulWhitemanwithMildredBailey-AllofMe.mp3",
-      video: false,
-    },
 
-    {
-      title: "Popeye - I don't scare",
-      link: "https://ia800501.us.archive.org/11/items/popeye_i_dont_scare/popeye_i_dont_scare_512kb.mp4",
-      video: true,
-    },
+  useEffect(() => {
+    const migrateAndTest = async () => {
+      console.log("testing out db");
+      await testDB();
+      console.log("tested out db");
 
-    {
-      title: "Podington Bear - “Rubber Robot”",
-      link: "https://s3.amazonaws.com/exp-us-standard/audio/playlist-example/Podington_Bear_-_Rubber_Robot.mp3",
-      video: false,
-    },
-    {
-      title: "Ray Charles - I can't stop loving you",
-      link: "https://ia801302.us.archive.org/19/items/ICantStopLovingYou/07.ICantStopLovingYou1.mp3",
-      video: false,
-    },
-  ];
+      console.log("init state");
+      setPlaylist(await readAll());
+      console.log("inited state");
+    };
+    void migrateAndTest();
+  }, []);
 
   useEffect(() => {
     const loadPlayerInternals = async () => {
@@ -110,7 +93,7 @@ export default function Index() {
             key={media.title}
             className="bg-slate-300 p-2">
             {/* <View> */}
-            <Text>{media.title}</Text>
+            <Link href={"/media"}>{media.title}</Link>
             {/* </View> */}
           </Pressable>
         ))}

@@ -11,6 +11,7 @@ module.exports = withTurborepoManagedCache(
       input: "./src/styles.css",
       configPath: "./tailwind.config.ts",
     }),
+    withDrizzleLocalStorage(getDefaultConfig(__dirname))
   ),
 );
 
@@ -51,5 +52,14 @@ function withTurborepoManagedCache(config) {
   config.cacheStores = [
     new FileStore({ root: path.join(__dirname, "node_modules/.cache/metro") }),
   ];
+  return config;
+}
+
+/**
+ * Required for Drizzle usage to integrate with sqlite for local/offline storage
+ * 
+ */
+function withDrizzleLocalStorage(config) {
+  config.resolver.sourceExts.push('sql');
   return config;
 }
