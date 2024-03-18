@@ -27,9 +27,9 @@ export default function Media() {
         <View className="flex h-screen gap-2 bg-slate-800 p-2">
           <TopActionsBar />
           <MediaArtAndImportantInfo media={media} />
-          <MediaActionsBar media={media} />
-          <MediaSummary media={media} />
-          <MediaTracks media={media} />
+          <MediaActionsBar />
+          <MediaSummary />
+          <MediaTracks />
         </View>
       )}
     </SafeAreaView>
@@ -63,7 +63,7 @@ const MediaArtAndImportantInfo = ({ media }: { media: PlaylistItemType }) => {
   );
 };
 
-const MediaActionsBar = ({ media }: { media: PlaylistItemType }) => {
+const MediaActionsBar = () => {
   return (
     <View className="flex flex-row items-center justify-between">
       {/* main button */}
@@ -83,7 +83,7 @@ const MediaActionsBar = ({ media }: { media: PlaylistItemType }) => {
   );
 };
 
-const MediaSummary = ({ media }: { media: PlaylistItemType }) => {
+const MediaSummary = () => {
   return (
     <View className="mt-4">
       <Text className="text-stone-300">
@@ -112,7 +112,7 @@ const MediaSummary = ({ media }: { media: PlaylistItemType }) => {
   );
 };
 
-const MediaTracks = ({ media }: { media: PlaylistItemType }) => {
+const MediaTracks = () => {
   return (
     <View className="mt-4">
       <View className="flex flex-row justify-between">
