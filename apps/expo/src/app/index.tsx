@@ -1,15 +1,13 @@
 import type { AVPlaybackStatus } from "expo-av";
-import { useEffect, useState } from "react";
-import { Pressable, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import { Link } from "expo-router";
 
 import type { PlayerType, PlaylistItemType } from "@acme/validators";
 
-import { readAll, testDB } from "~/utils/DBClient";
-import AudioPlayer from "./_components/AudioPlayer";
-import MinimizedAudioPlayer from "./_components/MinimizedAudioPlayer";
+import { readAll } from "~/store/mediaStore";
 
 export default function Index() {
   const [playlist, setPlaylist] = useState<PlaylistItemType[]>([]);
@@ -20,16 +18,11 @@ export default function Index() {
   } as PlayerType);
 
   useEffect(() => {
-    const migrateAndTest = async () => {
-      console.log("testing out db");
-      await testDB();
-      console.log("tested out db");
-
-      console.log("init state");
+    // TODO: replace with Tanstack?
+    const fetchData = async () => {
       setPlaylist(await readAll());
-      console.log("inited state");
     };
-    void migrateAndTest();
+    void fetchData();
   }, []);
 
   useEffect(() => {
@@ -81,30 +74,31 @@ export default function Index() {
   }, [player.playing]);
 
   return (
-    <SafeAreaView className="bg-slate-800">
-      <View className="flex h-screen gap-2 bg-slate-800">
+    <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
+      <View className="flex h-screen gap-4 bg-slate-800 p-4">
+        {playlist.length === 0 && (
+          <View className="flex h-screen items-center justify-center">
+            <Text className="text-2xl text-white">
+              There&apos;s nothing to play
+            </Text>
+          </View>
+        )}
+
         {playlist.map((media) => (
-          <Pressable
-            onPress={() =>
-              setPlayer((prev) => {
-                return { ...prev, source: media };
-              })
-            }
-            key={media.title}
-            className="bg-slate-300 p-2">
-            {/* <View> */}
-            <Link href={"/media"}>{media.title}</Link>
-            {/* </View> */}
-          </Pressable>
+          <Link href={`/media/${media.id}`} key={media.title} asChild>
+            <Pressable className="h-24 w-full rounded bg-slate-400 p-2">
+              <Text>{media.title}</Text>
+            </Pressable>
+          </Link>
         ))}
 
-        {player.source?.title && (
+        {/* {player.source?.title && (
           <AudioPlayer player={player} setPlayer={setPlayer} />
         )}
 
         {player.source?.title && (
           <MinimizedAudioPlayer player={player} setPlayer={setPlayer} />
-        )}
+        )} */}
       </View>
     </SafeAreaView>
   );

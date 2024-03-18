@@ -20,7 +20,7 @@ I'm learning React Native but so far it's moving along nicely. Have audio files 
 
 1) How to play audio files
 2) How to track and manipulate state, rewind/fastforward, and change tracks
-3) UI leaves some improvement which has been marked in the files with TODO: tags
+3) UI leaves some room for improvement which has been marked in the files with TODO: tags
 
 ## TODO
 
