@@ -85,7 +85,7 @@ export default function Index() {
         )}
 
         {playlist.map((media) => (
-          <Link href={`/media/${media.id}`} key={media.title} asChild>
+          <Link href={`/(media)/${media.id}`} key={media.title} asChild>
             <Pressable className="h-24 w-full rounded bg-slate-400 p-2">
               <Text>{media.title}</Text>
             </Pressable>
