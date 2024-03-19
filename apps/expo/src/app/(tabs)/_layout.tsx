@@ -3,13 +3,16 @@ import { FontAwesome, Ionicons } from "@expo/vector-icons";
 
 export default function TabLayout() {
   return (
+    // TODO: create transparent tabbar, for example: https://www.patreon.com/posts/create-blurred-92171969
     <Tabs
-      screenOptions={
-        {
-          // tabBarActiveTintColor: "white",
-          // tabBarBackground: () => <View className="bg-slate-800"></View>,
-        }
-      }>
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: "#fff",
+        tabBarStyle: {
+          backgroundColor: "rgb(30 41 59)",
+          borderBlockColor: "rgb(30 41 59)",
+        },
+      }}>
       <Tabs.Screen
         name="index"
         options={{

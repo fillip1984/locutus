@@ -82,5 +82,5 @@ export const loadSampleData = () => {
   playlist.forEach((item) => {
     void create(item);
   });
-  console.log("loading sample data");
+  console.log("loaded sample data");
 };

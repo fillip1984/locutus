@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router, useLocalSearchParams } from "expo-router";
+import { Link, router, useLocalSearchParams } from "expo-router";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 
 import type { PlaylistItemType } from "@acme/validators";
@@ -77,7 +77,9 @@ const MediaActionsBar = () => {
         <Ionicons name="cloud-download-outline" size={24} color="white" />
         {/* TODO: add actions that make sense, like add to reading queue/bookmark, download, mark as read */}
         {/* TODO: need to work out sheet that slides up to reveal options */}
-        <FontAwesome6 name="ellipsis" size={24} color="white" />
+        <Link href={`/(media)/modal`} asChild>
+          <FontAwesome6 name="ellipsis" size={24} color="white" />
+        </Link>
       </View>
     </View>
   );

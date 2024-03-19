@@ -13,12 +13,17 @@ export default function RootLayout() {
     <TRPCProvider>
       {/* TODO: is there a way to style safe area using tailwind/nativewind?  */}
       {/* TODO: style safe area to match background, right now I'm doing this <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>  */}
-      {/* <Stack
+      <Stack
         screenOptions={{
           headerShown: false,
-        }}></Stack> */}
-      <Stack>
+        }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="(media)/modal"
+          options={{
+            presentation: "modal",
+          }}
+        />
       </Stack>
       <StatusBar />
     </TRPCProvider>

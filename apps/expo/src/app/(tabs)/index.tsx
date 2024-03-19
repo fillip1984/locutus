@@ -4,6 +4,7 @@ import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import { Link } from "expo-router";
+import { FlashList } from "@shopify/flash-list";
 
 import type { PlayerType, PlaylistItemType } from "@acme/validators";
 
@@ -75,8 +76,22 @@ export default function Index() {
 
   return (
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
-      <View className="flex h-screen gap-4 bg-slate-800 p-4">
-        {playlist.length === 0 && (
+      {/* TODO: not happy with bottom padding, is there a better more accurate way to add it in? */}
+      {/* TODO: hide or customize scrollbar, right now it sits ontop of elements */}
+      <View className="h-screen bg-slate-800 p-4 pb-48">
+        <FlashList
+          className="scrollbar"
+          data={playlist}
+          estimatedItemSize={playlist.length}
+          renderItem={({ item }) => (
+            <Link href={`/(media)/${item.id}`} asChild>
+              <Pressable className="my-2 h-24 w-full rounded bg-slate-400 p-2">
+                <Text>{item.title}</Text>
+              </Pressable>
+            </Link>
+          )}
+        />
+        {/*   {playlist.length === 0 && (
           <View className="flex h-screen items-center justify-center">
             <Text className="text-2xl text-white">
               There&apos;s nothing to play
@@ -85,12 +100,12 @@ export default function Index() {
         )}
 
         {playlist.map((media) => (
-          <Link href={`/(media)/${media.id}`} key={media.title} asChild>
+          <Link href={`/(media)/${media.id}`} key={media.id} asChild>
             <Pressable className="h-24 w-full rounded bg-slate-400 p-2">
               <Text>{media.title}</Text>
             </Pressable>
           </Link>
-        ))}
+        ))} */}
 
         {/* {player.source?.title && (
           <AudioPlayer player={player} setPlayer={setPlayer} />
