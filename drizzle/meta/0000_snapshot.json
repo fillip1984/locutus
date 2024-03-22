@@ -1,48 +1,18 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "e414eef1-a062-4cde-8248-4c823d324ddf",
+  "id": "8e1f1677-8e82-4db3-bebf-600749451d8c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "library": {
-      "name": "library",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
     "libraryItem": {
       "name": "libraryItem",
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "integer",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": false
-        },
-        "ino": {
-          "name": "ino",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "autoincrement": true
         },
         "title": {
           "name": "title",
@@ -74,9 +44,9 @@
         },
         "libraryId": {
           "name": "libraryId",
-          "type": "text",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         }
       },
@@ -99,29 +69,15 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "libraryItemAudioFile": {
-      "name": "libraryItemAudioFile",
+    "library": {
+      "name": "library",
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "integer",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": false
-        },
-        "index": {
-          "name": "index",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "duration": {
-          "name": "duration",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "autoincrement": true
         },
         "name": {
           "name": "name",
@@ -129,38 +85,10 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
-        },
-        "path": {
-          "name": "path",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "libraryItemId": {
-          "name": "libraryItemId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "libraryItemAudioFile_libraryItemId_libraryItem_id_fk": {
-          "name": "libraryItemAudioFile_libraryItemId_libraryItem_id_fk",
-          "tableFrom": "libraryItemAudioFile",
-          "tableTo": "libraryItem",
-          "columnsFrom": [
-            "libraryItemId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     }
