@@ -1,4 +1,4 @@
-import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
@@ -12,19 +12,21 @@ function TabBarIcon(props: {
 export default function TabLayout() {
   return (
     <Tabs
-      screenOptions={
-        {
-          //  tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-          // Disable the static render of the header on web
-          // to prevent a hydration error in React Navigation v6.
-          // headerShown: useClientOnlyValue(false, true),
-        }
-      }>
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: "#fff",
+        tabBarStyle: {
+          backgroundColor: "rgb(30 41 59)",
+          borderBlockColor: "rgb(30 41 59)",
+        },
+      }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: "Tab One",
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: "Home",
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="home-sharp" size={24} color={color} />
+          ),
           // headerRight: () => (
           //   <Link href="/modal" asChild>
           //     <Pressable>
@@ -42,10 +44,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="settings"
         options={{
-          title: "Tab Two",
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: "Settings",
+          tabBarIcon: ({ color }) => (
+            <FontAwesome name="gears" size={24} color={color} />
+          ),
         }}
       />
     </Tabs>
