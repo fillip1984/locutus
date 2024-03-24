@@ -73,10 +73,11 @@ export default function TabOneScreen() {
               </Link>
             ))}
           </View>
-          <View className="flex items-center justify-center pb-48" />
-          <Pressable>
-            <FontAwesome name="arrow-circle-up" size={48} color="white" />
-          </Pressable>
+          <View className="flex items-center justify-center pb-[600px]">
+            <Pressable className="mt-8">
+              <FontAwesome name="arrow-circle-up" size={48} color="white" />
+            </Pressable>
+          </View>
         </ScrollView>
         {/* <View className="flex flex-row">
           <FlashList

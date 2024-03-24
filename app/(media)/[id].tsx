@@ -1,4 +1,4 @@
-import { FontAwesome6, Ionicons } from "@expo/vector-icons";
+import { FontAwesome, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { eq } from "drizzle-orm";
 import { Link, router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
@@ -60,7 +60,9 @@ export default function Media() {
           <MediaArtAndImportantInfo libraryItem={libraryItem} />
           <MediaActionsBar libraryItem={libraryItem} />
           <MediaSummary libraryItem={libraryItem} />
-          <MediaTracks libraryItem={libraryItem} audioFiles={audioFiles} />
+          {audioFiles && (
+            <MediaTracks libraryItem={libraryItem} audioFiles={audioFiles} />
+          )}
         </View>
       )}
     </SafeAreaView>
@@ -120,7 +122,7 @@ const MediaActionsBar = ({
         <Ionicons name="cloud-download-outline" size={24} color="white" />
         {/* TODO: add actions that make sense, like add to reading queue/bookmark, download, mark as read */}
         {/* TODO: need to work out sheet that slides up to reveal options */}
-        <Link href="/(libraryItem)/modal" asChild>
+        <Link href="/(media)/modal" asChild>
           <FontAwesome6 name="ellipsis" size={24} color="white" />
         </Link>
       </View>
@@ -135,7 +137,9 @@ const MediaSummary = ({
 }) => {
   return (
     <View className="mt-4">
-      <Text className="text-stone-300">{libraryItem.description}</Text>
+      <Text className="line-clamp-6 text-stone-300">
+        {libraryItem.description}
+      </Text>
 
       {/* TODO: looks like more CSS GRID would be a better fit here as well */}
       <View className="mt-4">
@@ -170,12 +174,17 @@ const MediaTracks = ({
         {audioFiles?.map((audioFile) => (
           <View
             key={audioFile.id}
-            className="m-1 flex flex-row justify-between rounded bg-slate-400/30 p-4">
+            className="m-1 flex flex-row justify-between gap-2 rounded bg-slate-400/30 p-4">
             <Text className="text-white">{audioFile.name}</Text>
             {/* <Text className="text-white">43:12</Text> */}
             <FontAwesome6 name="circle-play" size={24} color="white" />
           </View>
         ))}
+        <View className="flex items-center justify-center pb-[600px]">
+          <Pressable className="mt-8">
+            <FontAwesome name="arrow-circle-up" size={48} color="white" />
+          </Pressable>
+        </View>
       </ScrollView>
     </View>
   );
