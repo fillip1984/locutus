@@ -7,11 +7,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { localDb } from "@/db";
 import {
+  LibraryItemAudioFileSchemaType,
   LibraryItemSchemaType,
   libraryItemAudioFileSchema,
-  libraryItemAudioFileSchemaType,
   libraryItemSchema,
 } from "@/db/schema";
+import { downloadLibraryItem } from "@/services/libraryItemApi";
 
 export default function Media() {
   const { id } = useLocalSearchParams();
@@ -19,7 +20,7 @@ export default function Media() {
     LibraryItemSchemaType | null | undefined
   >(null);
   const [audioFiles, setAudioFiles] = useState<
-    libraryItemAudioFileSchemaType[] | null
+    LibraryItemAudioFileSchemaType[] | null
   >();
 
   useEffect(() => {
@@ -52,13 +53,31 @@ export default function Media() {
     fetchData();
   }, [id]);
 
+  const handleDownload = async (libraryItemId: string, fileId: string) => {
+    console.log("downloading");
+    if (fileId === "*" && audioFiles) {
+      // TODO: download them all, right now just doing one
+      const file = await downloadLibraryItem(
+        libraryItemId,
+        audioFiles[0].remoteId,
+      );
+      await localDb
+        .update(libraryItemAudioFileSchema)
+        .set({ path: file })
+        .where(eq(libraryItemAudioFileSchema.remoteId, audioFiles[0].remoteId));
+    }
+  };
+
   return (
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
       {libraryItem && (
         <View className="flex h-screen gap-2 bg-slate-800 p-2">
           <TopActionsBar />
           <MediaArtAndImportantInfo libraryItem={libraryItem} />
-          <MediaActionsBar libraryItem={libraryItem} />
+          <MediaActionsBar
+            libraryItem={libraryItem}
+            handleDownload={handleDownload}
+          />
           <MediaSummary libraryItem={libraryItem} />
           {audioFiles && (
             <MediaTracks libraryItem={libraryItem} audioFiles={audioFiles} />
@@ -104,8 +123,10 @@ const MediaArtAndImportantInfo = ({
 
 const MediaActionsBar = ({
   libraryItem,
+  handleDownload,
 }: {
   libraryItem: LibraryItemSchemaType;
+  handleDownload: (libraryItemId: string, fileId: string) => void;
 }) => {
   return (
     <View className="flex flex-row items-center justify-between">
@@ -119,7 +140,12 @@ const MediaActionsBar = ({
       </Link>
       {/* other menu items */}
       <View className="mr-2 flex flex-row items-center gap-4">
-        <Ionicons name="cloud-download-outline" size={24} color="white" />
+        <Ionicons
+          name="cloud-download-outline"
+          size={24}
+          color="white"
+          onPress={() => handleDownload(libraryItem.remoteId, "*")}
+        />
         {/* TODO: add actions that make sense, like add to reading queue/bookmark, download, mark as read */}
         {/* TODO: need to work out sheet that slides up to reveal options */}
         <Link href="/(media)/modal" asChild>
@@ -161,7 +187,7 @@ const MediaTracks = ({
   audioFiles,
 }: {
   libraryItem: LibraryItemSchemaType;
-  audioFiles: libraryItemAudioFileSchemaType[];
+  audioFiles: LibraryItemAudioFileSchemaType[];
 }) => {
   return (
     <View className="mt-4">

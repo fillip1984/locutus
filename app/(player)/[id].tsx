@@ -1,39 +1,137 @@
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
-import { Audio } from "expo-av";
+import { eq } from "drizzle-orm";
+import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
+import * as FileSystem from "expo-file-system";
 import { Link, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { SafeAreaView, Text, View } from "react-native";
+
+import { localDb } from "@/db";
+import {
+  LibraryItemSchemaType,
+  libraryItemAudioFileSchema,
+  libraryItemSchema,
+} from "@/db/schema";
+import { usePlayerState } from "@/stores/playerStore";
 
 export default function Player() {
   const { id } = useLocalSearchParams();
-  const [media, setMedia] = useState<PlaylistItemType | null | undefined>(null);
+  // const [media, setMedia] = useState<
+  //   LibraryItemAudioFileSchemaType | null | undefined
+  // >(null);
   const playerState = usePlayerState();
 
   useEffect(() => {
+    // const fetchData = async () => {
+    // const re = await readOne(parseInt(id as string));
+    // if (re) {
+    //   setMedia(re);
+    //   const { sound, status } = await Audio.Sound.createAsync(
+    //     { uri: re.link },
+    //     { shouldPlay: false },
+    //   );
+    //   if (status.isLoaded) {
+    //     playerState._playbackDriver = sound;
+    //     playerState.play();
+    //   }
+    // }
+    // };
+
     const fetchData = async () => {
-      const re = await readOne(parseInt(id as string));
-      if (re) {
-        setMedia(re);
-        const { sound, status } = await Audio.Sound.createAsync(
-          { uri: re.link },
-          { shouldPlay: false },
+      const result = await localDb
+        .select()
+        .from(libraryItemSchema)
+        .where(eq(libraryItemSchema.id, parseInt(id as string, 10)));
+      playerState.setMedia(result[0]);
+
+      const audioResults = await localDb
+        .select()
+        .from(libraryItemAudioFileSchema)
+        .where(
+          eq(
+            libraryItemAudioFileSchema.libraryItemId,
+            parseInt(id as string, 10),
+          ),
         );
-        if (status.isLoaded) {
-          playerState._playbackDriver = sound;
-          playerState.play();
-        }
-      }
+      // audioResults.forEach((aud) => console.log({ aud }));
+      console.log(audioResults[0].path);
+      playerState.setPlaylist(audioResults);
+      const f = await FileSystem.readAsStringAsync(
+        audioResults[0].path as string,
+        {
+          encoding: "base64",
+        },
+      );
+      console.log(f);
+
+      const s = await Audio.Sound.createAsync(
+        { uri: audioResults[0].path as string },
+        {
+          shouldPlay: true,
+        },
+      );
+      console.log(s.status);
+      playerState.setPlaybackDriver(s.sound);
+      // TODO: figure this out
+      // const result = localDb.query.libraryItemSchema.findFirst({
+      //   where: (libraryItemSchema, { eq }) =>
+      //     eq(libraryItemSchema.id, parseInt(id as string, 10)),
+      //   with: { libraryItemAudioFileSchema: true },
+      // });
+      // setLibraryItem(result);
     };
 
-    void fetchData();
+    fetchData();
   }, []);
+
+  useEffect(() => {
+    Audio.setAudioModeAsync({
+      staysActiveInBackground: true,
+      playsInSilentModeIOS: true,
+      interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+      interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+      playThroughEarpieceAndroid: true,
+    });
+
+    // const { sound } = await Audio.Sound.createAsync(
+    //     { uri: playerState.source.link },
+    //     { shouldPlay: player.playing },
+    //   );
+
+    //   player.internal = sound;
+    //   player.internal?.setOnPlaybackStatusUpdate((s: AVPlaybackStatus) => {
+    //     if (s.isLoaded) {
+    //       const durationMillis = s.durationMillis ?? 1;
+    //       const durationRemainingMillis = durationMillis - s.positionMillis;
+    //       setPlayer((prev) => {
+    //         return {
+    //           ...prev,
+    //           positionMillis: s.positionMillis,
+    //           percentComplete: Math.round(
+    //             (s.positionMillis / durationMillis) * 100,
+    //           ),
+    //           durationMillis,
+    //           durationRemainingMillis,
+    //         };
+    //       });
+    //     }
+    //   });
+    // }
+
+    // return sound
+    //   ? () => {
+    //       sound.unloadAsync();
+    //     }
+    //   : undefined;
+  }, [playerState.currentTrack]);
+
   return (
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
-      {media && (
+      {playerState.media && (
         <View className="flex h-screen gap-2 bg-slate-800 p-2">
           <TopActionsBar />
           <MediaArt />
-          <MediaInfo media={media} />
+          <MediaInfo media={playerState.media} />
           <MediaControls />
           {/*<MediaActionsBar media={media} />
         <MediaSummary />
@@ -65,7 +163,7 @@ const MediaArt = () => {
   );
 };
 
-const MediaInfo = ({ media }: { media: PlaylistItemType }) => {
+const MediaInfo = ({ media }: { media: LibraryItemSchemaType }) => {
   return (
     <View className="">
       <Text className="text-2xl text-white">{media.title}</Text>

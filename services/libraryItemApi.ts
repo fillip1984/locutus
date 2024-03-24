@@ -1,5 +1,7 @@
 import { audiobookshelf_token } from "@env";
 import axios from "axios";
+import { Buffer } from "buffer";
+import * as FileSystem from "expo-file-system";
 
 export const getLibraryItem = async (libraryItemId: string) => {
   try {
@@ -17,6 +19,64 @@ export const getLibraryItem = async (libraryItemId: string) => {
     console.error(
       `Exception occurred while fetching library item with id: ${libraryItemId}`,
       err,
+    );
+    throw err;
+  }
+};
+
+export const downloadLibraryItem = async (
+  libraryItemId: string,
+  fileId: string,
+) => {
+  // try {
+  //   console.log(
+  //     `downloading library item: ${libraryItemId} and fileId: ${fileId}`,
+  //   );
+  //   const response = await axios.get(
+  //     `http://192.168.68.68:13378/api/items/${libraryItemId}/file/${fileId}/download`,
+  //     {
+  //       headers: {
+  //         Authorization: `Bearer ${audiobookshelf_token}`,
+  //       },
+  //       responseType: "arraybuffer",
+  //     },
+  //   );
+  //   const filename = response.headers["content-disposition"]
+  //     .split("filename=")[1]
+  //     .split(".")[0];
+  //   const extension = response.headers["content-disposition"]
+  //     .split(".")[1]
+  //     .split(";")[0];
+  //   const file =
+  //     FileSystem.documentDirectory + `${encodeURI(filename + "." + extension)}`;
+
+  //   console.log({ filename, extension, file });
+
+  //   const buffer = Buffer.from(response.data, "base64");
+  //   const base64Encoded = buffer.toString("base64");
+  //   await FileSystem.writeAsStringAsync(file, base64Encoded, {
+  //     encoding: FileSystem.EncodingType.Base64,
+  //   });
+  //   // FileSystem.documentDirectory + "test.mp3";
+  //   // await FileSystem.wr;
+  //   console.log(`downloaded ${file}`);
+  //   return file;
+  // } catch (err) {
+  //   console.error(
+  //     `Exception occurred while downloading library item: ${libraryItemId} and fileId: ${fileId}`,
+  //   );
+  //   throw err;
+  // }
+
+  try {
+    const result = await FileSystem.downloadAsync(
+      `http://192.168.68.68:13378/api/items/${libraryItemId}/file/${fileId}/download`,
+      FileSystem.documentDirectory + "test.mp3",
+    );
+    return result.uri;
+  } catch (err) {
+    console.error(
+      `Exception occurred while downloading library item: ${libraryItemId} and fileId: ${fileId}`,
     );
     throw err;
   }

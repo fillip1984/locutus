@@ -45,5 +45,5 @@ export const libraryItemAudioFileSchema = sqliteTable("libraryItemAudioFile", {
   ),
 });
 
-export type libraryItemAudioFileSchemaType =
+export type LibraryItemAudioFileSchemaType =
   typeof libraryItemAudioFileSchema.$inferInsert;
