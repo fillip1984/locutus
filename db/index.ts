@@ -1,10 +1,11 @@
+import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { migrate } from "drizzle-orm/expo-sqlite/migrator";
 import { openDatabaseSync } from "expo-sqlite/next";
 
+import * as schema from "./schema";
 import migrations from "../drizzle/migrations";
-
-export const localDb = drizzle(openDatabaseSync("locutus.db"));
+export const localDb = drizzle(openDatabaseSync("locutus.db"), { schema });
 
 const runMigrations = async () => {
   try {
@@ -21,3 +22,18 @@ const runMigrations = async () => {
 };
 
 runMigrations();
+
+export const dropDatabase = async () => {
+  try {
+    console.log("dropping data");
+    const db = openDatabaseSync("locutus.db");
+    db.execSync("DROP TABLE IF EXISTS libraryItemAudioFile;");
+    db.execSync("DROP TABLE IF EXISTS libraryItem;");
+    db.execSync("DROP TABLE IF EXISTS library;");
+    console.log("dropped data");
+    runMigrations();
+  } catch (err) {
+    console.error("Exception occurred while dropping data", err);
+    throw err;
+  }
+};

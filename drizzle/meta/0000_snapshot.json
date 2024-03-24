@@ -1,9 +1,81 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "8e1f1677-8e82-4db3-bebf-600749451d8c",
+  "id": "a26e2818-2e73-45b8-9fd3-e55edebbeba2",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
+    "libraryItemAudioFile": {
+      "name": "libraryItemAudioFile",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "ino": {
+          "name": "ino",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "index": {
+          "name": "index",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "duration": {
+          "name": "duration",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "path": {
+          "name": "path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "libraryItemId": {
+          "name": "libraryItemId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "libraryItemAudioFile_libraryItemId_libraryItem_id_fk": {
+          "name": "libraryItemAudioFile_libraryItemId_libraryItem_id_fk",
+          "tableFrom": "libraryItemAudioFile",
+          "tableTo": "libraryItem",
+          "columnsFrom": [
+            "libraryItemId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "libraryItem": {
       "name": "libraryItem",
       "columns": {
@@ -13,6 +85,13 @@
           "primaryKey": true,
           "notNull": true,
           "autoincrement": true
+        },
+        "remoteId": {
+          "name": "remoteId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
         },
         "title": {
           "name": "title",
@@ -40,6 +119,34 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false
+        },
+        "publishedYear": {
+          "name": "publishedYear",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "isbn": {
+          "name": "isbn",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "asin": {
+          "name": "asin",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         },
         "libraryId": {
@@ -79,6 +186,13 @@
           "notNull": true,
           "autoincrement": true
         },
+        "remoteId": {
+          "name": "remoteId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "name": {
           "name": "name",
           "type": "text",
@@ -87,7 +201,15 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "library_remoteId_unique": {
+          "name": "library_remoteId_unique",
+          "columns": [
+            "remoteId"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}

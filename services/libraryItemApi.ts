@@ -1,75 +1,28 @@
 import { audiobookshelf_token } from "@env";
 import axios from "axios";
 
-export const getLibraryItems = async (libraryId: string) => {
+export const getLibraryItem = async (libraryItemId: string) => {
   try {
-    console.log(`fetching library items for library with id: ${libraryId}`);
+    console.log(`fetching library item with id: ${libraryItemId}`);
     const response = await axios.get<Root>(
-      `http://192.168.68.68:13378/api/libraries/${libraryId}/items`,
+      `http://192.168.68.68:13378/api/items/${libraryItemId}`,
       {
         headers: {
           Authorization: `Bearer ${audiobookshelf_token}`,
         },
       },
     );
-    return response.data.results;
+    return response.data.media.audioFiles;
   } catch (err) {
     console.error(
-      `Exception occurred while fetching items for library with id: ${libraryId}`,
+      `Exception occurred while fetching library item with id: ${libraryItemId}`,
       err,
     );
     throw err;
   }
 };
 
-// https://dev.to/olivermengich/file-download-in-react-native-and-expo-gk8
-// export const downloadLibraryItem = async (libraryId: string) => {
-//   try {
-//     console.log(`downloading library item with id: ${libraryId}`);
-//      axios.get(url, { responseType: "blob" }).then(res => {
-//       const headerContentDisp = res.headers["content-disposition"];
-//       const filename =
-//         headerContentDisp &&
-//         headerContentDisp.split("filename=")[1].replace(/["']/g, ""); // TODO improve parcing
-//       const contentType = res.headers["content-type"];
-
-//       const blob = new Blob([res.data], { contentType });
-//       const href = window.URL.createObjectURL(blob);
-
-//       const el = document.createElement("a");
-//       el.setAttribute("href", href);
-//       el.setAttribute(
-//         "download",
-//         filename || (config && config.filename) || "someFile"
-//       );
-//       el.click();
-
-//       window.URL.revokeObjectURL(blob);
-//       return res;
-//     });
-//   }
-//   } catch (err) {
-//     console.error(
-//       `Exception occurred while downloading library item with id: ${libraryId}`,
-//       err,
-//     );
-//   }
-// };
-
 export interface Root {
-  results: Result[];
-  total: number;
-  limit: number;
-  page: number;
-  sortDesc: boolean;
-  mediaType: string;
-  minified: boolean;
-  collapseseries: boolean;
-  include: string;
-  offset: number;
-}
-
-export interface Result {
   id: string;
   ino: string;
   oldLibraryItemId: any;
@@ -83,45 +36,137 @@ export interface Result {
   birthtimeMs: number;
   addedAt: number;
   updatedAt: number;
+  lastScan: number;
+  scanVersion: string;
   isMissing: boolean;
   isInvalid: boolean;
   mediaType: string;
   media: Media;
-  numFiles: number;
-  size: number;
+  libraryFiles: LibraryFile[];
 }
 
 export interface Media {
   id: string;
+  libraryItemId: string;
   metadata: Metadata;
-  coverPath?: string;
+  coverPath: string;
   tags: any[];
-  numTracks: number;
-  numAudioFiles: number;
-  numChapters: number;
-  numMissingParts: number;
-  numInvalidAudioFiles: number;
-  duration: number;
-  size: number;
-  ebookFormat?: string;
+  audioFiles: AudioFile[];
+  chapters: Chapter[];
+  missingParts: any[];
+  ebookFile: EbookFile;
 }
 
 export interface Metadata {
   title: string;
-  titleIgnorePrefix: string;
   subtitle: any;
-  authorName: string;
-  authorNameLF: string;
-  narratorName: string;
-  seriesName: string;
+  authors: Author[];
+  narrators: any[];
+  series: any[];
   genres: string[];
-  publishedYear?: string;
+  publishedYear: string;
   publishedDate: any;
-  publisher?: string;
-  description?: string;
-  isbn?: string;
+  publisher: any;
+  description: string;
+  isbn: any;
   asin: any;
-  language?: string;
+  language: any;
   explicit: boolean;
   abridged: boolean;
+}
+
+export interface Author {
+  id: string;
+  name: string;
+}
+
+export interface AudioFile {
+  index: number;
+  ino: string;
+  metadata: Metadata2;
+  addedAt: number;
+  updatedAt: number;
+  trackNumFromMeta: any;
+  discNumFromMeta: any;
+  trackNumFromFilename: number;
+  discNumFromFilename: any;
+  manuallyVerified: boolean;
+  invalid: boolean;
+  exclude: boolean;
+  error: any;
+  format: string;
+  duration: number;
+  bitRate: number;
+  language: any;
+  codec: string;
+  timeBase: string;
+  channels: number;
+  channelLayout: string;
+  chapters: any[];
+  embeddedCoverArt: any;
+  metaTags: MetaTags;
+  mimeType: string;
+}
+
+export interface Metadata2 {
+  filename: string;
+  ext: string;
+  path: string;
+  relPath: string;
+  size: number;
+  mtimeMs: number;
+  ctimeMs: number;
+  birthtimeMs: number;
+}
+
+export interface MetaTags {
+  tagAlbum: string;
+  tagArtist: string;
+  tagGenre: string;
+}
+
+export interface Chapter {
+  id: number;
+  start: number;
+  end: number;
+  title: string;
+}
+
+export interface EbookFile {
+  ino: string;
+  metadata: Metadata3;
+  ebookFormat: string;
+  addedAt: number;
+  updatedAt: number;
+}
+
+export interface Metadata3 {
+  filename: string;
+  ext: string;
+  path: string;
+  relPath: string;
+  size: number;
+  mtimeMs: number;
+  ctimeMs: number;
+  birthtimeMs: number;
+}
+
+export interface LibraryFile {
+  ino: string;
+  metadata: Metadata4;
+  isSupplementary?: boolean;
+  addedAt: number;
+  updatedAt: number;
+  fileType: string;
+}
+
+export interface Metadata4 {
+  filename: string;
+  ext: string;
+  path: string;
+  relPath: string;
+  size: number;
+  mtimeMs: number;
+  ctimeMs: number;
+  birthtimeMs: number;
 }
