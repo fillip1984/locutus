@@ -64,14 +64,22 @@ export default function Player() {
       );
       console.log(f);
 
-      const s = await Audio.Sound.createAsync(
+      const s = await Audio.setAudioModeAsync({
+        staysActiveInBackground: true,
+        playsInSilentModeIOS: true,
+        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+        interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+        playThroughEarpieceAndroid: true,
+      });
+
+      const playback = await Audio.Sound.createAsync(
         { uri: audioResults[0].path as string },
         {
           shouldPlay: true,
         },
       );
-      console.log(s.status);
-      playerState.setPlaybackDriver(s.sound);
+      console.log(playback.status);
+      playerState.setPlaybackDriver(playback.sound);
       // TODO: figure this out
       // const result = localDb.query.libraryItemSchema.findFirst({
       //   where: (libraryItemSchema, { eq }) =>
@@ -85,19 +93,17 @@ export default function Player() {
   }, []);
 
   useEffect(() => {
-    Audio.setAudioModeAsync({
-      staysActiveInBackground: true,
-      playsInSilentModeIOS: true,
-      interruptionModeIOS: InterruptionModeIOS.DoNotMix,
-      interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
-      playThroughEarpieceAndroid: true,
-    });
-
+    // const s = await Audio.setAudioModeAsync({
+    //   staysActiveInBackground: true,
+    //   playsInSilentModeIOS: true,
+    //   interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+    //   interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+    //   playThroughEarpieceAndroid: true,
+    // });
     // const { sound } = await Audio.Sound.createAsync(
     //     { uri: playerState.source.link },
     //     { shouldPlay: player.playing },
     //   );
-
     //   player.internal = sound;
     //   player.internal?.setOnPlaybackStatusUpdate((s: AVPlaybackStatus) => {
     //     if (s.isLoaded) {
@@ -117,7 +123,6 @@ export default function Player() {
     //     }
     //   });
     // }
-
     // return sound
     //   ? () => {
     //       sound.unloadAsync();

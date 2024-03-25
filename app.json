@@ -16,7 +16,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.illizen.loctus"
     },
     "android": {
       "adaptiveIcon": {
@@ -34,6 +35,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "a8edd52f-3b55-4242-a39b-ee31d35f807c"
+      }
     }
   }
 }
