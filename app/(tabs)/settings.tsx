@@ -110,7 +110,7 @@ export default function Settings() {
 
   return (
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
-      <View className="flex h-screen bg-slate-800 p-4">
+      <View className="flex h-screen gap-4 bg-slate-800 p-4">
         <Pressable
           onPress={handleSync}
           className="flex w-full items-center justify-center rounded bg-sky-300 px-4 py-2">
