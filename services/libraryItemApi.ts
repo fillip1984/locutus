@@ -1,6 +1,5 @@
 import { audiobookshelf_token } from "@env";
 import axios from "axios";
-import { Buffer } from "buffer";
 import * as FileSystem from "expo-file-system";
 
 export const getLibraryItem = async (libraryItemId: string) => {
