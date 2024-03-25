@@ -26,6 +26,7 @@ export const getLibraryItem = async (libraryItemId: string) => {
 export const downloadLibraryItem = async (
   libraryItemId: string,
   fileId: string,
+  filename: string,
 ) => {
   // try {
   //   console.log(
@@ -68,14 +69,25 @@ export const downloadLibraryItem = async (
   // }
 
   try {
+    const dirInfo = await FileSystem.getInfoAsync(
+      FileSystem.documentDirectory + libraryItemId,
+    );
+    if (!dirInfo.exists) {
+      // console.log("Gif directory doesn't exist, creating…");
+      await FileSystem.makeDirectoryAsync(
+        FileSystem.documentDirectory + libraryItemId,
+        { intermediates: true },
+      );
+    }
+
     const result = await FileSystem.downloadAsync(
       `http://192.168.68.68:13378/api/items/${libraryItemId}/file/${fileId}/download`,
-      FileSystem.documentDirectory + "test.mp3",
+      FileSystem.documentDirectory + libraryItemId + "/" + filename,
     );
     return result.uri;
   } catch (err) {
     console.error(
-      `Exception occurred while downloading library item: ${libraryItemId} and fileId: ${fileId}`,
+      `Exception occurred while downloading library item: ${libraryItemId}, fileId: ${fileId}, filename: ${filename}`,
     );
     throw err;
   }

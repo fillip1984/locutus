@@ -1,7 +1,12 @@
 import { FontAwesome, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { eq } from "drizzle-orm";
-import { Link, router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import {
+  Link,
+  router,
+  useFocusEffect,
+  useLocalSearchParams,
+} from "expo-router";
+import { useCallback, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -23,48 +28,53 @@ export default function Media() {
     LibraryItemAudioFileSchemaType[] | null
   >();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const result = await localDb
-        .select()
-        .from(libraryItemSchema)
-        .where(eq(libraryItemSchema.id, parseInt(id as string, 10)));
-      setLibraryItem(result[0]);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        console.log("refetching library item");
+        const result = await localDb
+          .select()
+          .from(libraryItemSchema)
+          .where(eq(libraryItemSchema.id, parseInt(id as string, 10)));
+        setLibraryItem(result[0]);
 
-      const audioResults = await localDb
-        .select()
-        .from(libraryItemAudioFileSchema)
-        .where(
-          eq(
-            libraryItemAudioFileSchema.libraryItemId,
-            parseInt(id as string, 10),
-          ),
-        );
-      setAudioFiles(audioResults);
-      // TODO: figure this out
-      // const result = localDb.query.libraryItemSchema.findFirst({
-      //   where: (libraryItemSchema, { eq }) =>
-      //     eq(libraryItemSchema.id, parseInt(id as string, 10)),
-      //   with: { libraryItemAudioFileSchema: true },
-      // });
-      // setLibraryItem(result);
-    };
+        console.log("refetching audio files");
+        const audioResults = await localDb
+          .select()
+          .from(libraryItemAudioFileSchema)
+          .where(
+            eq(
+              libraryItemAudioFileSchema.libraryItemId,
+              parseInt(id as string, 10),
+            ),
+          );
+        setAudioFiles(audioResults);
+      };
 
-    fetchData();
-  }, [id]);
+      fetchData();
+    }, []),
+  );
 
   const handleDownload = async (libraryItemId: string, fileId: string) => {
-    console.log("downloading");
+    console.log("downloading audio files");
+    // * for all, id for single downloads
     if (fileId === "*" && audioFiles) {
-      // TODO: download them all, right now just doing one
-      const file = await downloadLibraryItem(
-        libraryItemId,
-        audioFiles[0].remoteId,
-      );
-      await localDb
-        .update(libraryItemAudioFileSchema)
-        .set({ path: file })
-        .where(eq(libraryItemAudioFileSchema.remoteId, audioFiles[0].remoteId));
+      for (const audioFile of audioFiles) {
+        const file = await downloadLibraryItem(
+          libraryItemId,
+          audioFile.remoteId,
+          audioFile.name,
+        );
+        await localDb
+          .update(libraryItemAudioFileSchema)
+          .set({ path: file })
+          .where(eq(libraryItemAudioFileSchema.remoteId, audioFile.remoteId));
+        console.log(`downloaded audio file, result: ${file}`);
+      }
+      console.log("downloaded audio files");
+    } else {
+      // TODO: finish if we find a UI flow that makes sense for single file downloads
+      console.warn("still need to develop method for single file downloads");
     }
   };
 
