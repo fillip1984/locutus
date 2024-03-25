@@ -1,4 +1,3 @@
-import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { migrate } from "drizzle-orm/expo-sqlite/migrator";
 import { openDatabaseSync } from "expo-sqlite/next";
@@ -23,6 +22,7 @@ const runMigrations = async () => {
 
 runMigrations();
 
+// TODO: opening a second connection didn't work, prepared statements didn't recover even after rebuilding
 export const dropDatabase = async () => {
   try {
     console.log("dropping data");
