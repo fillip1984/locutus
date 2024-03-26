@@ -18,18 +18,20 @@ import {
   libraryItemSchema,
 } from "@/db/schema";
 import { downloadLibraryItem } from "@/services/libraryItemApi";
+import { PlayerState, usePlayerState } from "@/stores/playerStore";
 
 export default function Media() {
   const { id } = useLocalSearchParams();
-  const [libraryItem, setLibraryItem] = useState<
-    LibraryItemSchemaType | null | undefined
-  >(null);
+  const [libraryItem, setLibraryItem] =
+    useState<LibraryItemSchemaType | null>();
   const [audioFiles, setAudioFiles] = useState<
     LibraryItemAudioFileSchemaType[] | null
   >();
+  const playerState = usePlayerState();
 
   useFocusEffect(
     useCallback(() => {
+      // fetch library item for media data
       const fetchData = async () => {
         console.log("refetching library item");
         const result = await localDb
@@ -38,6 +40,7 @@ export default function Media() {
           .where(eq(libraryItemSchema.id, parseInt(id as string, 10)));
         setLibraryItem(result[0]);
 
+        // fetch audio files
         console.log("refetching audio files");
         const audioResults = await localDb
           .select()
@@ -87,6 +90,7 @@ export default function Media() {
           <MediaActionsBar
             libraryItem={libraryItem}
             handleDownload={handleDownload}
+            playerState={playerState}
           />
           <MediaSummary libraryItem={libraryItem} />
           {audioFiles && (
@@ -134,20 +138,31 @@ const MediaArtAndImportantInfo = ({
 const MediaActionsBar = ({
   libraryItem,
   handleDownload,
+  playerState,
 }: {
   libraryItem: LibraryItemSchemaType;
   handleDownload: (libraryItemId: string, fileId: string) => void;
+  playerState: PlayerState;
 }) => {
   return (
     <View className="flex flex-row items-center justify-between">
       {/* main button */}
       {/* TODO: Looks like Plex is using css grid to have 4 squares, the first col taking up a little over 1/3. This causes the art poster and play button to align */}
-      <Link href={`/(player)/${libraryItem.id}`}>
-        <View className="flex w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
-          <Ionicons name="play-sharp" size={40} color="white" />
-          <Text className="text-2xl font-bold text-white">Play</Text>
-        </View>
-      </Link>
+      {playerState.isPlaying ? (
+        <Pressable
+          onPress={() => playerState.pause()}
+          className="flex w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
+          <Ionicons name="pause" size={40} color="white" />
+          <Text className="text-2xl font-bold text-white">Pause</Text>
+        </Pressable>
+      ) : (
+        <Link href={`/(player)/${libraryItem.id}`}>
+          <View className="flex w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
+            <Ionicons name="play-sharp" size={40} color="white" />
+            <Text className="text-2xl font-bold text-white">Play</Text>
+          </View>
+        </Link>
+      )}
       {/* other menu items */}
       <View className="mr-2 flex flex-row items-center gap-4">
         <Ionicons
