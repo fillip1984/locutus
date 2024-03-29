@@ -1,5 +1,6 @@
 import { audiobookshelf_token } from "@env";
 import axios from "axios";
+import Toast from "react-native-toast-message";
 
 export const getLibraries = async () => {
   try {
@@ -15,6 +16,11 @@ export const getLibraries = async () => {
     return response.data.libraries;
   } catch (err) {
     console.error("Exception occurred while fetching libraries", err);
+    Toast.show({
+      position: "bottom",
+      type: "error",
+      text1: "Error while attempting to connect to server",
+    });
     throw err;
   }
 };

@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
 import { Pressable, SafeAreaView, Text, View } from "react-native";
+import Toast from "react-native-toast-message";
 
 import { dropDatabase, localDb } from "@/db";
 import {
@@ -102,6 +103,11 @@ export default function Settings() {
         }
       }
     }
+    Toast.show({
+      type: "success",
+      text1: "Libraries synchronized",
+      position: "bottom",
+    });
   };
 
   const handleDropData = () => {
