@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "e7eca140-bc69-4d57-906d-8c8b8ab2a769",
+  "id": "d490392f-f8e4-4bd3-a8ae-5ad1f1ff0382",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "libraryItemAudioFile": {
@@ -33,6 +33,13 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false
+        },
+        "progress": {
+          "name": "progress",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         },
         "name": {
@@ -144,6 +151,13 @@
         },
         "asin": {
           "name": "asin",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "coverArtPath": {
+          "name": "coverArtPath",
           "type": "text",
           "primaryKey": false,
           "notNull": false,

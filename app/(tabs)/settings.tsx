@@ -11,6 +11,7 @@ import {
   librarySchema,
   userSettingsSchema,
 } from "@/db/schema";
+import { downloadCoverArt } from "@/services/coverArtApi";
 import { getLibraries } from "@/services/libraryApi";
 import { getLibraryItem } from "@/services/libraryItemApi";
 import { getLibraryItems } from "@/services/libraryItemsApi";
@@ -70,6 +71,10 @@ export default function Settings() {
         if (exists.length > 0) {
           libraryItemId = exists[0].id;
         }
+
+        //download cover art
+        const coverArtPath = await downloadCoverArt(item.id);
+
         if (!libraryItemId) {
           console.log("adding library item");
           const result = await localDb.insert(libraryItemSchema).values({
@@ -81,6 +86,7 @@ export default function Settings() {
             publishedYear: item.media.metadata.publishedYear
               ? parseInt(item.media.metadata.publishedYear)
               : null,
+            coverArtPath,
             libraryId,
             remoteId: item.id,
           });
@@ -94,6 +100,7 @@ export default function Settings() {
               authorName: item.media.metadata.authorName,
               duration: item.media.duration,
               numAudioFiles: item.media.numAudioFiles,
+              coverArtPath,
               libraryId,
               remoteId: item.id,
             })

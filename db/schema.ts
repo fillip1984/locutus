@@ -26,6 +26,7 @@ export const libraryItemSchema = sqliteTable("libraryItem", {
   description: text("description"),
   isbn: text("isbn"),
   asin: text("asin"),
+  coverArtPath: text("coverArtPath"),
   libraryId: integer("libraryId")
     .notNull()
     .references(() => librarySchema.id),
@@ -38,6 +39,7 @@ export const libraryItemAudioFileSchema = sqliteTable("libraryItemAudioFile", {
   remoteId: text("ino").notNull(),
   index: integer("index").notNull(),
   duration: integer("duration").notNull(),
+  progress: integer("progress"),
   name: text("name").notNull(),
   path: text("path"),
   libraryItemId: integer("libraryItemId").references(

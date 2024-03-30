@@ -1,5 +1,6 @@
 import { FontAwesome, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { eq } from "drizzle-orm";
+import { Image } from "expo-image";
 import {
   Link,
   router,
@@ -128,8 +129,16 @@ const MediaArtAndImportantInfo = ({
 }) => {
   return (
     <View className="flex flex-row gap-2">
-      <View className="flex h-48 w-48 items-center justify-center rounded-lg bg-stone-400">
-        <Text>ABC</Text>
+      <View className="flex h-60 w-36">
+        <Image
+          key={libraryItem.id}
+          source={libraryItem.coverArtPath}
+          style={{ flex: 1 }}
+          // placeholder={blurhash}
+          contentFit="cover"
+          transition={1000}
+        />
+        {/* <Text className="text-white">{item.title}</Text> */}
       </View>
       <View className="flex justify-end">
         {/* TODO: figure out how to wrap text, usual tricks ain't working */}

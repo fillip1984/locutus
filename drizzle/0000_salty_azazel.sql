@@ -3,6 +3,7 @@ CREATE TABLE `libraryItemAudioFile` (
 	`ino` text NOT NULL,
 	`index` integer NOT NULL,
 	`duration` integer NOT NULL,
+	`progress` integer,
 	`name` text NOT NULL,
 	`path` text,
 	`libraryItemId` integer,
@@ -20,6 +21,7 @@ CREATE TABLE `libraryItem` (
 	`description` text,
 	`isbn` text,
 	`asin` text,
+	`coverArtPath` text,
 	`libraryId` integer NOT NULL,
 	FOREIGN KEY (`libraryId`) REFERENCES `library`(`id`) ON UPDATE no action ON DELETE no action
 );

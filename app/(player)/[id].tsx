@@ -2,6 +2,7 @@ import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import { format } from "date-fns";
 import { eq } from "drizzle-orm";
+import { Image } from "expo-image";
 import { Link, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, SafeAreaView, Text, View } from "react-native";
@@ -52,7 +53,7 @@ export default function Player() {
         <View className="flex h-screen gap-2 bg-slate-800 p-2">
           <TopActionsBar />
           <View className="h-1/2">
-            <MediaArt />
+            <MediaArt libraryItem={libraryItem} />
             <MediaInfo libraryItem={libraryItem} playerState={playerState} />
           </View>
           <TrackProgress playerState={playerState} />
@@ -74,12 +75,17 @@ const TopActionsBar = () => {
   );
 };
 
-const MediaArt = () => {
+const MediaArt = ({ libraryItem }: { libraryItem: LibraryItemSchemaType }) => {
   return (
-    <View className="items-start justify-center">
-      <View className="h-[300px] w-full rounded bg-slate-400">
-        <Text className="text-white">FSR</Text>
-      </View>
+    <View className="flex h-2/3 w-full">
+      <Image
+        key={libraryItem.id}
+        source={libraryItem.coverArtPath}
+        style={{ flex: 1 }}
+        // placeholder={blurhash}
+        contentFit="cover"
+        transition={1000}
+      />
     </View>
   );
 };
