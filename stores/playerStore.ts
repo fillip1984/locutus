@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import {
   AVPlaybackStatus,
   Audio,
@@ -7,7 +8,11 @@ import {
 import { Sound } from "expo-av/build/Audio";
 import { create } from "zustand";
 
-import { LibraryItemAudioFileSchemaType } from "@/db/schema";
+import { localDb } from "@/db";
+import {
+  LibraryItemAudioFileSchemaType,
+  libraryItemAudioFileSchema,
+} from "@/db/schema";
 
 export interface PlayerState {
   audioObject: Sound | null;
@@ -19,6 +24,7 @@ export interface PlayerState {
   durationRemainingMillis: number;
   percentComplete: number;
   rate: number;
+  progressUpdateCounter: number;
   play: ({
     audioFile,
     startingPosition,
@@ -44,6 +50,7 @@ export const usePlayerState = create<PlayerState>()((set, get) => ({
   durationRemainingMillis: 0,
   percentComplete: 0,
   rate: 1,
+  progressUpdateCounter: 0,
   play: async ({
     audioFile,
     startingPosition,
@@ -67,9 +74,11 @@ export const usePlayerState = create<PlayerState>()((set, get) => ({
       const { sound } = await Audio.Sound.createAsync(
         { uri: audioFile.path as string },
         {
-          shouldPlay: true,
+          shouldPlay: false,
         },
       );
+      console.log("resuming from position: " + audioFile.progress);
+      sound.playFromPositionAsync(audioFile.progress ?? 0);
 
       // updates position in track
       sound.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) => {
@@ -86,6 +95,21 @@ export const usePlayerState = create<PlayerState>()((set, get) => ({
               (status.positionMillis / durationMillis) * 100,
             ),
           }));
+
+          set((state) => ({
+            progressUpdateCounter: state.progressUpdateCounter + 1,
+          }));
+          if (get().progressUpdateCounter % 30 === 0) {
+            const audioFileId = get().currentTrack?.id;
+            if (audioFileId) {
+              console.log("saving progress: " + status.positionMillis);
+              localDb
+                .update(libraryItemAudioFileSchema)
+                .set({ progress: status.positionMillis })
+                .where(eq(libraryItemAudioFileSchema.id, audioFileId))
+                .run();
+            }
+          }
 
           // go to next track at end of this track
           if (durationRemainingMillis === 0) {
