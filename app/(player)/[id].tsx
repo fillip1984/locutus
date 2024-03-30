@@ -1,6 +1,5 @@
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { eq } from "drizzle-orm";
-import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import { Link, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { SafeAreaView, Text, View } from "react-native";
@@ -21,6 +20,7 @@ export default function Player() {
 
   useEffect(() => {
     const fetchData = async () => {
+      console.log(`refetching player data`);
       const result = await localDb
         .select()
         .from(libraryItemSchema)
@@ -38,24 +38,7 @@ export default function Player() {
         );
 
       playerState.setPlaylist(audioResults);
-      playerState.setCurrentTrack(audioResults[0]);
-      playerState.play();
-
-      // await Audio.setAudioModeAsync({
-      //   staysActiveInBackground: true,
-      //   playsInSilentModeIOS: true,
-      //   interruptionModeIOS: InterruptionModeIOS.DoNotMix,
-      //   interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
-      //   playThroughEarpieceAndroid: true,
-      // });
-
-      // const playback = await Audio.Sound.createAsync(
-      //   { uri: audioResults[0].path as string },
-      //   {
-      //     shouldPlay: true,
-      //   },
-      // );
-      // playerState.setPlaybackDriver(playback.sound);
+      playerState.play(audioResults[0]);
     };
 
     fetchData();
@@ -141,7 +124,7 @@ const MediaControls = ({ playerState }: { playerState: PlayerState }) => {
         />
       ) : (
         <Ionicons
-          onPress={playerState.play}
+          onPress={() => playerState.play()}
           name="play-sharp"
           size={40}
           color="black"

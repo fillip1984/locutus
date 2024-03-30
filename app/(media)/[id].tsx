@@ -159,7 +159,7 @@ const MediaActionsBar = ({
     <View className="flex flex-row items-center justify-between">
       {/* main button */}
       {/* TODO: Looks like Plex is using css grid to have 4 squares, the first col taking up a little over 1/3. This causes the art poster and play button to align */}
-      {playerState.isPlaying ? (
+      {/* {playerState.isPlaying ? (
         <Pressable
           onPress={() => playerState.pause()}
           className="flex w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
@@ -173,7 +173,13 @@ const MediaActionsBar = ({
             <Text className="text-2xl font-bold text-white">Play</Text>
           </View>
         </Link>
-      )}
+      )} */}
+      <Link href={`/(player)/${libraryItem.id}`}>
+        <View className="flex w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
+          <Ionicons name="play-sharp" size={40} color="white" />
+          <Text className="text-2xl font-bold text-white">Play</Text>
+        </View>
+      </Link>
       {/* other menu items */}
       <View className="mr-2 flex flex-row items-center gap-4">
         {audioFiles?.filter(
