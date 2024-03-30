@@ -6,7 +6,7 @@ import {
   useFocusEffect,
   useLocalSearchParams,
 } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
@@ -238,6 +238,7 @@ const MediaTracks = ({
   libraryItem: LibraryItemSchemaType;
   audioFiles: LibraryItemAudioFileSchemaType[];
 }) => {
+  const tracksScrollViewRef = useRef<ScrollView>(null);
   return (
     <View className="mt-4">
       <View className="flex flex-row justify-between">
@@ -245,7 +246,7 @@ const MediaTracks = ({
         <Text className="text-stone-300">{audioFiles?.length} unwatched</Text>
       </View>
 
-      <ScrollView>
+      <ScrollView ref={tracksScrollViewRef}>
         {audioFiles?.map((audioFile) => (
           <View
             key={audioFile.id}
@@ -256,7 +257,9 @@ const MediaTracks = ({
           </View>
         ))}
         <View className="flex items-center justify-center pb-[600px]">
-          <Pressable className="mt-8">
+          <Pressable
+            onPress={() => tracksScrollViewRef.current?.scrollTo({ y: 0 })}
+            className="mt-8">
             <FontAwesome name="arrow-circle-up" size={48} color="white" />
           </Pressable>
         </View>
