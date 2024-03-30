@@ -1,4 +1,9 @@
-import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
+import {
+  AVPlaybackStatus,
+  Audio,
+  InterruptionModeAndroid,
+  InterruptionModeIOS,
+} from "expo-av";
 import { Sound } from "expo-av/build/Audio";
 import { create } from "zustand";
 
@@ -7,19 +12,29 @@ import { LibraryItemAudioFileSchemaType } from "@/db/schema";
 export interface PlayerState {
   audioObject: Sound | null;
   isPlaying: boolean;
+  playlist: LibraryItemAudioFileSchemaType[] | null;
+  currentTrack: LibraryItemAudioFileSchemaType | null;
+  positionMillis: number;
+  durationMillis: number;
+  durationRemainingMillis: number;
+  percentComplete: number;
   play: (audioFile?: LibraryItemAudioFileSchemaType) => void;
   pause: () => void;
   skipBack: (millis: number) => void;
   skipForward: (millis: number) => void;
-  playlist: LibraryItemAudioFileSchemaType[] | null;
   setPlaylist: (playlist: LibraryItemAudioFileSchemaType[]) => void;
-  currentTrack: LibraryItemAudioFileSchemaType | null;
   changeTrack: (change: number) => void;
 }
 
 export const usePlayerState = create<PlayerState>()((set, get) => ({
   audioObject: null,
   isPlaying: false,
+  playlist: null,
+  currentTrack: null,
+  positionMillis: 0,
+  durationMillis: 0,
+  durationRemainingMillis: 0,
+  percentComplete: 0,
   play: async (audioFile?: LibraryItemAudioFileSchemaType) => {
     // when given an audio file we are expressing our intention to swap the playback track
     if (audioFile && audioFile.id !== get().currentTrack?.id) {
@@ -41,6 +56,28 @@ export const usePlayerState = create<PlayerState>()((set, get) => ({
         },
       );
 
+      // updates position in track
+      sound.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) => {
+        if (status.isLoaded) {
+          const durationMillis = status.durationMillis ?? 1;
+          const durationRemainingMillis =
+            durationMillis - status.positionMillis;
+          set((state) => ({
+            durationMillis,
+            durationRemainingMillis,
+            positionMillis: status.positionMillis,
+            percentComplete: Math.round(
+              (status.positionMillis / durationMillis) * 100,
+            ),
+          }));
+
+          // go to next track at end of this track
+          if (durationRemainingMillis === 0) {
+            get().changeTrack(1);
+          }
+        }
+      });
+
       // update state with new playback
       set(() => ({
         audioObject: sound,
@@ -60,14 +97,12 @@ export const usePlayerState = create<PlayerState>()((set, get) => ({
     });
   },
   skipBack: (millis) => {
-    get().audioObject?.setPositionAsync(0 - 30000);
+    get().audioObject?.setPositionAsync(get().positionMillis - millis);
   },
   skipForward: (millis) => {
-    get().audioObject?.setPositionAsync(0 + 30000);
+    get().audioObject?.setPositionAsync(get().positionMillis + millis);
   },
-  playlist: null,
   setPlaylist: (playlist) => set(() => ({ playlist })),
-  currentTrack: null,
   changeTrack: async (change: number) => {
     if (!get().playlist) {
       // console.log("when playlist isn't loaded, nothing to do");

@@ -1,4 +1,5 @@
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
+import { format } from "date-fns";
 import { eq } from "drizzle-orm";
 import { Link, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
@@ -51,10 +52,8 @@ export default function Player() {
           <TopActionsBar />
           <MediaArt />
           <MediaInfo libraryItem={libraryItem} playerState={playerState} />
+          <TrackProgress playerState={playerState} />
           <MediaControls playerState={playerState} />
-          {/*<MediaActionsBar media={media} />
-        <MediaSummary />
-        <MediaTracks /> */}
         </View>
       )}
     </SafeAreaView>
@@ -95,6 +94,35 @@ const MediaInfo = ({
       <Text className="text-xl text-slate-400">
         {playerState.currentTrack?.name}
       </Text>
+    </View>
+  );
+};
+
+const TrackProgress = ({ playerState }: { playerState: PlayerState }) => {
+  return (
+    <View className="flex gap-4 p-4">
+      <View className="relative">
+        {/* TODO: progress slide is not smooth at all and the knob may overshoot the end */}
+        <View
+          className="absolute z-10 h-2 rounded-lg bg-sky-300 transition-all duration-75 ease-in-out"
+          style={{ width: `${playerState.percentComplete ?? 0}%` }}
+        />
+        <View
+          className="absolute -bottom-[12px] z-20 h-5 w-5 rounded-full bg-sky-300"
+          style={{
+            left: `${playerState.percentComplete}%`,
+          }}
+        />
+        <View className="absolute h-2 w-full rounded-lg bg-slate-500" />
+      </View>
+      <View className="flex flex-row justify-between">
+        <Text className="text-sky-300">
+          {format(playerState.positionMillis ?? 0, "mm:ss")}
+        </Text>
+        <Text className="text-slate-300">
+          {format(playerState.durationRemainingMillis ?? 0, "mm:ss")}
+        </Text>
+      </View>
     </View>
   );
 };
