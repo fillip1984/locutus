@@ -3,7 +3,7 @@ import { format } from "date-fns";
 import { eq } from "drizzle-orm";
 import { Link, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { SafeAreaView, Text, View } from "react-native";
+import { Pressable, SafeAreaView, Text, View } from "react-native";
 
 import { localDb } from "@/db";
 import {
@@ -50,8 +50,10 @@ export default function Player() {
       {libraryItem && (
         <View className="flex h-screen gap-2 bg-slate-800 p-2">
           <TopActionsBar />
-          <MediaArt />
-          <MediaInfo libraryItem={libraryItem} playerState={playerState} />
+          <View className="h-1/2">
+            <MediaArt />
+            <MediaInfo libraryItem={libraryItem} playerState={playerState} />
+          </View>
           <TrackProgress playerState={playerState} />
           <MediaControls playerState={playerState} />
         </View>
@@ -73,7 +75,7 @@ const TopActionsBar = () => {
 
 const MediaArt = () => {
   return (
-    <View className="m-4 items-start justify-center">
+    <View className="items-start justify-center">
       <View className="h-[300px] w-full rounded bg-slate-400">
         <Text className="text-white">FSR</Text>
       </View>
@@ -89,7 +91,7 @@ const MediaInfo = ({
   playerState: PlayerState;
 }) => {
   return (
-    <View className="">
+    <View>
       <Text className="text-2xl text-white">{libraryItem.title}</Text>
       <Text className="text-xl text-slate-400">
         {playerState.currentTrack?.name}
@@ -100,27 +102,29 @@ const MediaInfo = ({
 
 const TrackProgress = ({ playerState }: { playerState: PlayerState }) => {
   return (
-    <View className="flex gap-4 p-4">
+    <View className="flex gap-4">
       <View className="relative">
         {/* TODO: progress slide is not smooth at all and the knob may overshoot the end */}
         <View
-          className="absolute z-10 h-2 rounded-lg bg-sky-300 transition-all duration-75 ease-in-out"
-          style={{ width: `${playerState.percentComplete ?? 0}%` }}
+          id="progressBar"
+          className="absolute z-10 h-2 rounded-lg bg-sky-300"
+          style={{ width: `${playerState.percentComplete}%` }}
         />
         <View
-          className="absolute -bottom-[12px] z-20 h-5 w-5 rounded-full bg-sky-300"
+          id="knob"
+          className="absolute -bottom-[9px] z-20 h-3 w-3 rounded-full bg-sky-300"
           style={{
-            left: `${playerState.percentComplete}%`,
+            left: `${playerState.percentComplete - 1}%`,
           }}
         />
         <View className="absolute h-2 w-full rounded-lg bg-slate-500" />
       </View>
       <View className="flex flex-row justify-between">
         <Text className="text-sky-300">
-          {format(playerState.positionMillis ?? 0, "mm:ss")}
+          {format(playerState.positionMillis, "mm:ss")}
         </Text>
         <Text className="text-slate-300">
-          {format(playerState.durationRemainingMillis ?? 0, "mm:ss")}
+          {format(playerState.durationRemainingMillis, "mm:ss")}
         </Text>
       </View>
     </View>
@@ -129,47 +133,54 @@ const TrackProgress = ({ playerState }: { playerState: PlayerState }) => {
 
 const MediaControls = ({ playerState }: { playerState: PlayerState }) => {
   return (
-    <View className="flex flex-row items-center justify-evenly rounded-b bg-slate-400 p-1">
-      {/* <Ionicons name="bookmark-outline" size={30} color="black" /> */}
-      <Ionicons
-        onPress={() => playerState.changeTrack(-1)}
-        name="play-skip-back-sharp"
-        size={30}
-        color="black"
-      />
-      <FontAwesome6
-        onPress={() => playerState.skipBack(30)}
-        name="arrow-rotate-left"
-        size={30}
-        color="black"
-      />
-      {playerState.isPlaying ? (
+    <View className="flex items-center gap-4">
+      <View className="flex w-full flex-row items-center justify-evenly p-1">
+        {/* <Ionicons name="bookmark-outline" size={30} color="black" /> */}
         <Ionicons
-          onPress={playerState.pause}
-          name="pause"
-          size={40}
-          color="black"
+          onPress={() => playerState.changeTrack(-1)}
+          name="play-skip-back-sharp"
+          size={30}
+          color="white"
         />
-      ) : (
+        <FontAwesome6
+          onPress={() => playerState.skipBack(30000)}
+          name="arrow-rotate-left"
+          size={30}
+          color="white"
+        />
+        {playerState.isPlaying ? (
+          <Ionicons
+            onPress={playerState.pause}
+            name="pause"
+            size={40}
+            color="white"
+          />
+        ) : (
+          <Ionicons
+            onPress={() => playerState.play()}
+            name="play-sharp"
+            size={40}
+            color="white"
+          />
+        )}
+        <FontAwesome6
+          onPress={() => playerState.skipForward(30000)}
+          name="arrow-rotate-right"
+          size={30}
+          color="white"
+        />
         <Ionicons
-          onPress={() => playerState.play()}
-          name="play-sharp"
-          size={40}
-          color="black"
+          onPress={() => playerState.changeTrack(1)}
+          name="play-skip-forward"
+          size={30}
+          color="white"
         />
-      )}
-      <FontAwesome6
-        onPress={() => playerState.skipForward(30)}
-        name="arrow-rotate-right"
-        size={30}
-        color="black"
-      />
-      <Ionicons
-        onPress={() => playerState.changeTrack(1)}
-        name="play-skip-forward"
-        size={30}
-        color="black"
-      />
+      </View>
+      <View className="flex w-full items-end">
+        <Pressable onPress={playerState.setRate} className="rounded-md p-2">
+          <Text className="text-2xl text-white">{playerState.rate}x</Text>
+        </Pressable>
+      </View>
     </View>
   );
 };

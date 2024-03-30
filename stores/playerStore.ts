@@ -18,12 +18,14 @@ export interface PlayerState {
   durationMillis: number;
   durationRemainingMillis: number;
   percentComplete: number;
+  rate: number;
   play: (audioFile?: LibraryItemAudioFileSchemaType) => void;
   pause: () => void;
   skipBack: (millis: number) => void;
   skipForward: (millis: number) => void;
   setPlaylist: (playlist: LibraryItemAudioFileSchemaType[]) => void;
   changeTrack: (change: number) => void;
+  setRate: () => void;
 }
 
 export const usePlayerState = create<PlayerState>()((set, get) => ({
@@ -35,6 +37,7 @@ export const usePlayerState = create<PlayerState>()((set, get) => ({
   durationMillis: 0,
   durationRemainingMillis: 0,
   percentComplete: 0,
+  rate: 1,
   play: async (audioFile?: LibraryItemAudioFileSchemaType) => {
     // when given an audio file we are expressing our intention to swap the playback track
     if (audioFile && audioFile.id !== get().currentTrack?.id) {
@@ -59,6 +62,7 @@ export const usePlayerState = create<PlayerState>()((set, get) => ({
       // updates position in track
       sound.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) => {
         if (status.isLoaded) {
+          // defaults to 1 so we don't divide by 0 when calculating percentComplete
           const durationMillis = status.durationMillis ?? 1;
           const durationRemainingMillis =
             durationMillis - status.positionMillis;
@@ -142,5 +146,11 @@ export const usePlayerState = create<PlayerState>()((set, get) => ({
       // console.log(`go to previous or next track ${index + change}`);
       get().play(playableMedia[index]);
     }
+  },
+  setRate: () => {
+    // increments in .25, cycles back to .5x if over 2x
+    const newRate = get().rate + 0.25 > 2 ? 0.5 : get().rate + 0.25;
+    set(() => ({ rate: newRate }));
+    get().audioObject?.setRateAsync(newRate, true);
   },
 }));
