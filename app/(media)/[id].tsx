@@ -90,7 +90,7 @@ export default function Media() {
 
   return (
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
-      {libraryItem && (
+      {libraryItem && audioFiles && (
         <View className="flex h-screen gap-2 bg-slate-800 p-2">
           <TopActionsBar />
           <MediaArtAndImportantInfo libraryItem={libraryItem} />
@@ -98,6 +98,7 @@ export default function Media() {
             libraryItem={libraryItem}
             handleDownload={handleDownload}
             playerState={playerState}
+            audioFiles={audioFiles}
           />
           <MediaSummary libraryItem={libraryItem} />
           {audioFiles && (
@@ -135,6 +136,7 @@ const MediaArtAndImportantInfo = ({
         <Text className="text-lg font-bold text-white">
           {libraryItem.title}
         </Text>
+        {/* TODO: complete */}
         <Text className="text-lg text-stone-400">2024 * 1hr 25m * TV-PG</Text>
         <Text className="text-stone-400">GoodReads rating</Text>
       </View>
@@ -146,10 +148,12 @@ const MediaActionsBar = ({
   libraryItem,
   handleDownload,
   playerState,
+  audioFiles,
 }: {
   libraryItem: LibraryItemSchemaType;
   handleDownload: (libraryItemId: string, fileId: string) => void;
   playerState: PlayerState;
+  audioFiles: LibraryItemAudioFileSchemaType[];
 }) => {
   return (
     <View className="flex flex-row items-center justify-between">
@@ -172,12 +176,19 @@ const MediaActionsBar = ({
       )}
       {/* other menu items */}
       <View className="mr-2 flex flex-row items-center gap-4">
-        <Ionicons
-          name="cloud-download-outline"
-          size={24}
-          color="white"
-          onPress={() => handleDownload(libraryItem.remoteId, "*")}
-        />
+        {audioFiles?.filter(
+          (audioFile) =>
+            audioFile.path === null ||
+            audioFile.path === null ||
+            audioFile.path.length === 0,
+        ).length > 1 && (
+          <Ionicons
+            name="cloud-download-outline"
+            size={24}
+            color="white"
+            onPress={() => handleDownload(libraryItem.remoteId, "*")}
+          />
+        )}
         {/* TODO: add actions that make sense, like add to reading queue/bookmark, download, mark as read */}
         {/* TODO: need to work out sheet that slides up to reveal options */}
         <Link href="/(media)/modal" asChild>
@@ -207,7 +218,7 @@ const MediaSummary = ({
         </View>
         <View className="flex flex-row items-center gap-4">
           <Text className="uppercase text-stone-400">PUBLISHED</Text>
-          <Text className="text-stone-300">December 25, 2022</Text>
+          <Text className="text-stone-300">{libraryItem.publishedYear}</Text>
         </View>
       </View>
     </View>

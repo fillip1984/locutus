@@ -78,7 +78,9 @@ export default function Settings() {
             duration: item.media.duration,
             numAudioFiles: item.media.numAudioFiles,
             description: item.media.metadata.description,
-            // publishedYear: item.media.metadata.publishedYear,
+            publishedYear: item.media.metadata.publishedYear
+              ? parseInt(item.media.metadata.publishedYear)
+              : null,
             libraryId,
             remoteId: item.id,
           });
