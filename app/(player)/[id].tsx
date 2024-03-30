@@ -1,4 +1,5 @@
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
+import Slider from "@react-native-community/slider";
 import { format } from "date-fns";
 import { eq } from "drizzle-orm";
 import { Link, useLocalSearchParams } from "expo-router";
@@ -39,7 +40,7 @@ export default function Player() {
         );
 
       playerState.setPlaylist(audioResults);
-      playerState.play(audioResults[0]);
+      playerState.play({ audioFile: audioResults[0] });
     };
 
     fetchData();
@@ -102,9 +103,9 @@ const MediaInfo = ({
 
 const TrackProgress = ({ playerState }: { playerState: PlayerState }) => {
   return (
-    <View className="flex gap-4">
-      <View className="relative">
-        {/* TODO: progress slide is not smooth at all and the knob may overshoot the end */}
+    <View className="flex">
+      {/* <View className="relative">
+        // TODO: progress slide is not smooth at all and the knob may overshoot the end
         <View
           id="progressBar"
           className="absolute z-10 h-2 rounded-lg bg-sky-300"
@@ -118,7 +119,26 @@ const TrackProgress = ({ playerState }: { playerState: PlayerState }) => {
           }}
         />
         <View className="absolute h-2 w-full rounded-lg bg-slate-500" />
-      </View>
+      </View> */}
+      <Slider
+        // style={{ width: 100, height: 90 }}
+        minimumValue={0}
+        maximumValue={100}
+        value={playerState.percentComplete}
+        onSlidingComplete={(newValue) => {
+          console.log({
+            newValue,
+            startingPosition: newValue * 0.01 * playerState.durationMillis,
+            duration: playerState.durationMillis,
+            currentPos: playerState.positionMillis,
+          });
+          playerState.play({
+            startingPosition: newValue * 0.01 * playerState.durationMillis,
+          });
+        }}
+        minimumTrackTintColor="#FFFFFF"
+        maximumTrackTintColor="#000000"
+      />
       <View className="flex flex-row justify-between">
         <Text className="text-sky-300">
           {format(playerState.positionMillis, "mm:ss")}
@@ -157,7 +177,7 @@ const MediaControls = ({ playerState }: { playerState: PlayerState }) => {
           />
         ) : (
           <Ionicons
-            onPress={() => playerState.play()}
+            onPress={() => playerState.play({})}
             name="play-sharp"
             size={40}
             color="white"

@@ -19,7 +19,13 @@ export interface PlayerState {
   durationRemainingMillis: number;
   percentComplete: number;
   rate: number;
-  play: (audioFile?: LibraryItemAudioFileSchemaType) => void;
+  play: ({
+    audioFile,
+    startingPosition,
+  }: {
+    audioFile?: LibraryItemAudioFileSchemaType;
+    startingPosition?: number;
+  }) => void;
   pause: () => void;
   skipBack: (millis: number) => void;
   skipForward: (millis: number) => void;
@@ -38,8 +44,14 @@ export const usePlayerState = create<PlayerState>()((set, get) => ({
   durationRemainingMillis: 0,
   percentComplete: 0,
   rate: 1,
-  play: async (audioFile?: LibraryItemAudioFileSchemaType) => {
-    // when given an audio file we are expressing our intention to swap the playback track
+  play: async ({
+    audioFile,
+    startingPosition,
+  }: {
+    audioFile?: LibraryItemAudioFileSchemaType;
+    startingPosition?: number;
+  }) => {
+    // when given an audio file different from the one currently playing we are expressing our intention to swap the playback track
     if (audioFile && audioFile.id !== get().currentTrack?.id) {
       console.log("unloading previous player");
       await get().audioObject?.unloadAsync();
@@ -89,9 +101,13 @@ export const usePlayerState = create<PlayerState>()((set, get) => ({
         currentTrack: audioFile,
       }));
     } else {
-      // else, we are only intending to resume play of current track
-      get().audioObject?.playAsync();
-      set(() => ({ isPlaying: true }));
+      if (startingPosition !== undefined) {
+        get().audioObject?.playFromPositionAsync(startingPosition);
+      } else {
+        // else, we are only intending to resume play of current track
+        get().audioObject?.playAsync();
+        set(() => ({ isPlaying: true }));
+      }
     }
   },
   pause: () => {
@@ -122,12 +138,12 @@ export const usePlayerState = create<PlayerState>()((set, get) => ({
 
     if (!get().currentTrack) {
       // console.log("when currentTrack isn't set, start at the beginning");
-      get().play(playableMedia[0]);
+      get().play({ audioFile: playableMedia[0] });
     }
 
     if (!get().currentTrack?.path) {
       // console.log("when currentTrack isn't playable, start at the beginning");
-      get().play(playableMedia[0]);
+      get().play({ audioFile: playableMedia[0] });
     }
 
     const index =
@@ -138,13 +154,13 @@ export const usePlayerState = create<PlayerState>()((set, get) => ({
     if (index < 0) {
       // console.log("if first track go to last");
       const lastTrack = playableMedia[playableMedia.length - 1];
-      get().play(lastTrack);
+      get().play({ audioFile: lastTrack });
     } else if (index >= playableMedia.length) {
       // console.log("if last track go to beginning");
-      get().play(playableMedia[0]);
+      get().play({ audioFile: playableMedia[0] });
     } else {
       // console.log(`go to previous or next track ${index + change}`);
-      get().play(playableMedia[index]);
+      get().play({ audioFile: playableMedia[index] });
     }
   },
   setRate: () => {
