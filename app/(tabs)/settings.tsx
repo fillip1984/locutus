@@ -6,7 +6,6 @@ import Toast from "react-native-toast-message";
 
 import { dropDatabase, localDb } from "@/db";
 import {
-  UserSettingsSchemaType,
   libraryItemAudioFileSchema,
   libraryItemSchema,
   librarySchema,
@@ -16,7 +15,6 @@ import { getLibraries } from "@/services/libraryApi";
 import { getLibraryItem } from "@/services/libraryItemApi";
 import { getLibraryItems } from "@/services/libraryItemsApi";
 import { login } from "@/services/login";
-import { ping } from "@/services/ping";
 
 export default function Settings() {
   const handleSync = async () => {
@@ -123,24 +121,18 @@ export default function Settings() {
     dropDatabase();
   };
 
-  const [userSettings, setUserSettings] =
-    useState<UserSettingsSchemaType | null>(null);
-
   useFocusEffect(
     useCallback(() => {
       const fetchData = async () => {
         const result = await localDb.select().from(userSettingsSchema);
         if (result.length === 0) {
-          setUserSettings({
-            serverUrl: result[0].serverUrl,
-            tokenId: result[0].tokenId,
-          });
-          await localDb.insert(userSettingsSchema).values({
-            serverUrl: "",
-            tokenId: "",
-          });
-        } else {
-          setUserSettings(result[0]);
+          //stub out record so it can be updated
+          await localDb
+            .insert(userSettingsSchema)
+            .values({ serverUrl: "", tokenId: "" });
+        } else if (result.length > 0) {
+          setServerUrl(result[0].serverUrl);
+          setTokenId(result[0].tokenId);
         }
       };
 
@@ -155,10 +147,11 @@ export default function Settings() {
       position: "bottom",
     });
 
-    await localDb.update(userSettingsSchema).set({
-      serverUrl: (userSettings?.serverUrl as string) ?? "",
-      tokenId: (userSettings?.tokenId as string) ?? "",
+    const results = await localDb.update(userSettingsSchema).set({
+      serverUrl,
+      tokenId,
     });
+    console.log({ results });
     Toast.show({
       type: "success",
       text1: "Saved settings",
@@ -166,71 +159,61 @@ export default function Settings() {
     });
   };
 
+  const [serverUrl, setServerUrl] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [tokenId, setTokenId] = useState("");
   const handleLogin = async () => {
     console.log("logging in");
-    const result = await login(
-      userSettings?.serverUrl as string,
-      username,
-      password,
-    );
+    const result = await login(serverUrl, username, password);
     console.log({ result });
-    setUserSettings({
-      serverUrl: userSettings?.serverUrl as string,
-      tokenId: result.user.token,
-    });
+    setTokenId(result.user.token);
   };
 
   return (
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
       <View className="flex h-screen gap-4 bg-slate-800 p-4">
         <Text className="text-3xl text-white">AudioBookShelf Settings</Text>
-        {userSettings && (
-          <View className="flex gap-2">
-            <Text className="text-white">Server Url</Text>
-            <TextInput
-              value={userSettings.serverUrl ?? ""}
-              onChangeText={(text) =>
-                setUserSettings({ ...userSettings, serverUrl: text })
-              }
-              className="rounded bg-white p-2 text-xl text-black"
-              placeholder="http://192.168.0.10:13378"
-            />
-            <Text className="text-white">Username</Text>
-            <TextInput
-              value={username}
-              onChangeText={(text) => setUsername(text)}
-              className="rounded bg-white p-2 text-xl text-black"
-            />
-            <Text className="text-white">Password</Text>
-            <TextInput
-              value={password}
-              onChangeText={(text) => setPassword(text)}
-              secureTextEntry
-              className="rounded bg-white p-2 text-xl text-black"
-            />
 
+        <View className="flex gap-2">
+          <Text className="text-white">Server Url</Text>
+          <TextInput
+            value={serverUrl}
+            onChangeText={(text) => setServerUrl(text)}
+            className="rounded bg-white p-2 text-xl text-black"
+            placeholder="http://192.168.0.10:13378"
+          />
+          <Text className="text-white">Username</Text>
+          <TextInput
+            value={username}
+            onChangeText={(text) => setUsername(text)}
+            className="rounded bg-white p-2 text-xl text-black"
+          />
+          <Text className="text-white">Password</Text>
+          <TextInput
+            value={password}
+            onChangeText={(text) => setPassword(text)}
+            secureTextEntry
+            className="rounded bg-white p-2 text-xl text-black"
+          />
+
+          <Pressable
+            onPress={handleLogin}
+            className="flex items-center rounded bg-sky-300 px-4 py-2">
+            <Text className="text-3xl text-white">Login</Text>
+          </Pressable>
+
+          <View>
+            <Text className="text-white">User token</Text>
+            <Text className="rounded p-2 text-slate-400">{tokenId}</Text>
             <Pressable
-              onPress={handleLogin}
+              onPress={handleSaveUserSettings}
               className="flex items-center rounded bg-sky-300 px-4 py-2">
-              <Text className="text-3xl text-white">Login</Text>
+              <Text className="text-3xl text-white">Save</Text>
             </Pressable>
-            {userSettings.tokenId && (
-              <View>
-                <Text className="text-white">User token</Text>
-                <Text className="rounded p-2 text-slate-400">
-                  {userSettings.tokenId}
-                </Text>
-                <Pressable
-                  onPress={handleSaveUserSettings}
-                  className="flex items-center rounded bg-sky-300 px-4 py-2">
-                  <Text className="text-3xl text-white">Save</Text>
-                </Pressable>
-              </View>
-            )}
           </View>
-        )}
+        </View>
+
         <View className="flex gap-2">
           <Text className="text-3xl text-white">Data</Text>
           <Pressable
