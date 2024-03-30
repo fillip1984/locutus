@@ -7,9 +7,10 @@
     "android": "expo start --android",
     "ios": "expo start -c --ios",
     "web": "expo start --web",
-    "generate": "drizzle-kit generate:sqlite",
+    "db:generate": "drizzle-kit generate:sqlite",
     "studio": "drizzle-kit studio",
-    "test": "jest --watchAll"
+    "test": "jest --watchAll",
+    "build:ios": "eas build --platform ios --profile preview --local"
   },
   "jest": {
     "preset": "jest-expo"

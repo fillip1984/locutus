@@ -30,4 +30,9 @@ CREATE TABLE `library` (
 	`name` text NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE `userSettings` (
+	`serverUrl` text NOT NULL,
+	`tokenId` text NOT NULL
+);
+--> statement-breakpoint
 CREATE UNIQUE INDEX `library_remoteId_unique` ON `library` (`remoteId`);

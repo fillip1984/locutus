@@ -1,15 +1,19 @@
-import { audiobookshelf_token } from "@env";
 import axios from "axios";
 import Toast from "react-native-toast-message";
 
+import { localDb } from "@/db";
+import { userSettingsSchema } from "@/db/schema";
+
 export const getLibraries = async () => {
+  const userSettings = (await localDb.select().from(userSettingsSchema))[0];
+
   try {
     console.log("fetching libraries");
     const response = await axios.get<Root>(
-      "http://192.168.68.68:13378/api/libraries",
+      `${userSettings.serverUrl}/api/libraries`,
       {
         headers: {
-          Authorization: `Bearer ${audiobookshelf_token}`,
+          Authorization: `Bearer ${userSettings.tokenId}`,
         },
       },
     );

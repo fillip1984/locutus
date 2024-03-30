@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "6662fb92-9bcb-4f74-bd25-5f9da156efad",
+  "id": "e7eca140-bc69-4d57-906d-8c8b8ab2a769",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "libraryItemAudioFile": {
@@ -210,6 +210,29 @@
           "isUnique": true
         }
       },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "userSettings": {
+      "name": "userSettings",
+      "columns": {
+        "serverUrl": {
+          "name": "serverUrl",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tokenId": {
+          "name": "tokenId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}

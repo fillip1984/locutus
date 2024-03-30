@@ -1,15 +1,19 @@
-import { audiobookshelf_token } from "@env";
 import axios from "axios";
 import * as FileSystem from "expo-file-system";
 
+import { localDb } from "@/db";
+import { userSettingsSchema } from "@/db/schema";
+
 export const getLibraryItem = async (libraryItemId: string) => {
+  const userSettings = (await localDb.select().from(userSettingsSchema))[0];
+
   try {
     console.log(`fetching library item with id: ${libraryItemId}`);
     const response = await axios.get<Root>(
-      `http://192.168.68.68:13378/api/items/${libraryItemId}`,
+      `${userSettings.serverUrl}/api/items/${libraryItemId}`,
       {
         headers: {
-          Authorization: `Bearer ${audiobookshelf_token}`,
+          Authorization: `Bearer ${userSettings.tokenId}`,
         },
       },
     );
@@ -28,6 +32,7 @@ export const downloadLibraryItem = async (
   fileId: string,
   filename: string,
 ) => {
+  const userSettings = (await localDb.select().from(userSettingsSchema))[0];
   // try {
   //   console.log(
   //     `downloading library item: ${libraryItemId} and fileId: ${fileId}`,
@@ -81,7 +86,7 @@ export const downloadLibraryItem = async (
     }
 
     const result = await FileSystem.downloadAsync(
-      `http://192.168.68.68:13378/api/items/${libraryItemId}/file/${fileId}/download`,
+      `${userSettings.serverUrl}/api/items/${libraryItemId}/file/${fileId}/download`,
       FileSystem.documentDirectory + libraryItemId + "/" + filename,
     );
     return result.uri;

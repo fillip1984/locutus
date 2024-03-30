@@ -8,8 +8,24 @@ import {
   LibraryItemSchemaType,
 } from "@/db/schema";
 
-const initAudioPlayer = async () => {
-  console.log("initing audio player");
+// const initAudioPlayer = async () => {
+// console.log("initing audio player");
+// await Audio.setAudioModeAsync({
+//   staysActiveInBackground: true,
+//   playsInSilentModeIOS: true,
+//   interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+//   interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+//   playThroughEarpieceAndroid: true,
+// });
+// };
+// initAudioPlayer();
+
+const handlePlay = async (audioFile: LibraryItemAudioFileSchemaType) => {
+  if (!audioFile.path) {
+    console.warn(`AudioFile's path is undefined: ${audioFile.name}`);
+    return;
+  }
+
   await Audio.setAudioModeAsync({
     staysActiveInBackground: true,
     playsInSilentModeIOS: true,
@@ -17,14 +33,6 @@ const initAudioPlayer = async () => {
     interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
     playThroughEarpieceAndroid: true,
   });
-};
-initAudioPlayer();
-
-const handlePlay = async (audioFile: LibraryItemAudioFileSchemaType) => {
-  if (!audioFile.path) {
-    console.warn(`AudioFile's path is undefined: ${audioFile.name}`);
-    return;
-  }
 
   const { sound } = await Audio.Sound.createAsync(
     { uri: audioFile.path as string },

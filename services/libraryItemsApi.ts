@@ -1,14 +1,18 @@
-import { audiobookshelf_token } from "@env";
 import axios from "axios";
 
+import { localDb } from "@/db";
+import { userSettingsSchema } from "@/db/schema";
+
 export const getLibraryItems = async (libraryId: string) => {
+  const userSettings = (await localDb.select().from(userSettingsSchema))[0];
+
   try {
     console.log(`fetching library items for library with id: ${libraryId}`);
     const response = await axios.get<Root>(
-      `http://192.168.68.68:13378/api/libraries/${libraryId}/items`,
+      `${userSettings.serverUrl}/api/libraries/${libraryId}/items`,
       {
         headers: {
-          Authorization: `Bearer ${audiobookshelf_token}`,
+          Authorization: `Bearer ${userSettings.tokenId}`,
         },
       },
     );

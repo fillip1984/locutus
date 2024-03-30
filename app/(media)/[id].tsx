@@ -9,6 +9,7 @@ import {
 import { useCallback, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 
 import { localDb } from "@/db";
 import {
@@ -59,7 +60,10 @@ export default function Media() {
   );
 
   const handleDownload = async (libraryItemId: string, fileId: string) => {
-    console.log("downloading audio files");
+    Toast.show({
+      type: "info",
+      text1: "Downloading audio files",
+    });
     // * for all, id for single downloads
     if (fileId === "*" && audioFiles) {
       for (const audioFile of audioFiles) {
@@ -74,7 +78,10 @@ export default function Media() {
           .where(eq(libraryItemAudioFileSchema.remoteId, audioFile.remoteId));
         console.log(`downloaded audio file, result: ${file}`);
       }
-      console.log("downloaded audio files");
+      Toast.show({
+        type: "success",
+        text1: "Downloaded audio files",
+      });
     } else {
       // TODO: finish if we find a UI flow that makes sense for single file downloads
       console.warn("still need to develop method for single file downloads");

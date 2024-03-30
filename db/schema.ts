@@ -46,4 +46,11 @@ export const libraryItemAudioFileSchema = sqliteTable("libraryItemAudioFile", {
 });
 
 export type LibraryItemAudioFileSchemaType =
-  typeof libraryItemAudioFileSchema.$inferInsert;
+  typeof libraryItemAudioFileSchema.$inferSelect;
+
+export const userSettingsSchema = sqliteTable("userSettings", {
+  serverUrl: text("serverUrl").notNull(),
+  tokenId: text("tokenId").notNull(),
+});
+
+export type UserSettingsSchemaType = typeof userSettingsSchema.$inferSelect;
