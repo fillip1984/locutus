@@ -199,28 +199,36 @@ const MediaTracks = ({
             <Link
               key={audioFile.id}
               href={`/(player)/${libraryItem.id}?audioFileId=${audioFile.id}`}>
-              <View
-                // className={`m-1 flex flex-row justify-between gap-2 rounded p-4 ${libraryItem.lastPlayedId === audioFile.id ? "bg-sky-300" : "bg-slate-400/30"}`}
-                className={clsx(
-                  "flex h-20 w-full flex-row items-center justify-between gap-2 rounded p-4",
-                  {
-                    "bg-slate-400/30 opacity-35":
-                      !(libraryItem.lastPlayedId === audioFile.id) &&
-                      audioFile.complete,
-                    "bg-slate-400/30":
-                      !(libraryItem.lastPlayedId === audioFile.id) &&
-                      !audioFile.complete,
-                    "bg-sky-300": libraryItem.lastPlayedId === audioFile.id,
-                  },
-                )}>
-                <Text className="flex-wrap text-wrap text-white">
-                  {audioFile.name}
-                </Text>
-                {audioFile.complete ? (
-                  <FontAwesome6 name="circle-check" size={24} color="white" />
-                ) : (
-                  <FontAwesome6 name="circle-play" size={24} color="white" />
-                )}
+              <View className="relative flex w-full">
+                <View
+                  // className={`m-1 flex flex-row justify-between gap-2 rounded p-4 ${libraryItem.lastPlayedId === audioFile.id ? "bg-sky-300" : "bg-slate-400/30"}`}
+                  className={clsx(
+                    "flex h-20 w-full flex-row items-center justify-between rounded-t p-2",
+                    {
+                      "bg-slate-400/30 opacity-35":
+                        !(libraryItem.lastPlayedId === audioFile.id) &&
+                        audioFile.complete,
+                      "bg-slate-400/30":
+                        !(libraryItem.lastPlayedId === audioFile.id) &&
+                        !audioFile.complete,
+                      "bg-sky-300": libraryItem.lastPlayedId === audioFile.id,
+                    },
+                  )}>
+                  <Text className="flex-wrap text-wrap text-white">
+                    {audioFile.name}
+                  </Text>
+                  {audioFile.complete ? (
+                    <FontAwesome6 name="circle-check" size={24} color="white" />
+                  ) : (
+                    <FontAwesome6 name="circle-play" size={24} color="white" />
+                  )}
+                </View>
+                <View
+                  className="absolute bottom-0 h-1 rounded-b bg-yellow-300"
+                  style={{
+                    width: `${calc(audioFile.progress ?? 1, audioFile.duration * 1000)}%`,
+                  }}
+                />
               </View>
             </Link>
           ))}
@@ -236,4 +244,11 @@ const MediaTracks = ({
       </ScrollView>
     </View>
   );
+};
+
+const calc = (positionMillis: number, durationMillis: number) => {
+  // TODO: for some reason math.round returns 100%???
+  // const result = Math.round(positionMillis / durationMillis) * 100;
+  const result = (positionMillis / durationMillis) * 100;
+  return parseInt(result.toFixed(2), 10);
 };
