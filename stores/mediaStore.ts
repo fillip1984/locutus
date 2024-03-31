@@ -8,11 +8,13 @@ import {
   libraryItemAudioFileSchema,
   libraryItemSchema,
 } from "@/db/schema";
+import { downloadLibraryItem } from "@/services/libraryItemApi";
 
 export interface MediaState {
   libraryItem: LibraryItemSchemaType | null;
   audioFiles: LibraryItemAudioFileSchemaType[] | null;
   refetch: (id: number) => void;
+  downloadAudioFiles: () => Promise<boolean>;
 }
 
 export const useMediaState = create<MediaState>()((set, get) => ({
@@ -36,5 +38,40 @@ export const useMediaState = create<MediaState>()((set, get) => ({
       .where(eq(libraryItemAudioFileSchema.libraryItemId, id));
     set(() => ({ audioFiles: audioResults }));
     console.log("fetched media state");
+  },
+  downloadAudioFiles: async () => {
+    const toDownload = get().audioFiles;
+    if (!toDownload) {
+      throw Error("No audio files to download");
+    }
+
+    const libraryItemId = get().libraryItem?.id;
+    if (!libraryItemId) {
+      throw Error(
+        "Unable to download audio files for library...missing library item id",
+      );
+    }
+
+    const remoteId = get().libraryItem?.remoteId;
+    if (!remoteId) {
+      throw Error(
+        "Unable to download audio files for library...missing remote id",
+      );
+    }
+
+    for (const audioFile of toDownload) {
+      const file = await downloadLibraryItem(
+        remoteId,
+        audioFile.remoteId,
+        audioFile.name,
+      );
+      await localDb
+        .update(libraryItemAudioFileSchema)
+        .set({ path: file })
+        .where(eq(libraryItemAudioFileSchema.remoteId, audioFile.remoteId));
+      console.log(`downloaded audio file, result: ${file}`);
+    }
+    get().refetch(libraryItemId);
+    return true;
   },
 }));

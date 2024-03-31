@@ -1,5 +1,4 @@
 import { FontAwesome, FontAwesome6, Ionicons } from "@expo/vector-icons";
-import { eq } from "drizzle-orm";
 import { Image } from "expo-image";
 import {
   Link,
@@ -7,59 +6,40 @@ import {
   useFocusEffect,
   useLocalSearchParams,
 } from "expo-router";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useRef } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
-import { localDb } from "@/db";
 import {
   LibraryItemAudioFileSchemaType,
   LibraryItemSchemaType,
-  libraryItemAudioFileSchema,
 } from "@/db/schema";
-import { downloadLibraryItem } from "@/services/libraryItemApi";
 import { useMediaState } from "@/stores/mediaStore";
-import { PlayerState, usePlayerState } from "@/stores/playerStore";
 
 export default function Media() {
   const { id } = useLocalSearchParams();
 
   const mediaState = useMediaState();
-  const playerState = usePlayerState();
+
   useFocusEffect(
     useCallback(() => {
       mediaState.refetch(parseInt(id as string, 10));
     }, []),
   );
 
-  const handleDownload = async (libraryItemId: string, fileId: string) => {
+  const handleDownload = async () => {
     Toast.show({
       type: "info",
       text1: "Downloading audio files",
+      position: "bottom",
     });
-    // * for all, id for single downloads
-    if (fileId === "*" && mediaState.audioFiles) {
-      for (const audioFile of mediaState.audioFiles) {
-        const file = await downloadLibraryItem(
-          libraryItemId,
-          audioFile.remoteId,
-          audioFile.name,
-        );
-        await localDb
-          .update(libraryItemAudioFileSchema)
-          .set({ path: file })
-          .where(eq(libraryItemAudioFileSchema.remoteId, audioFile.remoteId));
-        console.log(`downloaded audio file, result: ${file}`);
-      }
-      Toast.show({
-        type: "success",
-        text1: "Downloaded audio files",
-      });
-    } else {
-      // TODO: finish if we find a UI flow that makes sense for single file downloads
-      console.warn("still need to develop method for single file downloads");
-    }
+    await mediaState.downloadAudioFiles();
+    Toast.show({
+      type: "success",
+      text1: "Downloaded audio files",
+      position: "bottom",
+    });
   };
 
   return (
@@ -71,7 +51,6 @@ export default function Media() {
           <MediaActionsBar
             libraryItem={mediaState.libraryItem}
             handleDownload={handleDownload}
-            playerState={playerState}
             audioFiles={mediaState.audioFiles}
           />
           <MediaSummary libraryItem={mediaState.libraryItem} />
@@ -110,11 +89,9 @@ const MediaArtAndImportantInfo = ({
           key={libraryItem.id}
           source={libraryItem.coverArtPath}
           style={{ flex: 1 }}
-          // placeholder={blurhash}
           contentFit="cover"
           transition={1000}
         />
-        {/* <Text className="text-white">{item.title}</Text> */}
       </View>
       <View className="flex justify-end">
         {/* TODO: figure out how to wrap text, usual tricks ain't working */}
@@ -134,54 +111,33 @@ const MediaArtAndImportantInfo = ({
 const MediaActionsBar = ({
   libraryItem,
   handleDownload,
-  playerState,
   audioFiles,
 }: {
   libraryItem: LibraryItemSchemaType;
-  handleDownload: (libraryItemId: string, fileId: string) => void;
-  playerState: PlayerState;
+  handleDownload: () => void;
   audioFiles: LibraryItemAudioFileSchemaType[];
 }) => {
   return (
     <View className="flex flex-row items-center justify-between">
-      {/* main button */}
       {/* TODO: Looks like Plex is using css grid to have 4 squares, the first col taking up a little over 1/3. This causes the art poster and play button to align */}
-      {/* {playerState.isPlaying ? (
-        <Pressable
-          onPress={() => playerState.pause()}
-          className="flex w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
-          <Ionicons name="pause" size={40} color="white" />
-          <Text className="text-2xl font-bold text-white">Pause</Text>
-        </Pressable>
-      ) : (
+      {audioFiles.filter((a) => a.path).length > 0 ? (
         <Link href={`/(player)/${libraryItem.id}`}>
-          <View className="flex w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
+          <View className="flex h-14 w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
             <Ionicons name="play-sharp" size={40} color="white" />
-            <Text className="text-2xl font-bold text-white">Play</Text>
           </View>
         </Link>
-      )} */}
-      <Link href={`/(player)/${libraryItem.id}`}>
-        <View className="flex w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
-          <Ionicons name="play-sharp" size={40} color="white" />
-          <Text className="text-2xl font-bold text-white">Play</Text>
-        </View>
-      </Link>
-      {/* other menu items */}
-      <View className="mr-2 flex flex-row items-center gap-4">
-        {audioFiles?.filter(
-          (audioFile) =>
-            audioFile.path === null ||
-            audioFile.path === null ||
-            audioFile.path.length === 0,
-        ).length > 1 && (
+      ) : (
+        <View className="flex h-14 w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
           <Ionicons
             name="cloud-download-outline"
             size={24}
             color="white"
-            onPress={() => handleDownload(libraryItem.remoteId, "*")}
+            onPress={handleDownload}
           />
-        )}
+        </View>
+      )}
+
+      <View className="ml-auto mr-2 flex flex-row items-center justify-end gap-4">
         {/* TODO: add actions that make sense, like add to reading queue/bookmark, download, mark as read */}
         {/* TODO: need to work out sheet that slides up to reveal options */}
         <Link href="/(media)/modal" asChild>
@@ -230,7 +186,10 @@ const MediaTracks = ({
     <View className="mt-4">
       <View className="flex flex-row justify-between">
         <Text className="uppercase text-white">Chapters</Text>
-        <Text className="text-stone-300">{audioFiles?.length} unwatched</Text>
+        <Text className="text-stone-300">
+          {audioFiles?.filter((a) => !a.complete).length}/{audioFiles?.length}{" "}
+          remaining
+        </Text>
       </View>
 
       <ScrollView ref={tracksScrollViewRef}>

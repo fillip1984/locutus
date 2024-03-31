@@ -2,7 +2,7 @@ import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import { format } from "date-fns";
 import { Image } from "expo-image";
-import { Link, useLocalSearchParams } from "expo-router";
+import { Link } from "expo-router";
 import { useEffect } from "react";
 import { Pressable, SafeAreaView, Text, View } from "react-native";
 
@@ -11,44 +11,15 @@ import { useMediaState } from "@/stores/mediaStore";
 import { PlayerState, usePlayerState } from "@/stores/playerStore";
 
 export default function Player() {
-  // const { id } = useLocalSearchParams();
-  // const [libraryItem, setLibraryItem] =
-  //   useState<LibraryItemSchemaType | null>();
   const playerState = usePlayerState();
   const mediaState = useMediaState();
   useEffect(() => {
-    // seems like we would have a race condition of both player and media states pulling in info but this current design expects that the media state is already fetched
+    // TODO: seems like we would have a race condition of both player and media states pulling in info but this current design expects that the media state is already fetched
     if (mediaState.audioFiles) {
       playerState.setPlaylist(mediaState.audioFiles);
       playerState.play({ audioFile: mediaState.audioFiles[0] });
     }
   }, []);
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     console.log(`refetching player data`);
-  //     const result = await localDb
-  //       .select()
-  //       .from(libraryItemSchema)
-  //       .where(eq(libraryItemSchema.id, parseInt(id as string, 10)));
-  //     setLibraryItem(result[0]);
-
-  //     const audioResults = await localDb
-  //       .select()
-  //       .from(libraryItemAudioFileSchema)
-  //       .where(
-  //         eq(
-  //           libraryItemAudioFileSchema.libraryItemId,
-  //           parseInt(id as string, 10),
-  //         ),
-  //       );
-
-  //     playerState.setPlaylist(audioResults);
-  //     playerState.play({ audioFile: audioResults[0] });
-  //   };
-
-  //   fetchData();
-  // }, [id]);
 
   return (
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
@@ -88,7 +59,6 @@ const MediaArt = ({ libraryItem }: { libraryItem: LibraryItemSchemaType }) => {
         key={libraryItem.id}
         source={libraryItem.coverArtPath}
         style={{ flex: 1 }}
-        // placeholder={blurhash}
         contentFit="cover"
         transition={1000}
       />

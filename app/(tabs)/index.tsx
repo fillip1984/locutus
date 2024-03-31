@@ -7,23 +7,6 @@ import { Pressable, SafeAreaView, ScrollView, Text, View } from "react-native";
 import { useLibraryState } from "@/stores/libraryStore";
 
 export default function TabOneScreen() {
-  // TODO: still determining if zustand is useful, this code was doing the same thing
-  // const [libraryItems, setLibraryItems] = useState<
-  //   LibraryItemSchemaType[] | null
-  // >();
-
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     const fetchData = async () => {
-  //       console.log("refetching library items");
-  //       const result = await localDb.select().from(libraryItemSchema);
-  //       setLibraryItems(result);
-  //     };
-
-  //     fetchData();
-  //   }, []),
-  // );
-
   const libraryState = useLibraryState();
   useEffect(() => {
     libraryState.refetch();
@@ -44,10 +27,7 @@ export default function TabOneScreen() {
           <ScrollView ref={libraryScrollViewRef}>
             <View className="mt-6 flex flex-row flex-wrap gap-4">
               {libraryState.libraryItems.map((item) => (
-                <Link
-                  // className="h-60 w-36"
-                  key={item.id}
-                  href={`/(media)/${item.id}`}>
+                <Link key={item.id} href={`/(media)/${item.id}`}>
                   <View key={item.id} className="flex h-60 w-36">
                     <Image
                       key={item.id}
