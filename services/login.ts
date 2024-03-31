@@ -1,8 +1,6 @@
 import axios from "axios";
 import Toast from "react-native-toast-message";
 
-import { ping } from "./ping";
-
 export const login = async (
   url: string,
   username: string,

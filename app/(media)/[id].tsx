@@ -122,7 +122,9 @@ const MediaArtAndImportantInfo = ({
           {libraryItem.title}
         </Text>
         {/* TODO: complete */}
-        <Text className="text-lg text-stone-400">2024 * 1hr 25m * TV-PG</Text>
+        <Text className="text-lg text-stone-400">
+          {libraryItem.publishedYear} * 1hr 25m * TV-PG
+        </Text>
         <Text className="text-stone-400">GoodReads rating</Text>
       </View>
     </View>

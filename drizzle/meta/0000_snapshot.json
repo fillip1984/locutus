@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "d490392f-f8e4-4bd3-a8ae-5ad1f1ff0382",
+  "id": "e770db9e-5f87-4586-9539-9dc3f1cd06ec",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "libraryItemAudioFile": {
@@ -41,6 +41,14 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        },
+        "complete": {
+          "name": "complete",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": false
         },
         "name": {
           "name": "name",
@@ -89,9 +97,9 @@
         "id": {
           "name": "id",
           "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": true
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         },
         "remoteId": {
           "name": "remoteId",

@@ -4,6 +4,7 @@ CREATE TABLE `libraryItemAudioFile` (
 	`index` integer NOT NULL,
 	`duration` integer NOT NULL,
 	`progress` integer,
+	`complete` integer DEFAULT false,
 	`name` text NOT NULL,
 	`path` text,
 	`libraryItemId` integer,
@@ -11,7 +12,7 @@ CREATE TABLE `libraryItemAudioFile` (
 );
 --> statement-breakpoint
 CREATE TABLE `libraryItem` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`id` integer,
 	`remoteId` text NOT NULL,
 	`title` text NOT NULL,
 	`authorName` text NOT NULL,
