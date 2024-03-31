@@ -7,7 +7,7 @@ import {
   useFocusEffect,
   useLocalSearchParams,
 } from "expo-router";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
@@ -17,46 +17,19 @@ import {
   LibraryItemAudioFileSchemaType,
   LibraryItemSchemaType,
   libraryItemAudioFileSchema,
-  libraryItemSchema,
 } from "@/db/schema";
 import { downloadLibraryItem } from "@/services/libraryItemApi";
+import { useMediaState } from "@/stores/mediaStore";
 import { PlayerState, usePlayerState } from "@/stores/playerStore";
 
 export default function Media() {
   const { id } = useLocalSearchParams();
-  const [libraryItem, setLibraryItem] =
-    useState<LibraryItemSchemaType | null>();
-  const [audioFiles, setAudioFiles] = useState<
-    LibraryItemAudioFileSchemaType[] | null
-  >();
-  const playerState = usePlayerState();
 
+  const mediaState = useMediaState();
+  const playerState = usePlayerState();
   useFocusEffect(
     useCallback(() => {
-      // fetch library item for media data
-      const fetchData = async () => {
-        console.log("refetching library item");
-        const result = await localDb
-          .select()
-          .from(libraryItemSchema)
-          .where(eq(libraryItemSchema.id, parseInt(id as string, 10)));
-        setLibraryItem(result[0]);
-
-        // fetch audio files
-        console.log("refetching audio files");
-        const audioResults = await localDb
-          .select()
-          .from(libraryItemAudioFileSchema)
-          .where(
-            eq(
-              libraryItemAudioFileSchema.libraryItemId,
-              parseInt(id as string, 10),
-            ),
-          );
-        setAudioFiles(audioResults);
-      };
-
-      fetchData();
+      mediaState.refetch(parseInt(id as string, 10));
     }, []),
   );
 
@@ -66,8 +39,8 @@ export default function Media() {
       text1: "Downloading audio files",
     });
     // * for all, id for single downloads
-    if (fileId === "*" && audioFiles) {
-      for (const audioFile of audioFiles) {
+    if (fileId === "*" && mediaState.audioFiles) {
+      for (const audioFile of mediaState.audioFiles) {
         const file = await downloadLibraryItem(
           libraryItemId,
           audioFile.remoteId,
@@ -91,19 +64,22 @@ export default function Media() {
 
   return (
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
-      {libraryItem && audioFiles && (
+      {mediaState.libraryItem && mediaState.audioFiles && (
         <View className="flex h-screen gap-2 bg-slate-800 p-2">
           <TopActionsBar />
-          <MediaArtAndImportantInfo libraryItem={libraryItem} />
+          <MediaArtAndImportantInfo libraryItem={mediaState.libraryItem} />
           <MediaActionsBar
-            libraryItem={libraryItem}
+            libraryItem={mediaState.libraryItem}
             handleDownload={handleDownload}
             playerState={playerState}
-            audioFiles={audioFiles}
+            audioFiles={mediaState.audioFiles}
           />
-          <MediaSummary libraryItem={libraryItem} />
-          {audioFiles && (
-            <MediaTracks libraryItem={libraryItem} audioFiles={audioFiles} />
+          <MediaSummary libraryItem={mediaState.libraryItem} />
+          {mediaState.audioFiles && (
+            <MediaTracks
+              libraryItem={mediaState.libraryItem}
+              audioFiles={mediaState.audioFiles}
+            />
           )}
         </View>
       )}

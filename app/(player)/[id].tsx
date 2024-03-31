@@ -1,60 +1,66 @@
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import { format } from "date-fns";
-import { eq } from "drizzle-orm";
 import { Image } from "expo-image";
 import { Link, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Pressable, SafeAreaView, Text, View } from "react-native";
 
-import { localDb } from "@/db";
-import {
-  LibraryItemSchemaType,
-  libraryItemAudioFileSchema,
-  libraryItemSchema,
-} from "@/db/schema";
+import { LibraryItemSchemaType } from "@/db/schema";
+import { useMediaState } from "@/stores/mediaStore";
 import { PlayerState, usePlayerState } from "@/stores/playerStore";
 
 export default function Player() {
-  const { id } = useLocalSearchParams();
-  const [libraryItem, setLibraryItem] =
-    useState<LibraryItemSchemaType | null>();
+  // const { id } = useLocalSearchParams();
+  // const [libraryItem, setLibraryItem] =
+  //   useState<LibraryItemSchemaType | null>();
   const playerState = usePlayerState();
-
+  const mediaState = useMediaState();
   useEffect(() => {
-    const fetchData = async () => {
-      console.log(`refetching player data`);
-      const result = await localDb
-        .select()
-        .from(libraryItemSchema)
-        .where(eq(libraryItemSchema.id, parseInt(id as string, 10)));
-      setLibraryItem(result[0]);
+    // seems like we would have a race condition of both player and media states pulling in info but this current design expects that the media state is already fetched
+    if (mediaState.audioFiles) {
+      playerState.setPlaylist(mediaState.audioFiles);
+      playerState.play({ audioFile: mediaState.audioFiles[0] });
+    }
+  }, []);
 
-      const audioResults = await localDb
-        .select()
-        .from(libraryItemAudioFileSchema)
-        .where(
-          eq(
-            libraryItemAudioFileSchema.libraryItemId,
-            parseInt(id as string, 10),
-          ),
-        );
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     console.log(`refetching player data`);
+  //     const result = await localDb
+  //       .select()
+  //       .from(libraryItemSchema)
+  //       .where(eq(libraryItemSchema.id, parseInt(id as string, 10)));
+  //     setLibraryItem(result[0]);
 
-      playerState.setPlaylist(audioResults);
-      playerState.play({ audioFile: audioResults[0] });
-    };
+  //     const audioResults = await localDb
+  //       .select()
+  //       .from(libraryItemAudioFileSchema)
+  //       .where(
+  //         eq(
+  //           libraryItemAudioFileSchema.libraryItemId,
+  //           parseInt(id as string, 10),
+  //         ),
+  //       );
 
-    fetchData();
-  }, [id]);
+  //     playerState.setPlaylist(audioResults);
+  //     playerState.play({ audioFile: audioResults[0] });
+  //   };
+
+  //   fetchData();
+  // }, [id]);
 
   return (
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
-      {libraryItem && (
+      {mediaState.libraryItem && (
         <View className="flex h-screen gap-2 bg-slate-800 p-2">
           <TopActionsBar />
           <View className="h-1/2">
-            <MediaArt libraryItem={libraryItem} />
-            <MediaInfo libraryItem={libraryItem} playerState={playerState} />
+            <MediaArt libraryItem={mediaState.libraryItem} />
+            <MediaInfo
+              libraryItem={mediaState.libraryItem}
+              playerState={playerState}
+            />
           </View>
           <TrackProgress playerState={playerState} />
           <MediaControls playerState={playerState} />

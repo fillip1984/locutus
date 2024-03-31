@@ -1,46 +1,49 @@
 import { FontAwesome } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { Link, useFocusEffect } from "expo-router";
-import { useCallback, useRef, useState } from "react";
+import { Link } from "expo-router";
+import { useEffect, useRef } from "react";
 import { Pressable, SafeAreaView, ScrollView, Text, View } from "react-native";
 
-import { localDb } from "@/db";
-import { LibraryItemSchemaType, libraryItemSchema } from "@/db/schema";
+import { useLibraryState } from "@/stores/libraryStore";
 
 export default function TabOneScreen() {
-  const [libraryItems, setLibraryItems] = useState<
-    LibraryItemSchemaType[] | null
-  >();
+  // TODO: still determining if zustand is useful, this code was doing the same thing
+  // const [libraryItems, setLibraryItems] = useState<
+  //   LibraryItemSchemaType[] | null
+  // >();
 
-  useFocusEffect(
-    useCallback(() => {
-      const fetchData = async () => {
-        console.log("refetching library items");
-        const result = await localDb.select().from(libraryItemSchema);
-        setLibraryItems(result);
-      };
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     const fetchData = async () => {
+  //       console.log("refetching library items");
+  //       const result = await localDb.select().from(libraryItemSchema);
+  //       setLibraryItems(result);
+  //     };
 
-      fetchData();
-    }, []),
-  );
+  //     fetchData();
+  //   }, []),
+  // );
+
+  const libraryState = useLibraryState();
+  useEffect(() => {
+    libraryState.refetch();
+  }, []);
 
   const libraryScrollViewRef = useRef<ScrollView>(null);
-  const blurhash =
-    "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
   return (
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
       <View className="flex h-screen bg-slate-800 p-2">
-        {libraryItems?.length === 0 && (
+        {libraryState.libraryItems?.length === 0 && (
           <View className="flex h-screen items-center justify-center">
             <Text className="text-2xl text-white">Nothing to play</Text>
           </View>
         )}
 
-        {libraryItems && libraryItems.length > 0 && (
+        {libraryState.libraryItems && libraryState.libraryItems.length > 0 && (
           <ScrollView ref={libraryScrollViewRef}>
             <View className="mt-6 flex flex-row flex-wrap gap-4">
-              {libraryItems.map((item) => (
+              {libraryState.libraryItems.map((item) => (
                 <Link
                   // className="h-60 w-36"
                   key={item.id}
@@ -50,7 +53,6 @@ export default function TabOneScreen() {
                       key={item.id}
                       source={item.coverArtPath}
                       style={{ flex: 1 }}
-                      placeholder={blurhash}
                       contentFit="cover"
                       transition={1000}
                     />

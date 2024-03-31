@@ -60,10 +60,7 @@ export const usePlayerState = create<PlayerState>()((set, get) => ({
   }) => {
     // when given an audio file different from the one currently playing we are expressing our intention to swap the playback track
     if (audioFile && audioFile.id !== get().currentTrack?.id) {
-      console.log("unloading previous player");
       await get().audioObject?.unloadAsync();
-
-      console.log("init and play " + audioFile?.name);
       await Audio.setAudioModeAsync({
         staysActiveInBackground: true,
         playsInSilentModeIOS: true,
@@ -77,10 +74,9 @@ export const usePlayerState = create<PlayerState>()((set, get) => ({
           shouldPlay: false,
         },
       );
-      console.log("resuming from position: " + audioFile.progress);
       sound.playFromPositionAsync(audioFile.progress ?? 0);
 
-      // updates position in track
+      // updates position of track
       sound.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) => {
         if (status.isLoaded) {
           // defaults to 1 so we don't divide by 0 when calculating percentComplete
@@ -96,13 +92,13 @@ export const usePlayerState = create<PlayerState>()((set, get) => ({
             ),
           }));
 
+          // every xx seconds update progress so we can resume from last place left off
           set((state) => ({
             progressUpdateCounter: state.progressUpdateCounter + 1,
           }));
           if (get().progressUpdateCounter % 30 === 0) {
             const audioFileId = get().currentTrack?.id;
             if (audioFileId) {
-              console.log("saving progress: " + status.positionMillis);
               localDb
                 .update(libraryItemAudioFileSchema)
                 .set({ progress: status.positionMillis })
@@ -112,7 +108,7 @@ export const usePlayerState = create<PlayerState>()((set, get) => ({
           }
 
           // go to next track at end of this track
-          if (durationRemainingMillis === 0) {
+          if (durationRemainingMillis <= 0) {
             get().changeTrack(1);
           }
         }
