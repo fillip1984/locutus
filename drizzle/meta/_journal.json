@@ -8,6 +8,20 @@
       "when": 1711910887965,
       "tag": "0000_nosy_overlord",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1711913686723,
+      "tag": "0001_warm_azazel",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1711916646431,
+      "tag": "0002_easy_paibok",
+      "breakpoints": true
     }
   ]
 }

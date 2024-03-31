@@ -1,6 +1,8 @@
 import { eq } from "drizzle-orm";
 import { create } from "zustand";
 
+import { useLibraryState } from "./libraryStore";
+
 import { localDb } from "@/db";
 import {
   LibraryItemAudioFileSchemaType,
@@ -37,6 +39,9 @@ export const useMediaState = create<MediaState>()((set, get) => ({
       .from(libraryItemAudioFileSchema)
       .where(eq(libraryItemAudioFileSchema.libraryItemId, id));
     set(() => ({ audioFiles: audioResults }));
+
+    // refresh ajacent store
+    useLibraryState.getState().refetch();
     console.log("fetched media state");
   },
   downloadAudioFiles: async () => {
@@ -71,6 +76,10 @@ export const useMediaState = create<MediaState>()((set, get) => ({
         .where(eq(libraryItemAudioFileSchema.remoteId, audioFile.remoteId));
       console.log(`downloaded audio file, result: ${file}`);
     }
+    await localDb
+      .update(libraryItemSchema)
+      .set({ downloaded: true })
+      .where(eq(libraryItemSchema.id, libraryItemId));
     get().refetch(libraryItemId);
     return true;
   },

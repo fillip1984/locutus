@@ -2,7 +2,7 @@ import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import { format } from "date-fns";
 import { Image } from "expo-image";
-import { Link } from "expo-router";
+import { Link, useLocalSearchParams } from "expo-router";
 import { useEffect } from "react";
 import { Pressable, SafeAreaView, Text, View } from "react-native";
 
@@ -11,13 +11,26 @@ import { useMediaState } from "@/stores/mediaStore";
 import { PlayerState, usePlayerState } from "@/stores/playerStore";
 
 export default function Player() {
+  const { audioFileId } = useLocalSearchParams();
   const playerState = usePlayerState();
   const mediaState = useMediaState();
   useEffect(() => {
     // TODO: seems like we would have a race condition of both player and media states pulling in info but this current design expects that the media state is already fetched
     if (mediaState.audioFiles) {
       playerState.setPlaylist(mediaState.audioFiles);
-      playerState.play({ audioFile: mediaState.audioFiles[0] });
+      let seekId = audioFileId
+        ? audioFileId
+        : mediaState.libraryItem?.lastPlayedId;
+      if (!seekId) {
+        // should have received either of the above...if not go with the first track
+        seekId = mediaState.audioFiles[0].id;
+      }
+
+      const audioFileToPlay = mediaState.audioFiles.find(
+        (a) => a.id === parseInt(seekId as string, 10),
+      );
+
+      playerState.play({ audioFile: audioFileToPlay });
     }
   }, []);
 

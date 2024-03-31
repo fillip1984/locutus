@@ -1,4 +1,8 @@
-import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import {
+  FontAwesome,
+  Ionicons,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 
 export default function TabLayout() {
@@ -18,6 +22,15 @@ export default function TabLayout() {
           title: "Home",
           tabBarIcon: ({ color }) => (
             <Ionicons name="home-sharp" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="libraries"
+        options={{
+          title: "Libraries",
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="bookshelf" size={24} color={color} />
           ),
         }}
       />

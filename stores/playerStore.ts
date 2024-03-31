@@ -12,6 +12,7 @@ import { localDb } from "@/db";
 import {
   LibraryItemAudioFileSchemaType,
   libraryItemAudioFileSchema,
+  libraryItemSchema,
 } from "@/db/schema";
 
 export interface PlayerState {
@@ -109,6 +110,19 @@ export const usePlayerState = create<PlayerState>()((set, get) => ({
 
           // go to next track at end of this track
           if (durationRemainingMillis <= 0) {
+            if (audioFile.libraryItemId) {
+              // TODO: move entire item to complete when all audio files are complete
+              // localDb
+              //   .update(libraryItemSchema)
+              //   .set({ complete: true })
+              //   .where(eq(libraryItemSchema.id, audioFile.libraryItemId))
+              //   .run();
+              localDb
+                .update(libraryItemAudioFileSchema)
+                .set({ complete: true, progress: 0 })
+                .where(eq(libraryItemAudioFileSchema.id, audioFile.id))
+                .run();
+            }
             get().changeTrack(1);
           }
         }
@@ -120,6 +134,19 @@ export const usePlayerState = create<PlayerState>()((set, get) => ({
         isPlaying: true,
         currentTrack: audioFile,
       }));
+
+      if (audioFile.libraryItemId) {
+        localDb
+          .update(libraryItemSchema)
+          .set({ lastPlayedId: audioFile.id, complete: false })
+          .where(eq(libraryItemSchema.id, audioFile.libraryItemId))
+          .run();
+        localDb
+          .update(libraryItemAudioFileSchema)
+          .set({ complete: false })
+          .where(eq(libraryItemAudioFileSchema.id, audioFile.id))
+          .run();
+      }
     } else {
       if (startingPosition !== undefined) {
         get().audioObject?.playFromPositionAsync(startingPosition);

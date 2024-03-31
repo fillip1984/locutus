@@ -1,57 +1,94 @@
-import { FontAwesome } from "@expo/vector-icons";
-import { Image } from "expo-image";
-import { Link } from "expo-router";
-import { useEffect, useRef } from "react";
-import { Pressable, SafeAreaView, ScrollView, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { SafeAreaView, Text, View, ScrollView } from "react-native";
 
+import BookLink from "@/components/BookLink";
+import { LibraryItemSchemaType } from "@/db/schema";
 import { useLibraryState } from "@/stores/libraryStore";
 
-export default function TabOneScreen() {
+export default function Home() {
   const libraryState = useLibraryState();
   useEffect(() => {
-    libraryState.refetch();
+    libraryState.refetch("LastTouched");
   }, []);
 
-  const libraryScrollViewRef = useRef<ScrollView>(null);
+  useEffect(() => {
+    setContinueItems(libraryState.libraryItems?.filter((i) => i.lastPlayedId));
+    setDownloadedItems(libraryState.libraryItems?.filter((i) => i.downloaded));
+    setRelistenItems(libraryState.libraryItems?.filter((i) => i.complete));
+  }, [libraryState]);
+
+  // continue is a reserved word
+  const [continueItems, setContinueItems] = useState<LibraryItemSchemaType[]>();
+  const [downloadedItems, setDownloadedItems] =
+    useState<LibraryItemSchemaType[]>();
+  const [relistenItems, setRelistenItems] = useState<LibraryItemSchemaType[]>();
 
   return (
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
-      <View className="flex h-screen bg-slate-800 p-2">
-        {libraryState.libraryItems?.length === 0 && (
-          <View className="flex h-screen items-center justify-center">
-            <Text className="text-2xl text-white">Nothing to play</Text>
-          </View>
-        )}
+      {libraryState && libraryState.libraryItems && (
+        <View className="flex h-screen bg-slate-800 p-2">
+          <ScrollView>
+            <View className="flex gap-4">
+              {continueItems && continueItems.length > 0 && (
+                <ContinueSection items={continueItems} />
+              )}
 
-        {libraryState.libraryItems && libraryState.libraryItems.length > 0 && (
-          <ScrollView ref={libraryScrollViewRef}>
-            <View className="mt-6 flex flex-row flex-wrap gap-4">
-              {libraryState.libraryItems.map((item) => (
-                <Link key={item.id} href={`/(media)/${item.id}`}>
-                  <View key={item.id} className="flex h-60 w-36">
-                    <Image
-                      key={item.id}
-                      source={item.coverArtPath}
-                      style={{ flex: 1 }}
-                      contentFit="cover"
-                      transition={1000}
-                    />
-                    <Text className="text-white">{item.title}</Text>
-                  </View>
-                </Link>
-              ))}
-            </View>
-            <View className="flex items-center justify-center pb-[600px]">
-              <Pressable
-                onPress={() => libraryScrollViewRef.current?.scrollTo({ y: 0 })}
-                className="mt-8">
-                <FontAwesome name="arrow-circle-up" size={48} color="white" />
-              </Pressable>
+              {downloadedItems && downloadedItems.length > 0 && (
+                <DownloadedSection items={downloadedItems} />
+              )}
+
+              {relistenItems && relistenItems.length > 0 && (
+                <RelistenSection items={relistenItems} />
+              )}
             </View>
           </ScrollView>
-        )}
-        <View />
-      </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
+
+const ContinueSection = ({ items }: { items: LibraryItemSchemaType[] }) => {
+  return (
+    <>
+      <Text className="text-4xl text-white">Continue</Text>
+      <ScrollView>
+        <View className="flex flex-row gap-3">
+          {items.map((item) => (
+            <BookLink key={item.id} item={item} />
+          ))}
+        </View>
+      </ScrollView>
+    </>
+  );
+};
+
+const DownloadedSection = ({ items }: { items: LibraryItemSchemaType[] }) => {
+  return (
+    <>
+      <Text className="text-4xl text-white">Downloaded</Text>
+      <ScrollView horizontal>
+        <View className="flex flex-row gap-3">
+          {items.map((item) => (
+            <BookLink key={item.id} item={item} />
+          ))}
+        </View>
+      </ScrollView>
+    </>
+  );
+};
+
+const RelistenSection = ({ items }: { items: LibraryItemSchemaType[] }) => {
+  return (
+    <>
+      <Text className="text-4xl text-white">Relisten</Text>
+      <ScrollView>
+        <View className="flex flex-row gap-3">
+          {items.map((item) => (
+            <BookLink key={item.id} item={item} />
+          ))}
+        </View>
+      </ScrollView>
+    </>
+  );
+};

@@ -1,4 +1,5 @@
 import { FontAwesome, FontAwesome6, Ionicons } from "@expo/vector-icons";
+import clsx from "clsx";
 import { Image } from "expo-image";
 import {
   Link,
@@ -193,15 +194,38 @@ const MediaTracks = ({
       </View>
 
       <ScrollView ref={tracksScrollViewRef}>
-        {audioFiles?.map((audioFile) => (
-          <View
-            key={audioFile.id}
-            className="m-1 flex flex-row justify-between gap-2 rounded bg-slate-400/30 p-4">
-            <Text className="text-white">{audioFile.name}</Text>
-            {/* <Text className="text-white">43:12</Text> */}
-            <FontAwesome6 name="circle-play" size={24} color="white" />
-          </View>
-        ))}
+        <View className="my-2 flex gap-2">
+          {audioFiles?.map((audioFile) => (
+            <Link
+              key={audioFile.id}
+              href={`/(player)/${libraryItem.id}?audioFileId=${audioFile.id}`}>
+              <View
+                // className={`m-1 flex flex-row justify-between gap-2 rounded p-4 ${libraryItem.lastPlayedId === audioFile.id ? "bg-sky-300" : "bg-slate-400/30"}`}
+                className={clsx(
+                  "flex h-20 w-full flex-row items-center justify-between gap-2 rounded p-4",
+                  {
+                    "bg-slate-400/30 opacity-35":
+                      !(libraryItem.lastPlayedId === audioFile.id) &&
+                      audioFile.complete,
+                    "bg-slate-400/30":
+                      !(libraryItem.lastPlayedId === audioFile.id) &&
+                      !audioFile.complete,
+                    "bg-sky-300": libraryItem.lastPlayedId === audioFile.id,
+                  },
+                )}>
+                <Text className="flex-wrap text-wrap text-white">
+                  {audioFile.name}
+                </Text>
+                {audioFile.complete ? (
+                  <FontAwesome6 name="circle-check" size={24} color="white" />
+                ) : (
+                  <FontAwesome6 name="circle-play" size={24} color="white" />
+                )}
+              </View>
+            </Link>
+          ))}
+        </View>
+
         <View className="flex items-center justify-center pb-[600px]">
           <Pressable
             onPress={() => tracksScrollViewRef.current?.scrollTo({ y: 0 })}

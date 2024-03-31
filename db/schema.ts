@@ -6,6 +6,12 @@ export const librarySchema = sqliteTable(
     id: integer("id").primaryKey({ autoIncrement: true }),
     remoteId: text("remoteId").notNull(),
     name: text("name").notNull(),
+    createdAt: integer("createdAt", { mode: "timestamp" }).$defaultFn(
+      () => new Date(),
+    ),
+    updatedAt: integer("updatedAt", { mode: "timestamp" }).$defaultFn(
+      () => new Date(),
+    ),
   },
   (t) => ({
     unq: unique().on(t.remoteId),
@@ -28,9 +34,17 @@ export const libraryItemSchema = sqliteTable("libraryItem", {
   asin: text("asin"),
   coverArtPath: text("coverArtPath"),
   lastPlayedId: integer("lastPlayedId"),
+  downloaded: integer("downloaded", { mode: "boolean" }).default(false),
+  complete: integer("complete", { mode: "boolean" }).default(false),
   libraryId: integer("libraryId")
     .notNull()
     .references(() => librarySchema.id),
+  createdAt: integer("createdAt", { mode: "timestamp" }).$defaultFn(
+    () => new Date(),
+  ),
+  updatedAt: integer("updatedAt", { mode: "timestamp" }).$defaultFn(
+    () => new Date(),
+  ),
 });
 
 export type LibraryItemSchemaType = typeof libraryItemSchema.$inferSelect;
@@ -47,6 +61,12 @@ export const libraryItemAudioFileSchema = sqliteTable("libraryItemAudioFile", {
   libraryItemId: integer("libraryItemId").references(
     () => libraryItemSchema.id,
   ),
+  createdAt: integer("createdAt", { mode: "timestamp" }).$defaultFn(
+    () => new Date(),
+  ),
+  updatedAt: integer("updatedAt", { mode: "timestamp" }).$defaultFn(
+    () => new Date(),
+  ),
 });
 
 export type LibraryItemAudioFileSchemaType =
@@ -55,6 +75,13 @@ export type LibraryItemAudioFileSchemaType =
 export const userSettingsSchema = sqliteTable("userSettings", {
   serverUrl: text("serverUrl").notNull(),
   tokenId: text("tokenId").notNull(),
+  rate: integer("rate").notNull().default(1),
+  createdAt: integer("createdAt", { mode: "timestamp" }).$defaultFn(
+    () => new Date(),
+  ),
+  updatedAt: integer("updatedAt", { mode: "timestamp" }).$defaultFn(
+    () => new Date(),
+  ),
 });
 
 export type UserSettingsSchemaType = typeof userSettingsSchema.$inferSelect;

@@ -21,6 +21,7 @@
     "@react-navigation/native": "^6.1.17",
     "axios": "^1.6.8",
     "babel-plugin-inline-import": "^3.0.0",
+    "clsx": "^2.1.0",
     "date-fns": "^3.6.0",
     "drizzle-orm": "^0.30.6",
     "expo": "~50.0.14",

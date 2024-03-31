@@ -18,19 +18,28 @@ export interface LibraryState {
   libraries: LibrarySchemaType[] | null;
   libraryItems: LibraryItemSchemaType[] | null;
 
-  refetch: () => void;
+  refetch: (sort?: Sort) => void;
   syncWithServer: () => Promise<boolean>;
   addLibrary: (library: LibrarySchemaType) => void;
   removeLibrary: (id: number) => void;
 }
 
+export type Sort = "Alphabetically" | "LastTouched";
+
 export const useLibraryState = create<LibraryState>()((set, get) => ({
   libraries: null,
   libraryItems: null,
-  refetch: async () => {
+  refetch: async (sort?: Sort) => {
     const freshLibraries = await localDb.select().from(librarySchema);
     set(() => ({ libraries: freshLibraries }));
-    const freshLibraryItems = await localDb.select().from(libraryItemSchema);
+    const freshLibraryItems = await localDb
+      .select()
+      .from(libraryItemSchema)
+      .orderBy(
+        sort === "LastTouched"
+          ? libraryItemSchema.title
+          : libraryItemSchema.title,
+      );
     set(() => ({ libraryItems: freshLibraryItems }));
   },
   syncWithServer: async () => {
