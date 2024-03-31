@@ -3,6 +3,7 @@ import Toast from "react-native-toast-message";
 
 export const ping = async (url: string) => {
   try {
+    // TODO: finish this if we're going to keep it
     console.log("ping server");
     const response = await axios.get(`${url}/ping`);
     console.log({ stat: response.status, t: response.statusText });

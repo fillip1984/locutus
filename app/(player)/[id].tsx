@@ -121,12 +121,6 @@ const TrackProgress = ({ playerState }: { playerState: PlayerState }) => {
         maximumValue={100}
         value={playerState.percentComplete}
         onSlidingComplete={(newValue) => {
-          console.log({
-            newValue,
-            startingPosition: newValue * 0.01 * playerState.durationMillis,
-            duration: playerState.durationMillis,
-            currentPos: playerState.positionMillis,
-          });
           playerState.play({
             startingPosition: newValue * 0.01 * playerState.durationMillis,
           });
