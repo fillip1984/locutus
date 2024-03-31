@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "e770db9e-5f87-4586-9539-9dc3f1cd06ec",
+  "id": "36824e27-3287-45cb-b219-ce53309f0d99",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "libraryItemAudioFile": {
@@ -97,9 +97,9 @@
         "id": {
           "name": "id",
           "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
         },
         "remoteId": {
           "name": "remoteId",
@@ -167,6 +167,13 @@
         "coverArtPath": {
           "name": "coverArtPath",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "lastPlayedId": {
+          "name": "lastPlayedId",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false

@@ -12,7 +12,7 @@ CREATE TABLE `libraryItemAudioFile` (
 );
 --> statement-breakpoint
 CREATE TABLE `libraryItem` (
-	`id` integer,
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`remoteId` text NOT NULL,
 	`title` text NOT NULL,
 	`authorName` text NOT NULL,
@@ -23,6 +23,7 @@ CREATE TABLE `libraryItem` (
 	`isbn` text,
 	`asin` text,
 	`coverArtPath` text,
+	`lastPlayedId` integer,
 	`libraryId` integer NOT NULL,
 	FOREIGN KEY (`libraryId`) REFERENCES `library`(`id`) ON UPDATE no action ON DELETE no action
 );

@@ -27,7 +27,7 @@ export const libraryItemSchema = sqliteTable("libraryItem", {
   isbn: text("isbn"),
   asin: text("asin"),
   coverArtPath: text("coverArtPath"),
-  lastPlayed: integer("id"),
+  lastPlayedId: integer("lastPlayedId"),
   libraryId: integer("libraryId")
     .notNull()
     .references(() => librarySchema.id),
