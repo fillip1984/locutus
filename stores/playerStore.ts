@@ -6,6 +6,7 @@ import {
   InterruptionModeIOS,
 } from "expo-av";
 import { Sound } from "expo-av/build/Audio";
+import Toast from "react-native-toast-message";
 import { create } from "zustand";
 
 import { localDb } from "@/db";
@@ -173,6 +174,10 @@ export const usePlayerState = create<PlayerState>()((set, get) => ({
   changeTrack: async (change: number) => {
     if (!get().playlist) {
       // console.log("when playlist isn't loaded, nothing to do");
+      Toast.show({
+        type: "error",
+        text1: "no playlist",
+      });
       return;
     }
 
@@ -180,6 +185,10 @@ export const usePlayerState = create<PlayerState>()((set, get) => ({
     const playableMedia = get().playlist?.filter((audioFile) => audioFile.path);
     if (!playableMedia || playableMedia.length === 0) {
       // console.log("when there are no playable tracks, nothig to do");
+      Toast.show({
+        type: "error",
+        text1: "no playable tracks",
+      });
       return;
     }
 
