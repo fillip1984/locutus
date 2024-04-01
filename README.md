@@ -4,7 +4,7 @@ My mad dash to creating an Audiobook player built with react native. This is an 
 
 ## UI
 
-Using tabs currently, with the player being full screen. There is a modal on the
+Using tabs currently, with the player being full screen. There is a modal to demonstrate how to pull up a sheet but it isn't used currently...
 
 ## Current state
 
