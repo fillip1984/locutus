@@ -1,16 +1,10 @@
 # locutus
 
-Audiobook player built with react native. This is a t3 turbo repo with a NextJS backend and web interface but that's not really being used at this time
-
-Using expo AV for playback... a little archaic but it's getting the job done for now.
+My mad dash to creating an Audiobook player built with react native. This is an expo project written in Typescript, using drizzle for persistence, zustand for state, and NativeWind for UI. I am trying to build an audiobook player that uses AudioBookShelf as it's backend to fetch metadata and also the audiobooks themselves.
 
 ## UI
 
-Top shows list of tracks via cards, not spent much time here, when pressed the middle audio player and smaller audio player start and track progress.
-
-Larger audio player is a reproduction of the tailwind [dark mode example](https://tailwindcss.com/#dark-mode)
-
-The smaller audio player is a reproduction of what you see in Spotify when minimizing the player
+Using tabs currently, with the player being full screen. There is a modal on the
 
 ## Current state
 
@@ -22,10 +16,10 @@ I'm learning React Native but so far it's moving along nicely. Have audio files 
 
 ## TODO
 
-* Switch over audio player: https://medium.com/@gionata.brunel/implementing-react-native-track-player-with-expo-including-lock-screen-part-1-ios-9552fea5178c
-* They're marked in some files (mostly UI specific at this time, things I ran into that caused me trouble)
-* Need to figure out how to handle all the errors I keep getting when switching between files
-* Need to finish out flow from playlist to player
+* Switch over audio player: <https://medium.com/@gionata.brunel/implementing-react-native-track-player-with-expo-including-lock-screen-part-1-ios-9552fea5178c>
+* [ ] They're marked in some files (mostly UI specific at this time, things I ran into that caused me trouble)
+* [ ] Need to figure out how to handle all the errors I keep getting when switching between files
+* [X] Need to finish out flow from playlist to player
 * Need to finish out pushing the mini-player to the bottom when switching between player and library
 * Need to figure out tabs
 * Need to figure out how to store files locally
