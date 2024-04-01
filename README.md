@@ -22,6 +22,7 @@ I'm learning React Native but so far it's moving along nicely. Have audio files 
 
 ## TODO
 
+* Switch over audio player: https://medium.com/@gionata.brunel/implementing-react-native-track-player-with-expo-including-lock-screen-part-1-ios-9552fea5178c
 * They're marked in some files (mostly UI specific at this time, things I ran into that caused me trouble)
 * Need to figure out how to handle all the errors I keep getting when switching between files
 * Need to finish out flow from playlist to player
