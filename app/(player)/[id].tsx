@@ -1,55 +1,131 @@
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import { format } from "date-fns";
+import { eq } from "drizzle-orm";
 import { Image } from "expo-image";
 import { Link, useLocalSearchParams } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, SafeAreaView, Text, View } from "react-native";
+import Toast from "react-native-toast-message";
+import TrackPlayer, {
+  State,
+  Track,
+  useActiveTrack,
+  usePlaybackState,
+  useProgress,
+} from "react-native-track-player";
 
-import { LibraryItemSchemaType } from "@/db/schema";
-import { useMediaState } from "@/stores/mediaStore";
-import { PlayerState, usePlayerState } from "@/stores/playerStore";
+import { localDb } from "@/db";
+import {
+  LibraryItemAudioFileSchemaType,
+  libraryItemAudioFileSchema,
+  libraryItemSchema,
+} from "@/db/schema";
 
 export default function Player() {
-  const { audioFileId } = useLocalSearchParams();
-  const playerState = usePlayerState();
-  const mediaState = useMediaState();
+  const { audioFileId: audioFileIdSearchParam, id: libraryItemIdSearchParam } =
+    useLocalSearchParams();
+
   useEffect(() => {
-    // TODO: seems like we would have a race condition of both player and media states pulling in info but this current design expects that the media state is already fetched
-    if (mediaState.audioFiles) {
-      playerState.setPlaylist(mediaState.audioFiles);
-      let seekId = audioFileId
-        ? audioFileId
-        : mediaState.libraryItem?.lastPlayedId;
-      if (!seekId) {
-        // should have received either of the above...if not go with the first track
-        seekId = mediaState.audioFiles[0].id;
+    const audioFileId = parseInt(audioFileIdSearchParam as string, 10);
+    const libraryItemId = parseInt(libraryItemIdSearchParam as string, 10);
+
+    const fetchData = async () => {
+      const libraryItem = await localDb.query.libraryItemSchema.findFirst({
+        where: eq(libraryItemSchema.id, libraryItemId),
+      });
+
+      if (!libraryItem) {
+        const msg = `Unable to find library item for id: ${libraryItemId}`;
+        Toast.show({
+          type: "error",
+          text1: msg,
+        });
+        throw Error(msg);
       }
 
-      const audioFileToPlay = mediaState.audioFiles.find(
-        (a) => a.id === parseInt(seekId as string, 10),
-      );
+      const audioFiles =
+        await localDb.query.libraryItemAudioFileSchema.findMany({
+          where: eq(libraryItemAudioFileSchema.libraryItemId, libraryItemId),
+        });
 
-      playerState.play({ audioFile: audioFileToPlay });
-    }
+      let audioFile: LibraryItemAudioFileSchemaType | undefined;
+      if (audioFileId) {
+        // user selected a specific track
+        audioFile = await localDb.query.libraryItemAudioFileSchema.findFirst({
+          where: eq(libraryItemAudioFileSchema.id, audioFileId),
+        });
+      } else {
+        // otherwise try to play the last track played for the library item
+        audioFile = audioFiles.find((a) => a.id === libraryItem?.lastPlayedId);
+      }
+
+      if (!audioFile) {
+        // default to playing the first track
+        audioFile = audioFiles[0];
+      }
+
+      if (!audioFile) {
+        const msg = `Unable to find audio file to play for audio file id: ${audioFileId}`;
+        Toast.show({
+          type: "error",
+          text1: msg,
+        });
+        throw Error(msg);
+      }
+
+      const activeTrack = await TrackPlayer.getActiveTrack();
+
+      if (audioFile.name === activeTrack?.title) {
+        // if audioFile matches activeTrack then do nothing
+      } else if (
+        (await TrackPlayer.getQueue()).find((q) => q.title === audioFile?.name)
+      ) {
+        // if audioFile is withing queue, skip to audioFile
+        const trackToLoad = (await TrackPlayer.getQueue()).find(
+          (q) => q.title === audioFile?.name,
+        );
+        await TrackPlayer.load(trackToLoad as Track);
+        await TrackPlayer.play();
+      } else {
+        // reset and reload the works
+        await TrackPlayer.reset();
+        await TrackPlayer.add(
+          audioFiles.map(
+            (af) =>
+              ({
+                title: af.name,
+                artist: libraryItem.authorName,
+                album: libraryItem.title,
+                artwork: libraryItem.coverArtPath ?? undefined,
+                url: af.path as string,
+                duration: af.duration / 1000,
+              }) as Track,
+          ),
+        );
+
+        const trackToLoad = (await TrackPlayer.getQueue()).find(
+          (q) => q.title === audioFile?.name,
+        );
+        await TrackPlayer.load(trackToLoad as Track);
+        await TrackPlayer.play();
+      }
+    };
+
+    fetchData();
   }, []);
 
   return (
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
-      {mediaState.libraryItem && (
-        <View className="flex h-screen gap-2 bg-slate-800 p-2">
-          <TopActionsBar />
-          <View className="h-1/2">
-            <MediaArt libraryItem={mediaState.libraryItem} />
-            <MediaInfo
-              libraryItem={mediaState.libraryItem}
-              playerState={playerState}
-            />
-          </View>
-          <TrackProgress playerState={playerState} />
-          <MediaControls playerState={playerState} />
+      <View className="flex h-screen gap-2 bg-slate-800 p-2">
+        <TopActionsBar />
+        <View className="h-1/2">
+          <MediaArt />
+          <MediaInfo />
         </View>
-      )}
+        <TrackProgress />
+        <MediaControls />
+      </View>
     </SafeAreaView>
   );
 }
@@ -65,12 +141,12 @@ const TopActionsBar = () => {
   );
 };
 
-const MediaArt = ({ libraryItem }: { libraryItem: LibraryItemSchemaType }) => {
+const MediaArt = () => {
+  const track = useActiveTrack();
   return (
     <View className="flex h-2/3 w-full">
       <Image
-        key={libraryItem.id}
-        source={libraryItem.coverArtPath}
+        source={track?.artwork}
         style={{ flex: 1 }}
         contentFit="cover"
         transition={1000}
@@ -79,115 +155,101 @@ const MediaArt = ({ libraryItem }: { libraryItem: LibraryItemSchemaType }) => {
   );
 };
 
-const MediaInfo = ({
-  libraryItem,
-  playerState,
-}: {
-  libraryItem: LibraryItemSchemaType;
-  playerState: PlayerState;
-}) => {
+const MediaInfo = () => {
+  const track = useActiveTrack();
+
   return (
     <View>
-      <Text className="text-2xl text-white">{libraryItem.title}</Text>
-      <Text className="text-xl text-slate-400">
-        {playerState.currentTrack?.name}
-      </Text>
+      <Text className="text-2xl text-white">{track?.album}</Text>
+      <Text className="text-xl text-slate-400">{track?.title}</Text>
     </View>
   );
 };
 
-const TrackProgress = ({ playerState }: { playerState: PlayerState }) => {
+const TrackProgress = () => {
+  const progress = useProgress();
+
   return (
     <View className="flex">
-      {/* <View className="relative">
-        // TODO: progress slide is not smooth at all and the knob may overshoot the end
-        <View
-          id="progressBar"
-          className="absolute z-10 h-2 rounded-lg bg-sky-300"
-          style={{ width: `${playerState.percentComplete}%` }}
-        />
-        <View
-          id="knob"
-          className="absolute -bottom-[9px] z-20 h-3 w-3 rounded-full bg-sky-300"
-          style={{
-            left: `${playerState.percentComplete - 1}%`,
-          }}
-        />
-        <View className="absolute h-2 w-full rounded-lg bg-slate-500" />
-      </View> */}
       <Slider
         // style={{ width: 100, height: 90 }}
         minimumValue={0}
         maximumValue={100}
-        value={playerState.percentComplete}
+        value={Math.round((progress.position / progress.duration) * 100)}
         onSlidingComplete={(newValue) => {
-          playerState.play({
-            startingPosition: newValue * 0.01 * playerState.duration,
-          });
+          TrackPlayer.seekTo(newValue * 0.01 * progress.duration);
         }}
         minimumTrackTintColor="#FFFFFF"
         maximumTrackTintColor="#000000"
       />
       <View className="flex flex-row justify-between">
         <Text className="text-sky-300">
-          {format(playerState.position * 1000, "mm:ss")}
+          {format(progress.position * 1000, "mm:ss")}
         </Text>
         <Text className="text-slate-300">
-          {format(playerState.durationRemaining * 1000, "mm:ss")}
+          {format((progress.duration - progress.position) * 1000, "mm:ss")}
         </Text>
       </View>
     </View>
   );
 };
 
-const MediaControls = ({ playerState }: { playerState: PlayerState }) => {
+const MediaControls = () => {
+  const { state: playbackState } = usePlaybackState();
+  const [rate, setRate] = useState(1);
+  const handleSetRate = () => {
+    // increments in .25, cycles back to .5x if over 2x
+    const newRate = rate + 0.25 > 2 ? 0.5 : rate + 0.25;
+    TrackPlayer.setRate(newRate);
+    setRate(newRate);
+  };
   return (
     <View className="flex items-center gap-4">
       <View className="flex w-full flex-row items-center justify-evenly p-1">
         {/* <Ionicons name="bookmark-outline" size={30} color="black" /> */}
         <Ionicons
-          onPress={() => playerState.changeTrack(-1)}
+          onPress={() => TrackPlayer.skipToPrevious()}
           name="play-skip-back-sharp"
           size={30}
           color="white"
         />
         <FontAwesome6
-          onPress={() => playerState.skipBack()}
+          onPress={() => TrackPlayer.seekBy(-30)}
           name="arrow-rotate-left"
           size={30}
           color="white"
         />
-        {playerState.isPlaying ? (
+        {playbackState === State.Playing ? (
           <Ionicons
-            onPress={playerState.pause}
+            onPress={TrackPlayer.pause}
             name="pause"
             size={40}
             color="white"
           />
         ) : (
           <Ionicons
-            onPress={() => playerState.play({})}
+            onPress={TrackPlayer.play}
             name="play-sharp"
             size={40}
             color="white"
           />
         )}
         <FontAwesome6
-          onPress={() => playerState.skipForward()}
+          onPress={() => TrackPlayer.seekBy(30)}
           name="arrow-rotate-right"
           size={30}
           color="white"
         />
         <Ionicons
-          onPress={() => playerState.changeTrack(1)}
+          onPress={() => TrackPlayer.skipToNext()}
           name="play-skip-forward"
           size={30}
           color="white"
         />
       </View>
       <View className="flex w-full items-end">
-        <Pressable onPress={playerState.setRate} className="rounded-md p-2">
-          <Text className="text-2xl text-white">{playerState.rate}x</Text>
+        <Pressable onPress={handleSetRate} className="rounded-md p-2">
+          <Text className="text-2xl text-white">{rate}x</Text>
         </Pressable>
       </View>
     </View>

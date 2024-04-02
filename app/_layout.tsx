@@ -3,11 +3,9 @@ import { useEffect } from "react";
 import Toast from "react-native-toast-message";
 import TrackPlayer, { Capability, Event } from "react-native-track-player";
 
-import { skipInterval, usePlayerState } from "@/stores/playerStore";
 import "../global.css";
 
 export default function RootLayout() {
-  const playerState = usePlayerState();
   const setupPlayer = async () => {
     await TrackPlayer.setupPlayer();
     await TrackPlayer.updateOptions({
@@ -16,10 +14,11 @@ export default function RootLayout() {
         Capability.Pause,
         Capability.SkipToPrevious,
         Capability.SkipToNext,
+        Capability.JumpBackward,
+        Capability.JumpForward,
       ],
-      forwardJumpInterval: skipInterval,
-      backwardJumpInterval: skipInterval,
-      progressUpdateEventInterval: 1,
+      forwardJumpInterval: 30,
+      backwardJumpInterval: 30,
     });
   };
   useEffect(() => {
@@ -28,9 +27,14 @@ export default function RootLayout() {
   }, []);
 
   const playbackService = async () => {
-    TrackPlayer.addEventListener(Event.RemotePlay, () => playerState.play({}));
-
-    TrackPlayer.addEventListener(Event.RemotePause, () => playerState.pause());
+    TrackPlayer.addEventListener(Event.RemotePlay, () => TrackPlayer.play());
+    TrackPlayer.addEventListener(Event.RemotePause, () => TrackPlayer.pause());
+    TrackPlayer.addEventListener(Event.RemoteNext, () =>
+      TrackPlayer.skipToNext(),
+    );
+    TrackPlayer.addEventListener(Event.RemotePrevious, () =>
+      TrackPlayer.skipToPrevious(),
+    );
   };
 
   return (
