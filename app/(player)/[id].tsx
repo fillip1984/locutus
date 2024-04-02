@@ -122,7 +122,7 @@ const TrackProgress = ({ playerState }: { playerState: PlayerState }) => {
         value={playerState.percentComplete}
         onSlidingComplete={(newValue) => {
           playerState.play({
-            startingPosition: newValue * 0.01 * playerState.durationMillis,
+            startingPosition: newValue * 0.01 * playerState.duration,
           });
         }}
         minimumTrackTintColor="#FFFFFF"
@@ -130,10 +130,10 @@ const TrackProgress = ({ playerState }: { playerState: PlayerState }) => {
       />
       <View className="flex flex-row justify-between">
         <Text className="text-sky-300">
-          {format(playerState.positionMillis, "mm:ss")}
+          {format(playerState.position * 1000, "mm:ss")}
         </Text>
         <Text className="text-slate-300">
-          {format(playerState.durationRemainingMillis, "mm:ss")}
+          {format(playerState.durationRemaining * 1000, "mm:ss")}
         </Text>
       </View>
     </View>
@@ -152,7 +152,7 @@ const MediaControls = ({ playerState }: { playerState: PlayerState }) => {
           color="white"
         />
         <FontAwesome6
-          onPress={() => playerState.skipBack(30000)}
+          onPress={() => playerState.skipBack()}
           name="arrow-rotate-left"
           size={30}
           color="white"
@@ -173,7 +173,7 @@ const MediaControls = ({ playerState }: { playerState: PlayerState }) => {
           />
         )}
         <FontAwesome6
-          onPress={() => playerState.skipForward(30000)}
+          onPress={() => playerState.skipForward()}
           name="arrow-rotate-right"
           size={30}
           color="white"
