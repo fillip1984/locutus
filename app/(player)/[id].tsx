@@ -15,7 +15,7 @@ import TrackPlayer, {
   useProgress,
 } from "react-native-track-player";
 
-import { fetchInitialPosition } from "../servies/playbackService";
+import { fetchInitialPosition } from "../../services/playbackService";
 
 import { localDb } from "@/db";
 import {
@@ -111,7 +111,7 @@ export default function Player() {
         const trackToLoad = (await TrackPlayer.getQueue()).find(
           (q) => q.id === audioFile?.id,
         );
-        await TrackPlayer.load(trackToLoad as Track);
+        await TrackPlayer.skip().load(trackToLoad as Track);
         await TrackPlayer.seekTo(audioFile.progress ?? 0);
         await TrackPlayer.play();
       }

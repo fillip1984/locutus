@@ -5,7 +5,7 @@ import TrackPlayer, { Capability } from "react-native-track-player";
 
 import "../global.css";
 
-import { playbackService } from "./servies/playbackService";
+import { playbackService } from "../services/playbackService";
 
 export default function RootLayout() {
   const setupPlayer = async () => {

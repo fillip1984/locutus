@@ -17,6 +17,12 @@ export async function playbackService() {
   TrackPlayer.addEventListener(Event.RemotePrevious, async () =>
     TrackPlayer.skipToPrevious((await fetchInitialPosition(-1)) ?? 0),
   );
+  TrackPlayer.addEventListener(Event.RemoteJumpBackward, () =>
+    TrackPlayer.seekBy(-30),
+  );
+  TrackPlayer.addEventListener(Event.RemoteJumpForward, () =>
+    TrackPlayer.seekBy(30),
+  );
   TrackPlayer.addEventListener(
     Event.PlaybackActiveTrackChanged,
     async (e: PlaybackActiveTrackChangedEvent) => {
