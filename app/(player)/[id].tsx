@@ -84,11 +84,10 @@ export default function Player() {
         (await TrackPlayer.getQueue()).find((q) => q.id === audioFile?.id)
       ) {
         // if audioFile is withing queue, skip to audioFile
-        const trackToLoad = (await TrackPlayer.getQueue()).find(
+        const trackToLoadIndex = (await TrackPlayer.getQueue()).findIndex(
           (q) => q.id === audioFile?.id,
         );
-        await TrackPlayer.load(trackToLoad as Track);
-        await TrackPlayer.seekTo(audioFile.progress ?? 0);
+        await TrackPlayer.skip(trackToLoadIndex, audioFile.progress ?? 0);
         await TrackPlayer.play();
       } else {
         // reset and reload the works
@@ -108,11 +107,10 @@ export default function Player() {
           ),
         );
 
-        const trackToLoad = (await TrackPlayer.getQueue()).find(
+        const trackToLoadIndex = (await TrackPlayer.getQueue()).findIndex(
           (q) => q.id === audioFile?.id,
         );
-        await TrackPlayer.skip().load(trackToLoad as Track);
-        await TrackPlayer.seekTo(audioFile.progress ?? 0);
+        await TrackPlayer.skip(trackToLoadIndex, audioFile.progress ?? 0);
         await TrackPlayer.play();
       }
     };
