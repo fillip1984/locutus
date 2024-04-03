@@ -15,6 +15,8 @@ import TrackPlayer, {
   useProgress,
 } from "react-native-track-player";
 
+import { fetchInitialPosition } from "../servies/playbackService";
+
 import { localDb } from "@/db";
 import {
   LibraryItemAudioFileSchemaType,
@@ -76,16 +78,17 @@ export default function Player() {
 
       const activeTrack = await TrackPlayer.getActiveTrack();
 
-      if (audioFile.name === activeTrack?.title) {
+      if (audioFile.id === activeTrack?.id) {
         // if audioFile matches activeTrack then do nothing
       } else if (
-        (await TrackPlayer.getQueue()).find((q) => q.title === audioFile?.name)
+        (await TrackPlayer.getQueue()).find((q) => q.id === audioFile?.id)
       ) {
         // if audioFile is withing queue, skip to audioFile
         const trackToLoad = (await TrackPlayer.getQueue()).find(
-          (q) => q.title === audioFile?.name,
+          (q) => q.id === audioFile?.id,
         );
         await TrackPlayer.load(trackToLoad as Track);
+        await TrackPlayer.seekTo(audioFile.progress ?? 0);
         await TrackPlayer.play();
       } else {
         // reset and reload the works
@@ -94,20 +97,22 @@ export default function Player() {
           audioFiles.map(
             (af) =>
               ({
+                id: af.id,
                 title: af.name,
                 artist: libraryItem.authorName,
                 album: libraryItem.title,
                 artwork: libraryItem.coverArtPath ?? undefined,
                 url: af.path as string,
-                duration: af.duration / 1000,
+                duration: af.duration,
               }) as Track,
           ),
         );
 
         const trackToLoad = (await TrackPlayer.getQueue()).find(
-          (q) => q.title === audioFile?.name,
+          (q) => q.id === audioFile?.id,
         );
         await TrackPlayer.load(trackToLoad as Track);
+        await TrackPlayer.seekTo(audioFile.progress ?? 0);
         await TrackPlayer.play();
       }
     };
@@ -208,7 +213,9 @@ const MediaControls = () => {
       <View className="flex w-full flex-row items-center justify-evenly p-1">
         {/* <Ionicons name="bookmark-outline" size={30} color="black" /> */}
         <Ionicons
-          onPress={() => TrackPlayer.skipToPrevious()}
+          onPress={async () =>
+            TrackPlayer.skipToPrevious((await fetchInitialPosition(-1)) ?? 0)
+          }
           name="play-skip-back-sharp"
           size={30}
           color="white"
@@ -241,7 +248,9 @@ const MediaControls = () => {
           color="white"
         />
         <Ionicons
-          onPress={() => TrackPlayer.skipToNext()}
+          onPress={async () =>
+            TrackPlayer.skipToNext((await fetchInitialPosition(1)) ?? 0)
+          }
           name="play-skip-forward"
           size={30}
           color="white"

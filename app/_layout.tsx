@@ -1,9 +1,11 @@
 import { Stack } from "expo-router";
 import { useEffect } from "react";
 import Toast from "react-native-toast-message";
-import TrackPlayer, { Capability, Event } from "react-native-track-player";
+import TrackPlayer, { Capability } from "react-native-track-player";
 
 import "../global.css";
+
+import { playbackService } from "./servies/playbackService";
 
 export default function RootLayout() {
   const setupPlayer = async () => {
@@ -19,23 +21,13 @@ export default function RootLayout() {
       ],
       forwardJumpInterval: 30,
       backwardJumpInterval: 30,
+      progressUpdateEventInterval: 500,
     });
   };
   useEffect(() => {
     setupPlayer();
     TrackPlayer.registerPlaybackService(() => playbackService);
   }, []);
-
-  const playbackService = async () => {
-    TrackPlayer.addEventListener(Event.RemotePlay, () => TrackPlayer.play());
-    TrackPlayer.addEventListener(Event.RemotePause, () => TrackPlayer.pause());
-    TrackPlayer.addEventListener(Event.RemoteNext, () =>
-      TrackPlayer.skipToNext(),
-    );
-    TrackPlayer.addEventListener(Event.RemotePrevious, () =>
-      TrackPlayer.skipToPrevious(),
-    );
-  };
 
   return (
     <>

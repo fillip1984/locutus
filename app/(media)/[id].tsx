@@ -226,7 +226,7 @@ const MediaTracks = ({
                 <View
                   className="absolute bottom-0 h-1 rounded-b bg-yellow-300"
                   style={{
-                    width: `${calc(audioFile.progress ?? 1, audioFile.duration * 1000)}%`,
+                    width: `${calc(audioFile.progress ?? 1, audioFile.duration)}%`,
                   }}
                 />
               </View>
@@ -246,9 +246,9 @@ const MediaTracks = ({
   );
 };
 
-const calc = (positionMillis: number, durationMillis: number) => {
+const calc = (position: number, duration: number) => {
   // TODO: for some reason math.round returns 100%???
-  // const result = Math.round(positionMillis / durationMillis) * 100;
-  const result = (positionMillis / durationMillis) * 100;
+  // const result = Math.round(position / duration) * 100;
+  const result = (position / duration) * 100;
   return parseInt(result.toFixed(2), 10);
 };
