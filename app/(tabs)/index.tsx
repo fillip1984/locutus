@@ -3,19 +3,19 @@ import { SafeAreaView, Text, View, ScrollView } from "react-native";
 
 import BookLink from "@/components/BookLink";
 import { LibraryItemSchemaType } from "@/db/schema";
-import { useLibraryState } from "@/stores/libraryStore";
+import { useLibraryStore } from "@/stores/libraryStore";
 
 export default function Home() {
-  const libraryState = useLibraryState();
+  const libraryStore = useLibraryStore();
   useEffect(() => {
-    libraryState.refetch("LastTouched");
+    libraryStore.refetch("LastTouched");
   }, []);
 
   useEffect(() => {
-    setContinueItems(libraryState.libraryItems?.filter((i) => i.lastPlayedId));
-    setDownloadedItems(libraryState.libraryItems?.filter((i) => i.downloaded));
-    setRelistenItems(libraryState.libraryItems?.filter((i) => i.complete));
-  }, [libraryState]);
+    setContinueItems(libraryStore.libraryItems?.filter((i) => i.lastPlayedId));
+    setDownloadedItems(libraryStore.libraryItems?.filter((i) => i.downloaded));
+    setRelistenItems(libraryStore.libraryItems?.filter((i) => i.complete));
+  }, [libraryStore]);
 
   // continue is a reserved word
   const [continueItems, setContinueItems] = useState<LibraryItemSchemaType[]>();
@@ -25,7 +25,7 @@ export default function Home() {
 
   return (
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
-      {libraryState && libraryState.libraryItems && (
+      {libraryStore && libraryStore.libraryItems && (
         <View className="flex h-screen bg-slate-800 p-2">
           <ScrollView>
             <View className="flex gap-4">

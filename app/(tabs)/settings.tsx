@@ -6,17 +6,17 @@ import Toast from "react-native-toast-message";
 import { dropDatabase, localDb } from "@/db";
 import { userSettingsSchema } from "@/db/schema";
 import { login } from "@/services/login";
-import { useLibraryState } from "@/stores/libraryStore";
+import { useLibraryStore } from "@/stores/libraryStore";
 
 export default function Settings() {
-  const libraryState = useLibraryState();
+  const libraryStore = useLibraryStore();
   const handleSync = async () => {
     Toast.show({
       type: "info",
       text1: "Syncing with server",
       position: "bottom",
     });
-    await libraryState.syncWithServer();
+    await libraryStore.syncWithServer();
     Toast.show({
       type: "success",
       text1: "Libraries synchronized",
@@ -26,7 +26,7 @@ export default function Settings() {
 
   const handleDropData = () => {
     dropDatabase();
-    libraryState.refetch();
+    libraryStore.refetch();
   };
 
   useFocusEffect(

@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { create } from "zustand";
 
-import { useLibraryState } from "./libraryStore";
+import { useLibraryStore } from "./libraryStore";
 
 import { localDb } from "@/db";
 import {
@@ -12,18 +12,20 @@ import {
 } from "@/db/schema";
 import { downloadLibraryItem } from "@/services/libraryItemApi";
 
-export interface MediaState {
+export interface MediaStore {
   libraryItem: LibraryItemSchemaType | null;
   audioFiles: LibraryItemAudioFileSchemaType[] | null;
+  isDownloading: boolean;
   refetch: (id: number) => void;
   downloadAudioFiles: () => Promise<boolean>;
 }
 
-export const useMediaState = create<MediaState>()((set, get) => ({
+export const useMediaStore = create<MediaStore>()((set, get) => ({
   libraryItem: null,
   audioFiles: null,
+  isDownloading: false,
   refetch: async (id: number) => {
-    console.log("fetching media state");
+    // console.log("fetching media Store");
     const result = await localDb
       .select()
       .from(libraryItemSchema)
@@ -41,8 +43,8 @@ export const useMediaState = create<MediaState>()((set, get) => ({
     set(() => ({ audioFiles: audioResults }));
 
     // refresh ajacent store
-    useLibraryState.getState().refetch();
-    console.log("fetched media state");
+    useLibraryStore.getState().refetch();
+    // console.log("fetched media Store");
   },
   downloadAudioFiles: async () => {
     const toDownload = get().audioFiles;
@@ -64,23 +66,29 @@ export const useMediaState = create<MediaState>()((set, get) => ({
       );
     }
 
-    for (const audioFile of toDownload) {
-      const file = await downloadLibraryItem(
-        remoteId,
-        audioFile.remoteId,
-        audioFile.name,
-      );
+    try {
+      set(() => ({ isDownloading: true }));
+
+      for (const audioFile of toDownload) {
+        const file = await downloadLibraryItem(
+          remoteId,
+          audioFile.remoteId,
+          audioFile.name,
+        );
+        await localDb
+          .update(libraryItemAudioFileSchema)
+          .set({ path: file })
+          .where(eq(libraryItemAudioFileSchema.remoteId, audioFile.remoteId));
+        // console.log(`downloaded audio file, result: ${file}`);
+      }
       await localDb
-        .update(libraryItemAudioFileSchema)
-        .set({ path: file })
-        .where(eq(libraryItemAudioFileSchema.remoteId, audioFile.remoteId));
-      console.log(`downloaded audio file, result: ${file}`);
+        .update(libraryItemSchema)
+        .set({ downloaded: true })
+        .where(eq(libraryItemSchema.id, libraryItemId));
+      get().refetch(libraryItemId);
+      return true;
+    } finally {
+      set(() => ({ isDownloading: false }));
     }
-    await localDb
-      .update(libraryItemSchema)
-      .set({ downloaded: true })
-      .where(eq(libraryItemSchema.id, libraryItemId));
-    get().refetch(libraryItemId);
-    return true;
   },
 }));

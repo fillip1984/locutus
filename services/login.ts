@@ -7,7 +7,7 @@ export const login = async (
   password: string,
 ) => {
   try {
-    console.log("logging in");
+    // console.log("logging in");
     const response = await axios.post<Root>(`${url}/login`, {
       username,
       password,

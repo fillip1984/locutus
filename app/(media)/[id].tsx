@@ -16,16 +16,16 @@ import {
   LibraryItemAudioFileSchemaType,
   LibraryItemSchemaType,
 } from "@/db/schema";
-import { useMediaState } from "@/stores/mediaStore";
+import { useMediaStore } from "@/stores/mediaStore";
 
 export default function Media() {
   const { id } = useLocalSearchParams();
 
-  const mediaState = useMediaState();
+  const mediaStore = useMediaStore();
 
   useFocusEffect(
     useCallback(() => {
-      mediaState.refetch(parseInt(id as string, 10));
+      mediaStore.refetch(parseInt(id as string, 10));
     }, []),
   );
 
@@ -35,7 +35,7 @@ export default function Media() {
       text1: "Downloading audio files",
       position: "bottom",
     });
-    await mediaState.downloadAudioFiles();
+    await mediaStore.downloadAudioFiles();
     Toast.show({
       type: "success",
       text1: "Downloaded audio files",
@@ -45,20 +45,21 @@ export default function Media() {
 
   return (
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
-      {mediaState.libraryItem && mediaState.audioFiles && (
+      {mediaStore.libraryItem && mediaStore.audioFiles && (
         <View className="flex h-screen gap-2 bg-slate-800 p-2">
           <TopActionsBar />
-          <MediaArtAndImportantInfo libraryItem={mediaState.libraryItem} />
+          <MediaArtAndImportantInfo libraryItem={mediaStore.libraryItem} />
           <MediaActionsBar
-            libraryItem={mediaState.libraryItem}
+            libraryItem={mediaStore.libraryItem}
             handleDownload={handleDownload}
-            audioFiles={mediaState.audioFiles}
+            isDownloading={mediaStore.isDownloading}
+            audioFiles={mediaStore.audioFiles}
           />
-          <MediaSummary libraryItem={mediaState.libraryItem} />
-          {mediaState.audioFiles && (
+          <MediaSummary libraryItem={mediaStore.libraryItem} />
+          {mediaStore.audioFiles && (
             <MediaTracks
-              libraryItem={mediaState.libraryItem}
-              audioFiles={mediaState.audioFiles}
+              libraryItem={mediaStore.libraryItem}
+              audioFiles={mediaStore.audioFiles}
             />
           )}
         </View>
@@ -112,29 +113,45 @@ const MediaArtAndImportantInfo = ({
 const MediaActionsBar = ({
   libraryItem,
   handleDownload,
+  isDownloading,
   audioFiles,
 }: {
   libraryItem: LibraryItemSchemaType;
   handleDownload: () => void;
+  isDownloading: boolean;
   audioFiles: LibraryItemAudioFileSchemaType[];
 }) => {
   return (
     <View className="flex flex-row items-center justify-between">
       {/* TODO: Looks like Plex is using css grid to have 4 squares, the first col taking up a little over 1/3. This causes the art poster and play button to align */}
-      {audioFiles.filter((a) => a.path).length > 0 ? (
-        <Link href={`/(player)/${libraryItem.id}`}>
+      {isDownloading === false &&
+        audioFiles.filter((a) => a.path).length > 0 && (
+          <Link href={`/(player)/${libraryItem.id}`}>
+            <View className="flex h-14 w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
+              <Ionicons name="play-sharp" size={40} color="white" />
+            </View>
+          </Link>
+        )}
+
+      {isDownloading === false &&
+        audioFiles.filter((a) => a.path).length === 0 && (
           <View className="flex h-14 w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
-            <Ionicons name="play-sharp" size={40} color="white" />
+            <View className="animate-bounce">
+              <Ionicons
+                name="cloud-download-outline"
+                size={24}
+                color="white"
+                onPress={handleDownload}
+              />
+            </View>
           </View>
-        </Link>
-      ) : (
+        )}
+
+      {isDownloading && (
         <View className="flex h-14 w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
-          <Ionicons
-            name="cloud-download-outline"
-            size={24}
-            color="white"
-            onPress={handleDownload}
-          />
+          <View className="animate-spin">
+            <FontAwesome6 name="circle-notch" size={24} color="white" />
+          </View>
         </View>
       )}
 
@@ -196,41 +213,11 @@ const MediaTracks = ({
       <ScrollView ref={tracksScrollViewRef}>
         <View className="my-2 flex gap-2">
           {audioFiles?.map((audioFile) => (
-            <Link
+            <Chapter
               key={audioFile.id}
-              href={`/(player)/${libraryItem.id}?audioFileId=${audioFile.id}`}>
-              <View className="relative flex w-full">
-                <View
-                  // className={`m-1 flex flex-row justify-between gap-2 rounded p-4 ${libraryItem.lastPlayedId === audioFile.id ? "bg-sky-300" : "bg-slate-400/30"}`}
-                  className={clsx(
-                    "flex h-20 w-full flex-row items-center justify-between rounded-t p-2",
-                    {
-                      "bg-slate-400/30 opacity-35":
-                        !(libraryItem.lastPlayedId === audioFile.id) &&
-                        audioFile.complete,
-                      "bg-slate-400/30":
-                        !(libraryItem.lastPlayedId === audioFile.id) &&
-                        !audioFile.complete,
-                      "bg-sky-300": libraryItem.lastPlayedId === audioFile.id,
-                    },
-                  )}>
-                  <Text className="flex-wrap text-wrap text-white">
-                    {audioFile.name}
-                  </Text>
-                  {audioFile.complete ? (
-                    <FontAwesome6 name="circle-check" size={24} color="white" />
-                  ) : (
-                    <FontAwesome6 name="circle-play" size={24} color="white" />
-                  )}
-                </View>
-                <View
-                  className="absolute bottom-0 h-1 rounded-b bg-yellow-300"
-                  style={{
-                    width: `${calc(audioFile.progress ?? 1, audioFile.duration)}%`,
-                  }}
-                />
-              </View>
-            </Link>
+              audioFile={audioFile}
+              isLastPlayed={libraryItem.lastPlayedId === audioFile.id}
+            />
           ))}
         </View>
 
@@ -246,7 +233,61 @@ const MediaTracks = ({
   );
 };
 
-const calc = (position: number, duration: number) => {
+const Chapter = ({
+  audioFile,
+  isLastPlayed,
+}: {
+  audioFile: LibraryItemAudioFileSchemaType;
+  isLastPlayed: boolean;
+}) => {
+  return (
+    <Link
+      disabled={!audioFile.path}
+      href={`/(player)/${audioFile.libraryItemId}?audioFileId=${audioFile.id}`}>
+      <View className="relative flex w-full">
+        <View
+          // className={`m-1 flex flex-row justify-between gap-2 rounded p-4 ${libraryItem.lastPlayedId === audioFile.id ? "bg-sky-300" : "bg-slate-400/30"}`}
+          className={clsx(
+            "flex h-20 w-full flex-row items-center justify-between gap-4 rounded-t p-2",
+            {
+              "bg-slate-400/30 opacity-35": !isLastPlayed && audioFile.complete,
+              "bg-slate-400/30": !isLastPlayed && !audioFile.complete,
+              "bg-sky-300": isLastPlayed,
+            },
+          )}>
+          <Text
+            className={clsx("flex-wrap text-wrap font-bold", {
+              "text-slate-800": isLastPlayed,
+              "text-white": !isLastPlayed,
+            })}>
+            {audioFile.name}
+          </Text>
+
+          {/* TODO: figure out how to prevent this icon from shrinking and flowing out of the card */}
+          {audioFile.path && audioFile.complete && (
+            <View className="flex-shrink-0 p-2">
+              <FontAwesome6 name="circle-check" size={24} color="white" />
+            </View>
+          )}
+          {audioFile.path && !audioFile.complete && (
+            <View className="flex-shrink-0 px-2">
+              <FontAwesome6 name="circle-play" size={24} color="white" />
+            </View>
+          )}
+        </View>
+        <View
+          className="absolute bottom-0 h-1 rounded-b bg-yellow-300"
+          style={{
+            width: `${calc(audioFile.progress ?? 1, audioFile.duration)}%`,
+          }}
+        />
+      </View>
+    </Link>
+  );
+};
+
+// TODO: move to central place
+export const calc = (position: number, duration: number) => {
   // TODO: for some reason math.round returns 100%???
   // const result = Math.round(position / duration) * 100;
   const result = (position / duration) * 100;

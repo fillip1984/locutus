@@ -8,7 +8,7 @@ export const getLibraries = async () => {
   const userSettings = (await localDb.select().from(userSettingsSchema))[0];
 
   try {
-    console.log("fetching libraries");
+    // console.log("fetching libraries");
     const response = await axios.get<Root>(
       `${userSettings.serverUrl}/api/libraries`,
       {

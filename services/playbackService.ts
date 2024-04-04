@@ -44,7 +44,7 @@ export async function playbackService() {
       const track = await TrackPlayer.getActiveTrack();
 
       if (track) {
-        console.log("update audio file progress");
+        // console.log("update audio file progress");
         localDb
           .update(libraryItemAudioFileSchema)
           .set({ complete: false, progress: e.position })
@@ -60,7 +60,7 @@ export async function playbackService() {
             where: eq(libraryItemSchema.id, audioFile.libraryItemId),
           });
           if (libraryItem) {
-            console.log("update library item progress");
+            // console.log("update library item progress");
             localDb
               .update(libraryItemSchema)
               .set({ complete: false, lastPlayedId: track.id })
@@ -85,7 +85,7 @@ export const fetchInitialPosition = async (indexChange: number) => {
         });
 
       if (audioFile) {
-        console.log("returning progress: " + audioFile.progress);
+        // console.log("returning progress: " + audioFile.progress);
         return audioFile.progress;
       }
     }

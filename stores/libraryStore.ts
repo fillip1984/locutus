@@ -14,7 +14,7 @@ import { getLibraries } from "@/services/libraryApi";
 import { getLibraryItem } from "@/services/libraryItemApi";
 import { getLibraryItems } from "@/services/libraryItemsApi";
 
-export interface LibraryState {
+export interface LibraryStore {
   libraries: LibrarySchemaType[] | null;
   libraryItems: LibraryItemSchemaType[] | null;
 
@@ -26,7 +26,7 @@ export interface LibraryState {
 
 export type Sort = "Alphabetically" | "LastTouched";
 
-export const useLibraryState = create<LibraryState>()((set, get) => ({
+export const useLibraryStore = create<LibraryStore>()((set, get) => ({
   libraries: null,
   libraryItems: null,
   refetch: async (sort?: Sort) => {
@@ -63,13 +63,13 @@ export const useLibraryState = create<LibraryState>()((set, get) => ({
         libraryId = existingLibrary[0].id;
       }
       if (!libraryId) {
-        console.log("adding library");
+        // console.log("adding library");
         const result = await localDb
           .insert(librarySchema)
           .values({ name: library.name, remoteId: library.id });
         libraryId = result.lastInsertRowId;
       } else {
-        console.log("updating library");
+        // console.log("updating library");
         await localDb
           .update(librarySchema)
           .set({ name: library.name })
@@ -96,7 +96,7 @@ export const useLibraryState = create<LibraryState>()((set, get) => ({
         const coverArtPath = await downloadCoverArt(item.id);
 
         if (!libraryItemId) {
-          console.log("adding library item");
+          // console.log("adding library item");
           const result = await localDb.insert(libraryItemSchema).values({
             title: item.media.metadata.title,
             authorName: item.media.metadata.authorName,
@@ -112,7 +112,7 @@ export const useLibraryState = create<LibraryState>()((set, get) => ({
           });
           libraryItemId = result.lastInsertRowId;
         } else {
-          console.log("updating library item");
+          // console.log("updating library item");
           await localDb
             .update(libraryItemSchema)
             .set({

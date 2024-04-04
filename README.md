@@ -16,18 +16,20 @@ I'm learning React Native but so far it's moving along nicely. Have audio files 
 
 ## TODO
 
-* [ ] Switch over audio player: <https://medium.com/@gionata.brunel/implementing-react-native-track-player-with-expo-including-lock-screen-part-1-ios-9552fea5178c>
+* [X] Switch over audio player: <https://medium.com/@gionata.brunel/implementing-react-native-track-player-with-expo-including-lock-screen-part-1-ios-9552fea5178c>
+* [ ] Need to finish out pushing the mini-player to the bottom when switching between player and library
+* [ ] Enhance drizzle to simplify data queries (right now app doesn't pull in relationships)
 * [ ] They're marked in some files (mostly UI specific at this time, things I ran into that caused me trouble)
-* [ ] Need to figure out how to handle all the errors I keep getting when switching between files
+* [ ] Figure out security (face id)
+* [X] Enhance UI for download experience
+* [X] Need to figure out how to handle all the errors I keep getting when switching between files
 * [X] Need to finish out flow from playlist to player
-* Need to finish out pushing the mini-player to the bottom when switching between player and library
 * [X] Need to figure out tabs
 * [X] Need to figure out how to store files locally
 * [X] Need to figure out how to import files from elsewhere
-* [ ] Figure out security (face id)
 * [X] Figure out how to distribute without app store
 * [X] Figure out how to get it to play in the background
-* [ ] Eventually figure out how to integrate into Apple now playing experiences
-* [ ] Eventually figure out how to integrate into Apple lock screen
-* [ ] Eventually figure out how to integrate with Apple Carplay
-* [ ] Eventually figure out how to integrate with Apple iwatch
+* [X] Eventually figure out how to integrate into Apple now playing experiences
+* [X] Eventually figure out how to integrate into Apple lock screen
+* [X] Eventually figure out how to integrate with Apple Carplay
+* [X] Eventually figure out how to integrate with Apple iwatch

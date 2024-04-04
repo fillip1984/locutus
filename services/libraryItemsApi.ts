@@ -7,7 +7,7 @@ export const getLibraryItems = async (libraryId: string) => {
   const userSettings = (await localDb.select().from(userSettingsSchema))[0];
 
   try {
-    console.log(`fetching library items for library with id: ${libraryId}`);
+    // console.log(`fetching library items for library with id: ${libraryId}`);
     const response = await axios.get<Root>(
       `${userSettings.serverUrl}/api/libraries/${libraryId}/items`,
       {

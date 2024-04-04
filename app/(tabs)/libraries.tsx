@@ -5,12 +5,12 @@ import { useEffect, useRef } from "react";
 import { Pressable, SafeAreaView, ScrollView, Text, View } from "react-native";
 
 import BookLink from "@/components/BookLink";
-import { useLibraryState } from "@/stores/libraryStore";
+import { useLibraryStore } from "@/stores/libraryStore";
 
 export default function Libraries() {
-  const libraryState = useLibraryState();
+  const libraryStore = useLibraryStore();
   useEffect(() => {
-    libraryState.refetch();
+    libraryStore.refetch();
   }, []);
 
   const libraryScrollViewRef = useRef<ScrollView>(null);
@@ -18,16 +18,16 @@ export default function Libraries() {
   return (
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
       <View className="flex h-screen bg-slate-800 p-2">
-        {libraryState.libraryItems?.length === 0 && (
+        {libraryStore.libraryItems?.length === 0 && (
           <View className="flex h-screen items-center justify-center">
             <Text className="text-2xl text-white">Nothing to play</Text>
           </View>
         )}
 
-        {libraryState.libraryItems && libraryState.libraryItems.length > 0 && (
+        {libraryStore.libraryItems && libraryStore.libraryItems.length > 0 && (
           <ScrollView ref={libraryScrollViewRef}>
             <View className="mt-6 flex flex-row flex-wrap gap-4">
-              {libraryState.libraryItems.map((item) => (
+              {libraryStore.libraryItems.map((item) => (
                 <BookLink key={item.id} item={item} />
               ))}
             </View>
