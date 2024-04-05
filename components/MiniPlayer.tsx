@@ -5,45 +5,55 @@ import TrackPlayer, {
   State,
   useActiveTrack,
   usePlaybackState,
+  useProgress,
 } from "react-native-track-player";
 
 import { calc } from "@/app/(media)/[id]";
 
 export default function MiniPlayer() {
   const track = useActiveTrack();
+  const progress = useProgress();
   const { state: playbackState } = usePlaybackState();
   return (
-    <View className="absolute bottom-20 left-0 right-0">
-      <View className="relative flex w-full">
-        <View className="flex w-full flex-row items-center justify-between">
-          <View className="flex p-2">
-            <Text className="font-bold text-white">{track?.title}</Text>
-            <Text className="text-white">{track?.artist}</Text>
-          </View>
+    <View className="relative flex w-full">
+      <View className="flex flex-row items-center gap-2 p-4">
+        <View className="flex h-12 w-12">
+          <Image
+            source={track?.artwork}
+            style={{ flex: 1 }}
+            contentFit="cover"
+          />
+        </View>
+        <View>
+          {/* TODO: make text scroll left and right */}
+          <Text className="font-bold text-white">{track?.title}</Text>
+          <Text className="text-white">{track?.artist}</Text>
+        </View>
 
+        <View className="ml-auto mr-2">
           {playbackState === State.Playing ? (
             <Ionicons
               onPress={TrackPlayer.pause}
               name="pause"
-              size={40}
+              size={30}
               color="white"
             />
           ) : (
             <Ionicons
               onPress={TrackPlayer.play}
               name="play-sharp"
-              size={40}
+              size={30}
               color="white"
             />
           )}
         </View>
-        <View
-          className="absolute bottom-0 h-1 rounded-b bg-yellow-300"
-          style={{
-            width: `${calc(1000, track?.duration ?? 1)}%`,
-          }}
-        />
       </View>
+      <View
+        className="absolute bottom-0 h-1 rounded-b bg-yellow-300"
+        style={{
+          width: `${calc(progress.position, track?.duration ?? 1)}%`,
+        }}
+      />
     </View>
   );
 }

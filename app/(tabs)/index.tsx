@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { SafeAreaView, Text, View, ScrollView } from "react-native";
+import { SafeAreaView, ScrollView, Text, View } from "react-native";
+import { useActiveTrack } from "react-native-track-player";
 
 import BookLink from "@/components/BookLink";
+import MiniPlayer from "@/components/MiniPlayer";
 import { LibraryItemSchemaType } from "@/db/schema";
 import { useLibraryStore } from "@/stores/libraryStore";
 
@@ -10,6 +12,7 @@ export default function Home() {
   useEffect(() => {
     libraryStore.refetch("LastTouched");
   }, []);
+  const track = useActiveTrack();
 
   useEffect(() => {
     setContinueItems(libraryStore.libraryItems?.filter((i) => i.lastPlayedId));
@@ -25,25 +28,34 @@ export default function Home() {
 
   return (
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
-      {libraryStore && libraryStore.libraryItems && (
-        <View className="flex h-screen bg-slate-800 p-2">
-          <ScrollView>
-            <View className="flex gap-4">
-              {continueItems && continueItems.length > 0 && (
-                <ContinueSection items={continueItems} />
-              )}
+      <View className="relative">
+        {libraryStore && libraryStore.libraryItems && (
+          <View className="flex h-screen bg-slate-800 p-2">
+            <ScrollView>
+              <View className="flex gap-4">
+                {continueItems && continueItems.length > 0 && (
+                  <ContinueSection items={continueItems} />
+                )}
 
-              {downloadedItems && downloadedItems.length > 0 && (
-                <DownloadedSection items={downloadedItems} />
-              )}
+                {downloadedItems && downloadedItems.length > 0 && (
+                  <DownloadedSection items={downloadedItems} />
+                )}
 
-              {relistenItems && relistenItems.length > 0 && (
-                <RelistenSection items={relistenItems} />
-              )}
-            </View>
-          </ScrollView>
-        </View>
-      )}
+                {relistenItems && relistenItems.length > 0 && (
+                  <RelistenSection items={relistenItems} />
+                )}
+              </View>
+            </ScrollView>
+          </View>
+        )}
+        {/* TODO: not sure why, but I have to declare bg color here for it to take effect */}
+        {/* TODO: Couldn't find a better way to afix to the bottom, try flex methods maybe? */}
+        {track && (
+          <View className="absolute bottom-36 left-0 right-0 bg-slate-900">
+            <MiniPlayer />
+          </View>
+        )}
+      </View>
     </SafeAreaView>
   );
 }
@@ -52,7 +64,7 @@ const ContinueSection = ({ items }: { items: LibraryItemSchemaType[] }) => {
   return (
     <>
       <Text className="text-4xl text-white">Continue</Text>
-      <ScrollView>
+      <ScrollView horizontal>
         <View className="flex flex-row gap-3">
           {items.map((item) => (
             <BookLink key={item.id} item={item} />
@@ -82,7 +94,7 @@ const RelistenSection = ({ items }: { items: LibraryItemSchemaType[] }) => {
   return (
     <>
       <Text className="text-4xl text-white">Relisten</Text>
-      <ScrollView>
+      <ScrollView horizontal>
         <View className="flex flex-row gap-3">
           {items.map((item) => (
             <BookLink key={item.id} item={item} />

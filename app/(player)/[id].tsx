@@ -3,7 +3,7 @@ import Slider from "@react-native-community/slider";
 import { format } from "date-fns";
 import { eq } from "drizzle-orm";
 import { Image } from "expo-image";
-import { Link, useLocalSearchParams } from "expo-router";
+import { Link, Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, SafeAreaView, Text, View } from "react-native";
 import Toast from "react-native-toast-message";
@@ -124,6 +124,7 @@ export default function Player() {
   return (
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
       <View className="flex h-screen gap-2 bg-slate-800 p-2">
+        <Stack.Screen options={{ gestureDirection: "vertical" }} />
         <TopActionsBar />
         <View className="h-1/2">
           <MediaArt />
