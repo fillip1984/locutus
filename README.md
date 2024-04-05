@@ -2,6 +2,8 @@
 
 My mad dash to creating an Audiobook player built with react native. This is an expo project written in Typescript, using drizzle for persistence, zustand for state, and NativeWind for UI. I am trying to build an audiobook player that uses AudioBookShelf as it's backend to fetch metadata and also the audiobooks themselves.
 
+For audio playback, I started with expo-av but switched over to react-native-track-player since it integrated into ios Now Playing allowing me to show the player on the lock screen, on my apple watch, on car play which was great!
+
 ## UI
 
 Using tabs currently, with the player being full screen. There is a modal to demonstrate how to pull up a sheet but it isn't used currently...
