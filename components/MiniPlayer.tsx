@@ -17,7 +17,8 @@ export default function MiniPlayer() {
   return (
     <View className="relative flex w-full">
       <View className="flex flex-row items-center gap-2 p-4">
-        <View className="flex h-12 w-12">
+        {/* TODO: not sure what I'm fighting, either expo or nativewind but this worked and then didn't... */}
+        <View className="flex">
           <Image
             source={track?.artwork}
             style={{ flex: 1 }}
