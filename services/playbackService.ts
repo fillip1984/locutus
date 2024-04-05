@@ -26,13 +26,17 @@ export async function playbackService() {
   TrackPlayer.addEventListener(
     Event.PlaybackActiveTrackChanged,
     async (e: PlaybackActiveTrackChangedEvent) => {
-      if (
-        e.lastTrack &&
-        (e.lastTrack?.duration as number) - e.lastPosition < 5
-      ) {
+      if (e.lastTrack) {
+        const complete = (e.lastTrack?.duration as number) - e.lastPosition < 1;
+        // console.log(
+        //   `mark file as complete if within 1 second of completing track, else update complete to false and mark progress. Complete: ${complete}, progress: ${e.lastPosition}`,
+        // );
         localDb
           .update(libraryItemAudioFileSchema)
-          .set({ complete: true, progress: 0 })
+          .set({
+            complete,
+            progress: complete ? 0 : e.lastPosition,
+          })
           .where(eq(libraryItemAudioFileSchema.id, e.lastTrack.id))
           .run();
       }
@@ -42,15 +46,17 @@ export async function playbackService() {
     Event.PlaybackProgressUpdated,
     async (e: PlaybackProgressUpdatedEvent) => {
       const track = await TrackPlayer.getActiveTrack();
-
       if (track) {
-        // console.log("update audio file progress");
-        localDb
-          .update(libraryItemAudioFileSchema)
-          .set({ complete: false, progress: e.position })
-          .where(eq(libraryItemAudioFileSchema.id, track.id))
-          .run();
-
+        if (e.position > 0) {
+          // Ignore initial false reports of postion 0 seconds. I've noticed that when a track initially gets loaded up,
+          // and the track is being resumed, it there will be an update with 0 as the position while the track is still being loaded up
+          // console.log(`update audio file progress: ${e.position}`);
+          localDb
+            .update(libraryItemAudioFileSchema)
+            .set({ complete: false, progress: e.position })
+            .where(eq(libraryItemAudioFileSchema.id, track.id))
+            .run();
+        }
         const audioFile =
           await localDb.query.libraryItemAudioFileSchema.findFirst({
             where: eq(libraryItemAudioFileSchema.id, track.id),
@@ -85,7 +91,7 @@ export const fetchInitialPosition = async (indexChange: number) => {
         });
 
       if (audioFile) {
-        // console.log("returning progress: " + audioFile.progress);
+        // console.log(`returning progress: ${audioFile.progress}`);
         return audioFile.progress;
       }
     }

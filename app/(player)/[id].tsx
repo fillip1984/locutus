@@ -79,18 +79,21 @@ export default function Player() {
       const activeTrack = await TrackPlayer.getActiveTrack();
 
       if (audioFile.id === activeTrack?.id) {
-        // if audioFile matches activeTrack then do nothing
+        // console.log("if audioFile matches activeTrack then do nothing");
       } else if (
         (await TrackPlayer.getQueue()).find((q) => q.id === audioFile?.id)
       ) {
-        // if audioFile is withing queue, skip to audioFile
+        // console.log("if audioFile is withing queue, skip to audioFile");
         const trackToLoadIndex = (await TrackPlayer.getQueue()).findIndex(
           (q) => q.id === audioFile?.id,
         );
+        // console.log(
+        //   `determining starting point based on progress: ${audioFile.progress}`,
+        // );
         await TrackPlayer.skip(trackToLoadIndex, audioFile.progress ?? 0);
         await TrackPlayer.play();
       } else {
-        // reset and reload the works
+        // console.log("reset and reload the works");
         await TrackPlayer.reset();
         await TrackPlayer.add(
           audioFiles.map(

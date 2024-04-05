@@ -7,10 +7,6 @@ import "../global.css";
 
 import { playbackService } from "../services/playbackService";
 
-import MiniPlayer from "@/components/MiniPlayer";
-
-import { View } from "react-native";
-
 export default function RootLayout() {
   const setupPlayer = async () => {
     await TrackPlayer.setupPlayer();
@@ -25,7 +21,7 @@ export default function RootLayout() {
       ],
       forwardJumpInterval: 30,
       backwardJumpInterval: 30,
-      progressUpdateEventInterval: 500,
+      progressUpdateEventInterval: 1000,
     });
   };
   useEffect(() => {
@@ -48,8 +44,6 @@ export default function RootLayout() {
         />
       </Stack>
       <Toast />
-
-      {/* <MiniPlayer /> */}
     </>
   );
 }
