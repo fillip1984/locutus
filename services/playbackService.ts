@@ -65,7 +65,7 @@ export async function playbackService() {
         );
         localDb
           .update(libraryItemAudioFileSchema)
-          .set({ complete, progress: e.position })
+          .set({ complete, progress: complete ? 0 : e.position })
           .where(eq(libraryItemAudioFileSchema.id, track.id))
           .run();
 
@@ -79,9 +79,10 @@ export async function playbackService() {
           });
           if (libraryItem) {
             // console.log("update library item progress");
+            // TODO: figure out how to mark the library item as complete
             localDb
               .update(libraryItemSchema)
-              .set({ complete, lastPlayedId: track.id })
+              .set({ complete: false, lastPlayedId: track.id })
               .where(eq(libraryItemSchema.id, libraryItem.id))
               .run();
           }
