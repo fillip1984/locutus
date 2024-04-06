@@ -109,3 +109,15 @@ export const fetchInitialPosition = async (indexChange: number) => {
     }
   }
 };
+
+export const fetchLibraryItemFromTrack = async (audioFileId: number) => {
+  const audioFile = await localDb.query.libraryItemAudioFileSchema.findFirst({
+    where: eq(libraryItemAudioFileSchema.id, audioFileId),
+  });
+  if (audioFile && audioFile.libraryItemId) {
+    const libraryItem = await localDb.query.libraryItemSchema.findFirst({
+      where: eq(libraryItemSchema.id, audioFile.libraryItemId),
+    });
+    return libraryItem;
+  }
+};

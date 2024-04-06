@@ -1,6 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { Text, View } from "react-native";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import { Pressable, Text, View } from "react-native";
 import TrackPlayer, {
   State,
   useActiveTrack,
@@ -9,14 +11,36 @@ import TrackPlayer, {
 } from "react-native-track-player";
 
 import { calc } from "@/app/(media)/[id]";
+import { LibraryItemSchemaType } from "@/db/schema";
+import { fetchLibraryItemFromTrack } from "@/services/playbackService";
 
 export default function MiniPlayer() {
+  const [libraryItem, setLibraryItem] = useState<
+    LibraryItemSchemaType | undefined
+  >();
   const track = useActiveTrack();
   const progress = useProgress();
   const { state: playbackState } = usePlaybackState();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (track) {
+        const result = (await fetchLibraryItemFromTrack(
+          track.id,
+        )) as LibraryItemSchemaType;
+        if (result) {
+          setLibraryItem(result);
+        }
+      }
+    };
+
+    fetchData();
+  }, [track]);
   return (
     <View className="relative flex w-full">
-      <View className="flex flex-row items-center gap-2 p-4">
+      <Pressable
+        onPress={() => router.push(`/(player)/${libraryItem?.id}`)}
+        className="flex flex-row items-center gap-2 p-4">
         {/* TODO: not sure what I'm fighting, either expo or nativewind but this worked and then didn't... */}
         <View className="flex">
           <Image
@@ -48,7 +72,8 @@ export default function MiniPlayer() {
             />
           )}
         </View>
-      </View>
+      </Pressable>
+
       <View
         className="absolute bottom-0 h-1 rounded-b bg-yellow-300"
         style={{
