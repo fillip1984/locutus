@@ -1,7 +1,6 @@
 import { eq } from "drizzle-orm";
 import TrackPlayer, {
   Event,
-  PlaybackActiveTrackChangedEvent,
   PlaybackProgressUpdatedEvent,
 } from "react-native-track-player";
 
@@ -23,40 +22,53 @@ export async function playbackService() {
   TrackPlayer.addEventListener(Event.RemoteJumpForward, () =>
     TrackPlayer.seekBy(30),
   );
-  TrackPlayer.addEventListener(
-    Event.PlaybackActiveTrackChanged,
-    async (e: PlaybackActiveTrackChangedEvent) => {
-      if (e.lastTrack) {
-        const complete = (e.lastTrack?.duration as number) - e.lastPosition < 1;
-        // console.log(
-        //   `mark file as complete if within 1 second of completing track, else update complete to false and mark progress. Complete: ${complete}, progress: ${e.lastPosition}`,
-        // );
-        localDb
-          .update(libraryItemAudioFileSchema)
-          .set({
-            complete,
-            progress: complete ? 0 : e.lastPosition,
-          })
-          .where(eq(libraryItemAudioFileSchema.id, e.lastTrack.id))
-          .run();
-      }
-    },
-  );
+  // TODO: seems to be a bug, progress is always undefined
+  // TrackPlayer.addEventListener(
+  //   Event.PlaybackActiveTrackChanged,
+  //   async (e: PlaybackActiveTrackChangedEvent) => {
+  //     if (e.lastTrack) {
+  //       console.log({
+  //         lastTitle: e.lastTrack?.title,
+  //         lastPosition: e.lastTrack?.position,
+  //         title: e.track?.title,
+  //         position: "???",
+  //       });
+  //       const complete = (e.lastTrack?.duration as number) - e.lastPosition < 1;
+  //       // console.log(
+  //       //   `mark file as complete if within 1 second of completing track, else update complete to false and mark progress. Complete: ${complete}, progress: ${e.lastPosition}`,
+  //       // );
+  //       localDb
+  //         .update(libraryItemAudioFileSchema)
+  //         .set({
+  //           complete,
+  //           progress: complete ? 0 : e.lastPosition,
+  //         })
+  //         .where(eq(libraryItemAudioFileSchema.id, e.lastTrack.id))
+  //         .run();
+  //     }
+  //   },
+  // );
   TrackPlayer.addEventListener(
     Event.PlaybackProgressUpdated,
     async (e: PlaybackProgressUpdatedEvent) => {
+      if (e.position === 0) {
+        // console.warn(
+        //   "There seems to be a bug where position is reported as 0 just prior to playing and reporting actual position",
+        // );
+        return;
+      }
       const track = await TrackPlayer.getActiveTrack();
       if (track) {
-        if (e.position > 0) {
-          // Ignore initial false reports of postion 0 seconds. I've noticed that when a track initially gets loaded up,
-          // and the track is being resumed, it there will be an update with 0 as the position while the track is still being loaded up
-          // console.log(`update audio file progress: ${e.position}`);
-          localDb
-            .update(libraryItemAudioFileSchema)
-            .set({ complete: false, progress: e.position })
-            .where(eq(libraryItemAudioFileSchema.id, track.id))
-            .run();
-        }
+        const complete = e.duration - e.position < 1;
+        console.log(
+          `update audio file: ${track.title}, progress: ${e.position}, mark as complete? ${complete}`,
+        );
+        localDb
+          .update(libraryItemAudioFileSchema)
+          .set({ complete, progress: e.position })
+          .where(eq(libraryItemAudioFileSchema.id, track.id))
+          .run();
+
         const audioFile =
           await localDb.query.libraryItemAudioFileSchema.findFirst({
             where: eq(libraryItemAudioFileSchema.id, track.id),
@@ -69,7 +81,7 @@ export async function playbackService() {
             // console.log("update library item progress");
             localDb
               .update(libraryItemSchema)
-              .set({ complete: false, lastPlayedId: track.id })
+              .set({ complete, lastPlayedId: track.id })
               .where(eq(libraryItemSchema.id, libraryItem.id))
               .run();
           }
