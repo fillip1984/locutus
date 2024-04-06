@@ -10,8 +10,9 @@
     "db:generate": "drizzle-kit generate:sqlite",
     "studio": "drizzle-kit studio",
     "test": "jest --watchAll",
-    "build:ios:dev": "eas build --platform ios --profile development --local --non-interactive",
-    "install:simulator": "eas build:run -p ios"
+    "build-production": "eas build --platform ios --profile production --local --non-interactive",
+    "build-simulator": "eas build --platform ios --profile development --local --non-interactive",
+    "install-simulator": "eas build:run --platform ios --profile development"
   },
   "jest": {
     "preset": "jest-expo"
