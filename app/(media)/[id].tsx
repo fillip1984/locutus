@@ -243,12 +243,13 @@ const Chapter = ({
   return (
     <Link
       disabled={!audioFile.path}
-      href={`/(player)/${audioFile.libraryItemId}?audioFileId=${audioFile.id}`}>
-      <View className="relative flex w-full">
+      href={`/(player)/${audioFile.libraryItemId}?audioFileId=${audioFile.id}`}
+      asChild>
+      <Pressable className="relative flex w-full">
         <View
           // className={`m-1 flex flex-row justify-between gap-2 rounded p-4 ${libraryItem.lastPlayedId === audioFile.id ? "bg-sky-300" : "bg-slate-400/30"}`}
           className={clsx(
-            "flex h-20 w-full flex-row items-center justify-between gap-4 rounded-t p-2",
+            "flex w-full flex-row items-center justify-between gap-4 rounded-t p-2 py-4",
             {
               "bg-slate-400/30 opacity-35": !isLastPlayed && audioFile.complete,
               "bg-slate-400/30": !isLastPlayed && !audioFile.complete,
@@ -256,21 +257,20 @@ const Chapter = ({
             },
           )}>
           <Text
-            className={clsx("flex-wrap text-wrap font-bold", {
+            className={clsx("w-4/5 font-bold", {
               "text-slate-800": isLastPlayed,
               "text-white": !isLastPlayed,
             })}>
             {audioFile.name}
           </Text>
 
-          {/* TODO: figure out how to prevent this icon from shrinking and flowing out of the card */}
           {audioFile.path && audioFile.complete && (
-            <View className="flex-shrink-0 p-2">
+            <View className="p-2">
               <FontAwesome6 name="circle-check" size={24} color="white" />
             </View>
           )}
           {audioFile.path && !audioFile.complete && (
-            <View className="flex-shrink-0 px-2">
+            <View className="px-2">
               <FontAwesome6 name="circle-play" size={24} color="white" />
             </View>
           )}
@@ -281,7 +281,7 @@ const Chapter = ({
             width: `${calc(audioFile.progress ?? 1, audioFile.duration)}%`,
           }}
         />
-      </View>
+      </Pressable>
     </Link>
   );
 };

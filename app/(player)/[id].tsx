@@ -83,7 +83,7 @@ export default function Player() {
       } else if (
         (await TrackPlayer.getQueue()).find((q) => q.id === audioFile?.id)
       ) {
-        // console.log("if audioFile is withing queue, skip to audioFile");
+        // console.log("if audioFile is within queue, skip to audioFile");
         const trackToLoadIndex = (await TrackPlayer.getQueue()).findIndex(
           (q) => q.id === audioFile?.id,
         );

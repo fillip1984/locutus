@@ -5,7 +5,7 @@ import Toast from "react-native-toast-message";
 
 import { dropDatabase, localDb } from "@/db";
 import { userSettingsSchema } from "@/db/schema";
-import { login } from "@/services/login";
+import { login } from "@/services/loginApi";
 import { useLibraryStore } from "@/stores/libraryStore";
 
 export default function Settings() {
