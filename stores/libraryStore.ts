@@ -129,13 +129,27 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
 
         const audioFiles = await getLibraryItem(remoteId);
         for (const audioFile of audioFiles) {
-          await localDb.insert(libraryItemAudioFileSchema).values({
-            remoteId: audioFile.ino,
-            index: audioFile.index,
-            duration: audioFile.duration,
-            name: audioFile.metadata.filename,
-            libraryItemId,
-          });
+          const exists =
+            await localDb.query.libraryItemAudioFileSchema.findFirst({
+              where: eq(libraryItemAudioFileSchema.remoteId, audioFile.ino),
+            });
+          if (!exists) {
+            await localDb.insert(libraryItemAudioFileSchema).values({
+              remoteId: audioFile.ino,
+              index: audioFile.index,
+              name: audioFile.metadata.filename,
+              duration: audioFile.duration,
+              libraryItemId,
+            });
+          } else {
+            await localDb
+              .update(libraryItemAudioFileSchema)
+              .set({
+                name: audioFile.metadata.filename,
+                duration: audioFile.duration,
+              })
+              .where(eq(libraryItemAudioFileSchema.remoteId, audioFile.ino));
+          }
         }
       }
     }
