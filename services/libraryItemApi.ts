@@ -89,7 +89,10 @@ export const downloadLibraryItem = async (
     // delete previous version of the file
     const destination =
       FileSystem.documentDirectory + libraryItemId + "/" + filename;
-    await FileSystem.deleteAsync(destination);
+    const info = await FileSystem.getInfoAsync(destination);
+    if (info.exists) {
+      await FileSystem.deleteAsync(destination);
+    }
 
     const result = await FileSystem.downloadAsync(
       `${userSettings.serverUrl}/api/items/${libraryItemId}/file/${fileId}/download`,
