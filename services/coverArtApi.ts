@@ -20,6 +20,7 @@ export const downloadCoverArt = async (libraryItemId: string) => {
     const result = await FileSystem.downloadAsync(
       `${userSettings.serverUrl}/api/items/${libraryItemId}/cover`,
       FileSystem.documentDirectory + libraryItemId + "/cover.webp",
+      { headers: { Authorization: `Bearer ${userSettings.tokenId}` } },
     );
     return result.uri;
   } catch (err) {

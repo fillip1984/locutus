@@ -3,7 +3,7 @@ import Slider from "@react-native-community/slider";
 import { format } from "date-fns";
 import { eq } from "drizzle-orm";
 import { Image } from "expo-image";
-import { Link, Stack, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { Link, Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, SafeAreaView, Text, View } from "react-native";
 import Toast from "react-native-toast-message";
@@ -84,7 +84,8 @@ export default function Player() {
       const activeTrack = await TrackPlayer.getActiveTrack();
 
       if (audioFile.id === activeTrack?.id) {
-        // console.log("if audioFile matches activeTrack then do nothing");
+        // console.log("if audioFile matches activeTrack then do nothing other than ensure that track is playing");
+        TrackPlayer.play();
       } else if (
         (await TrackPlayer.getQueue()).find((q) => q.id === audioFile?.id)
       ) {

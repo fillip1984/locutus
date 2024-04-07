@@ -74,6 +74,7 @@ export const downloadLibraryItem = async (
   // }
 
   try {
+    console.log(`downloading libraryItemId: ${libraryItemId}`);
     const dirInfo = await FileSystem.getInfoAsync(
       FileSystem.documentDirectory + libraryItemId,
     );
@@ -85,14 +86,29 @@ export const downloadLibraryItem = async (
       );
     }
 
+    // delete previous version of the file
+    const destination =
+      FileSystem.documentDirectory + libraryItemId + "/" + filename;
+    await FileSystem.deleteAsync(destination);
+
     const result = await FileSystem.downloadAsync(
       `${userSettings.serverUrl}/api/items/${libraryItemId}/file/${fileId}/download`,
-      FileSystem.documentDirectory + libraryItemId + "/" + filename,
+      destination,
+      { headers: { Authorization: `Bearer ${userSettings.tokenId}` } },
     );
+
+    if (result.status === 401) {
+      console.log({ result });
+      throw Error(
+        "Failed to download item, result was login challenge. Are you logged in?",
+      );
+    }
+
     return result.uri;
   } catch (err) {
     console.error(
       `Exception occurred while downloading library item: ${libraryItemId}, fileId: ${fileId}, filename: ${filename}`,
+      err,
     );
     throw err;
   }

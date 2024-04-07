@@ -18,6 +18,7 @@ export interface MediaStore {
   isDownloading: boolean;
   refetch: (id: number) => void;
   downloadAudioFiles: () => Promise<boolean>;
+  deleteLibraryItem: (libraryItemId: number) => Promise<boolean>;
 }
 
 export const useMediaStore = create<MediaStore>()((set, get) => ({
@@ -90,5 +91,9 @@ export const useMediaStore = create<MediaStore>()((set, get) => ({
     } finally {
       set(() => ({ isDownloading: false }));
     }
+  },
+  deleteLibraryItem: async (libraryItemId: number) => {
+    console.warn("Not yet implemented");
+    return true;
   },
 }));
