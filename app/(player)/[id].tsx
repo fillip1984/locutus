@@ -3,7 +3,7 @@ import Slider from "@react-native-community/slider";
 import { format } from "date-fns";
 import { eq } from "drizzle-orm";
 import { Image } from "expo-image";
-import { Link, Stack, useLocalSearchParams } from "expo-router";
+import { Link, Stack, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, SafeAreaView, Text, View } from "react-native";
 import Toast from "react-native-toast-message";
@@ -208,13 +208,21 @@ const TrackProgress = () => {
 
 const MediaControls = () => {
   const { state: playbackState } = usePlaybackState();
-  const [rate, setRate] = useState(1);
-  const handleSetRate = () => {
+  const [rate, setRate] = useState<number | undefined>();
+  const handleSetRate = async () => {
     // increments in .25, cycles back to .5x if over 2x
-    const newRate = rate + 0.25 > 2 ? 0.5 : rate + 0.25;
+    const currentRate = await TrackPlayer.getRate();
+    const newRate = currentRate + 0.25 > 2 ? 0.5 : currentRate + 0.25;
     TrackPlayer.setRate(newRate);
     setRate(newRate);
   };
+
+  useEffect(() => {
+    const init = async () => {
+      setRate(await TrackPlayer.getRate());
+    };
+    init();
+  }, []);
   return (
     <View className="flex items-center gap-4">
       <View className="flex w-full flex-row items-center justify-evenly p-1">
