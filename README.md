@@ -10,7 +10,7 @@ My mad dash to creating an Audiobook player built with react native. This is an 
 
 ## Current state
 
-Other than UI imperfections (marked with TODO: tags), playback works and progress is being tracked and resumed on audiobook files. Audiobooks play in the background and also appear (can be controled) from lock screen, carplay, and applewatch.
+Other than UI imperfections (marked with TODO: tags), playback works and progress is being tracked and resumed on audiobook files. Audiobooks play in the background and also appear (can be controlled) from lock screen, carplay, and applewatch.
 
 ## TODO
 
