@@ -21,7 +21,7 @@ export default function RootLayout() {
       ],
       forwardJumpInterval: 30,
       backwardJumpInterval: 30,
-      progressUpdateEventInterval: 5,
+      progressUpdateEventInterval: 15,
     });
     TrackPlayer.registerPlaybackService(() => playbackService);
   };

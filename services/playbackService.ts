@@ -28,9 +28,9 @@ export async function playbackService() {
       // );
       if (e.lastTrack && e.lastPosition > 0) {
         const complete = (e.lastTrack?.duration as number) - e.lastPosition < 1;
-        console.log(
-          `track changed, update audio file: ${e.lastTrack.title}, progress: ${e.lastPosition}, mark as complete? ${complete}`,
-        );
+        // console.log(
+        //   `track changed, update audio file: ${e.lastTrack.title}, progress: ${e.lastPosition}, mark as complete? ${complete}`,
+        // );
         updateProgress(e.lastTrack.id, e.lastPosition, complete);
       }
     },
@@ -55,9 +55,9 @@ export async function playbackService() {
         const complete = e.duration - e.position < 1;
 
         if (e.position > 0) {
-          console.log(
-            `update audio file: ${track.title}, progress: ${e.position}, mark as complete? ${complete}`,
-          );
+          // console.log(
+          //   `update audio file: ${track.title}, progress: ${e.position}, mark as complete? ${complete}`,
+          // );
           // console.log(
           //   "There seems to be a bug where position is reported as 0 just prior to playing and reporting actual position",
           // );
@@ -92,7 +92,7 @@ export const fetchInitialPosition = async (indexChange: number) => {
         });
 
       if (audioFile) {
-        console.log(`returning progress: ${audioFile.progress}`);
+        // console.log(`returning progress: ${audioFile.progress}`);
         return audioFile.progress;
       }
     }
