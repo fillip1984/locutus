@@ -6,7 +6,7 @@ My mad dash to creating an Audiobook player built with react native. This is an 
 
 ## UI
 
-![Sample project gif](Screen recording.gif)
+![Sample project gif](demo.gif)
 
 ## Current state
 
