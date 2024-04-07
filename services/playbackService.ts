@@ -14,12 +14,11 @@ export async function playbackService() {
   TrackPlayer.addEventListener(Event.RemoteNext, skipToNext);
   TrackPlayer.addEventListener(
     Event.RemotePrevious,
-    async () => skipToPrevious,
+    skipToPrevious,
   );
   TrackPlayer.addEventListener(Event.RemoteJumpBackward, jumpBackward);
   TrackPlayer.addEventListener(Event.RemoteJumpForward, jumpForward);
 
-  // TODO: seems to be a bug, progress is always undefined
   TrackPlayer.addEventListener(
     Event.PlaybackActiveTrackChanged,
     async (e: PlaybackActiveTrackChangedEvent) => {
