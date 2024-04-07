@@ -41,8 +41,8 @@ export default function MiniPlayer() {
       <Pressable
         onPress={() => router.push(`/(player)/${libraryItem?.id}`)}
         className="flex flex-row items-center gap-2 p-4">
-        {/* TODO: not sure what I'm fighting, either expo or nativewind but this worked and then didn't... */}
-        <View className="flex">
+        {/* TODO: not sure what I'm fighting, either expo or nativewind but this worked and then didn't... now using styles */}
+        <View style={{ width: 40, height: 40 }}>
           <Image
             source={track?.artwork}
             style={{ flex: 1 }}

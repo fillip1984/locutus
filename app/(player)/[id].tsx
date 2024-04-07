@@ -15,7 +15,12 @@ import TrackPlayer, {
   useProgress,
 } from "react-native-track-player";
 
-import { fetchInitialPosition } from "../../services/playbackService";
+import {
+  jumpBackward,
+  jumpForward,
+  skipToNext,
+  skipToPrevious,
+} from "../../services/playbackService";
 
 import { localDb } from "@/db";
 import {
@@ -215,15 +220,13 @@ const MediaControls = () => {
       <View className="flex w-full flex-row items-center justify-evenly p-1">
         {/* <Ionicons name="bookmark-outline" size={30} color="black" /> */}
         <Ionicons
-          onPress={async () =>
-            TrackPlayer.skipToPrevious((await fetchInitialPosition(-1)) ?? 0)
-          }
+          onPress={skipToPrevious}
           name="play-skip-back-sharp"
           size={30}
           color="white"
         />
         <FontAwesome6
-          onPress={() => TrackPlayer.seekBy(-30)}
+          onPress={jumpBackward}
           name="arrow-rotate-left"
           size={30}
           color="white"
@@ -244,15 +247,13 @@ const MediaControls = () => {
           />
         )}
         <FontAwesome6
-          onPress={() => TrackPlayer.seekBy(30)}
+          onPress={jumpForward}
           name="arrow-rotate-right"
           size={30}
           color="white"
         />
         <Ionicons
-          onPress={async () =>
-            TrackPlayer.skipToNext((await fetchInitialPosition(1)) ?? 0)
-          }
+          onPress={skipToNext}
           name="play-skip-forward"
           size={30}
           color="white"

@@ -11,18 +11,14 @@ import { libraryItemAudioFileSchema, libraryItemSchema } from "@/db/schema";
 export async function playbackService() {
   TrackPlayer.addEventListener(Event.RemotePlay, () => TrackPlayer.play());
   TrackPlayer.addEventListener(Event.RemotePause, () => TrackPlayer.pause());
-  TrackPlayer.addEventListener(Event.RemoteNext, async () =>
-    TrackPlayer.skipToNext((await fetchInitialPosition(1)) ?? 0),
+  TrackPlayer.addEventListener(Event.RemoteNext, skipToNext);
+  TrackPlayer.addEventListener(
+    Event.RemotePrevious,
+    async () => skipToPrevious,
   );
-  TrackPlayer.addEventListener(Event.RemotePrevious, async () =>
-    TrackPlayer.skipToPrevious((await fetchInitialPosition(-1)) ?? 0),
-  );
-  TrackPlayer.addEventListener(Event.RemoteJumpBackward, () =>
-    TrackPlayer.seekBy(-30),
-  );
-  TrackPlayer.addEventListener(Event.RemoteJumpForward, () =>
-    TrackPlayer.seekBy(30),
-  );
+  TrackPlayer.addEventListener(Event.RemoteJumpBackward, jumpBackward);
+  TrackPlayer.addEventListener(Event.RemoteJumpForward, jumpForward);
+
   // TODO: seems to be a bug, progress is always undefined
   TrackPlayer.addEventListener(
     Event.PlaybackActiveTrackChanged,
@@ -35,15 +31,7 @@ export async function playbackService() {
         console.log(
           `track changed, update audio file: ${e.lastTrack.title}, progress: ${e.lastPosition}, mark as complete? ${complete}`,
         );
-
-        localDb
-          .update(libraryItemAudioFileSchema)
-          .set({
-            complete,
-            progress: complete ? 0 : e.lastPosition,
-          })
-          .where(eq(libraryItemAudioFileSchema.id, e.lastTrack.id))
-          .run();
+        updateProgress(e.lastTrack.id, e.lastPosition, complete);
       }
     },
   );
@@ -73,11 +61,7 @@ export async function playbackService() {
           // console.log(
           //   "There seems to be a bug where position is reported as 0 just prior to playing and reporting actual position",
           // );
-          localDb
-            .update(libraryItemAudioFileSchema)
-            .set({ complete, progress: complete ? 0 : e.position })
-            .where(eq(libraryItemAudioFileSchema.id, track.id))
-            .run();
+          updateProgress(track.id, e.position, complete);
         }
 
         if (libraryItem && audioFile) {
@@ -125,4 +109,31 @@ export const fetchLibraryItemFromTrack = async (audioFileId: number) => {
     });
     return libraryItem;
   }
+};
+
+export const updateProgress = async (
+  audioFileId: number,
+  position: number,
+  complete: boolean,
+) => {
+  localDb
+    .update(libraryItemAudioFileSchema)
+    .set({ complete, progress: complete ? 0 : position })
+    .where(eq(libraryItemAudioFileSchema.id, audioFileId))
+    .run();
+};
+
+export const skipToNext = async () => {
+  TrackPlayer.skipToNext((await fetchInitialPosition(1)) ?? 0);
+};
+
+export const skipToPrevious = async () => {
+  TrackPlayer.skipToPrevious((await fetchInitialPosition(-1)) ?? 0);
+};
+
+export const jumpBackward = () => {
+  TrackPlayer.seekBy(-30);
+};
+export const jumpForward = () => {
+  TrackPlayer.seekBy(30);
 };

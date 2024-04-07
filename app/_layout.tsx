@@ -8,7 +8,7 @@ import "../global.css";
 import { playbackService } from "../services/playbackService";
 
 export default function RootLayout() {
-  const setupPlayer = async () => {
+  const initializePlayer = async () => {
     await TrackPlayer.setupPlayer();
     await TrackPlayer.updateOptions({
       capabilities: [
@@ -21,12 +21,12 @@ export default function RootLayout() {
       ],
       forwardJumpInterval: 30,
       backwardJumpInterval: 30,
-      progressUpdateEventInterval: 1000,
+      progressUpdateEventInterval: 5,
     });
+    TrackPlayer.registerPlaybackService(() => playbackService);
   };
   useEffect(() => {
-    setupPlayer();
-    TrackPlayer.registerPlaybackService(() => playbackService);
+    initializePlayer();
   }, []);
 
   return (

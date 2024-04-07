@@ -51,7 +51,7 @@ export default function Home() {
         {/* TODO: not sure why, but I have to declare bg color here for it to take effect */}
         {/* TODO: Couldn't find a better way to afix to the bottom, try flex methods maybe? */}
         {track && (
-          <View className="absolute bottom-36 left-0 right-0 bg-slate-900">
+          <View className="absolute bottom-[138px] left-0 right-0 bg-slate-900">
             <MiniPlayer />
           </View>
         )}
