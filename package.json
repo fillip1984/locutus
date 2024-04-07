@@ -5,7 +5,7 @@
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
-    "ios": "expo start -c --ios",
+    "ios": "expo start --ios",
     "web": "expo start --web",
     "db:generate": "drizzle-kit generate:sqlite",
     "studio": "drizzle-kit studio",
