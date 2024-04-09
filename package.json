@@ -19,14 +19,14 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.0",
-    "@react-native-community/slider": "4.4.2",
+    "@react-native-community/slider": "~4.4.2",
     "@react-navigation/native": "^6.1.17",
     "axios": "^1.6.8",
     "babel-plugin-inline-import": "^3.0.0",
     "clsx": "^2.1.0",
     "date-fns": "^3.6.0",
-    "drizzle-orm": "^0.30.6",
-    "expo": "~50.0.15",
+    "drizzle-orm": "^0.30.7",
+    "expo": "~50.0.14",
     "expo-av": "^13.10.5",
     "expo-dev-client": "~3.3.11",
     "expo-file-system": "~16.0.8",
@@ -43,7 +43,6 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-native": "0.73.6",
-    "react-native-dotenv": "^3.4.11",
     "react-native-reanimated": "~3.6.2",
     "react-native-safe-area-context": "4.8.2",
     "react-native-screens": "~3.29.0",
@@ -54,7 +53,7 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.24.3",
+    "@babel/core": "^7.24.4",
     "@types/react": "~18.2.45",
     "drizzle-kit": "^0.20.14",
     "eslint": "^8.57.0",
@@ -64,7 +63,7 @@
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.5.13",
     "react-test-renderer": "18.2.0",
-    "typescript": "^5.4.3"
+    "typescript": "^5.4.4"
   },
   "private": true
 }
