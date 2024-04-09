@@ -20,6 +20,7 @@ export default function Library() {
   const libraryScrollViewRef = useRef<ScrollView>(null);
 
   const bottomTabbarHeight = useBottomTabBarHeight();
+
   useFocusEffect(() => {
     console.log({ bottomTabbarHeight });
   });
@@ -62,7 +63,9 @@ export default function Library() {
         {/* TODO: not sure why, but I have to declare bg color here for it to take effect */}
         {/* TODO: Couldn't find a better way to afix to the bottom, try flex methods maybe? */}
         {track && (
-          <View className="absolute bottom-[138px] left-0 right-0 bg-slate-900">
+          <View
+            className="absolute left-0 right-0 bg-slate-900"
+            style={{ bottom: bottomTabbarHeight + 59 }}>
             <MiniPlayer />
           </View>
         )}

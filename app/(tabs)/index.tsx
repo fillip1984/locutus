@@ -1,3 +1,4 @@
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView, ScrollView, Text, View } from "react-native";
 import { useActiveTrack } from "react-native-track-player";
@@ -26,6 +27,8 @@ export default function Home() {
     useState<LibraryItemSchemaType[]>();
   const [relistenItems, setRelistenItems] = useState<LibraryItemSchemaType[]>();
 
+  const bottomTabbarHeight = useBottomTabBarHeight();
+
   return (
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
       <View className="relative">
@@ -51,7 +54,9 @@ export default function Home() {
         {/* TODO: not sure why, but I have to declare bg color here for it to take effect */}
         {/* TODO: Couldn't find a better way to afix to the bottom, try flex methods maybe? */}
         {track && (
-          <View className="absolute bottom-[138px] left-0 right-0 bg-slate-900">
+          <View
+            className="absolute left-0 right-0 bg-slate-900"
+            style={{ bottom: bottomTabbarHeight + 59 }}>
             <MiniPlayer />
           </View>
         )}
