@@ -117,13 +117,14 @@ const MediaActionsBar = ({
         (playbackState !== State.Playing ||
           !audioFiles.find((af) => af.id === activeTrack?.id)) &&
         audioFiles.filter((a) => a.path).length > 0 && (
-          
-            <Pressable onPress={()=>{
-TrackPlayer.play();
-router()`/(player)/${libraryItem.id}`
-}} className="flex h-14 w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
-              <Ionicons name="play-sharp" size={40} color="white" />
-            </Pressable>
+          <Pressable
+            onPress={() => {
+              TrackPlayer.play();
+              router.push(`/(player)/${libraryItem.id}`);
+            }}
+            className="flex h-14 w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
+            <Ionicons name="play-sharp" size={40} color="white" />
+          </Pressable>
         )}
 
       {downloadStore.isDownloading(libraryItem.id) === false &&
@@ -203,6 +204,7 @@ const MediaTracks = ({
   audioFiles: LibraryItemAudioFileSchemaType[];
 }) => {
   const tracksScrollViewRef = useRef<ScrollView>(null);
+
   return (
     <View className="mt-4">
       <View className="flex flex-row justify-between">
@@ -215,12 +217,21 @@ const MediaTracks = ({
 
       <ScrollView ref={tracksScrollViewRef}>
         <View className="my-2 flex gap-2">
-          {audioFiles?.map((audioFile) => (
-            <Chapter
+          {audioFiles?.map((audioFile, i) => (
+            <View
               key={audioFile.id}
-              audioFile={audioFile}
-              isLastPlayed={libraryItem.lastPlayedId === audioFile.id}
-            />
+              onLayout={(e) => {
+                if (libraryItem.lastPlayedId === audioFile.id) {
+                  tracksScrollViewRef.current?.scrollTo({
+                    y: e.nativeEvent.layout.y - 10,
+                  });
+                }
+              }}>
+              <Chapter
+                audioFile={audioFile}
+                isLastPlayed={libraryItem.lastPlayedId === audioFile.id}
+              />
+            </View>
           ))}
         </View>
 
