@@ -117,11 +117,13 @@ const MediaActionsBar = ({
         (playbackState !== State.Playing ||
           !audioFiles.find((af) => af.id === activeTrack?.id)) &&
         audioFiles.filter((a) => a.path).length > 0 && (
-          <Link href={`/(player)/${libraryItem.id}`}>
-            <View className="flex h-14 w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
+          
+            <Pressable onPress={()=>{
+TrackPlayer.play();
+router()`/(player)/${libraryItem.id}`
+}} className="flex h-14 w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
               <Ionicons name="play-sharp" size={40} color="white" />
-            </View>
-          </Link>
+            </Pressable>
         )}
 
       {downloadStore.isDownloading(libraryItem.id) === false &&
