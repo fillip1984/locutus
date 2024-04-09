@@ -26,9 +26,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="libraries"
+        name="library"
         options={{
-          title: "Libraries",
+          title: "Library",
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons name="bookshelf" size={24} color={color} />
           ),

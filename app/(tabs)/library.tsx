@@ -1,4 +1,6 @@
 import { FontAwesome } from "@expo/vector-icons";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useFocusEffect } from "expo-router";
 import { useEffect, useRef } from "react";
 import { Pressable, SafeAreaView, ScrollView, Text, View } from "react-native";
 import { useActiveTrack } from "react-native-track-player";
@@ -7,7 +9,7 @@ import BookLink from "@/components/BookLink";
 import MiniPlayer from "@/components/MiniPlayer";
 import { useLibraryStore } from "@/stores/libraryStore";
 
-export default function Libraries() {
+export default function Library() {
   const libraryStore = useLibraryStore();
   useEffect(() => {
     libraryStore.refetch();
@@ -16,6 +18,11 @@ export default function Libraries() {
   const track = useActiveTrack();
 
   const libraryScrollViewRef = useRef<ScrollView>(null);
+
+  const bottomTabbarHeight = useBottomTabBarHeight();
+  useFocusEffect(() => {
+    console.log({ bottomTabbarHeight });
+  });
 
   return (
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
