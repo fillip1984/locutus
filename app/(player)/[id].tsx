@@ -84,8 +84,7 @@ export default function Player() {
       const activeTrack = await TrackPlayer.getActiveTrack();
 
       if (audioFile.id === activeTrack?.id) {
-        // console.log("if audioFile matches activeTrack then do nothing other than ensure that track is playing");
-        TrackPlayer.play();
+        // console.log("if audioFile matches activeTrack then do nothing");
       } else if (
         (await TrackPlayer.getQueue()).find((q) => q.id === audioFile?.id)
       ) {
