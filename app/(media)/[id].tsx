@@ -10,9 +10,9 @@ import {
 import { useCallback, useRef } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Toast from "react-native-toast-message";
 import TrackPlayer, {
   State,
+  useActiveTrack,
   usePlaybackState,
 } from "react-native-track-player";
 
@@ -20,6 +20,7 @@ import {
   LibraryItemAudioFileSchemaType,
   LibraryItemSchemaType,
 } from "@/db/schema";
+import { handleDownload, useDownloadStore } from "@/stores/downloadStore";
 import { useMediaStore } from "@/stores/mediaStore";
 
 export default function Media() {
@@ -33,20 +34,6 @@ export default function Media() {
     }, []),
   );
 
-  const handleDownload = async () => {
-    Toast.show({
-      type: "info",
-      text1: "Downloading audio files",
-      position: "bottom",
-    });
-    await mediaStore.downloadAudioFiles();
-    Toast.show({
-      type: "success",
-      text1: "Downloaded audio files",
-      position: "bottom",
-    });
-  };
-
   return (
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
       {mediaStore.libraryItem && mediaStore.audioFiles && (
@@ -55,8 +42,6 @@ export default function Media() {
           <MediaArtAndImportantInfo libraryItem={mediaStore.libraryItem} />
           <MediaActionsBar
             libraryItem={mediaStore.libraryItem}
-            handleDownload={handleDownload}
-            isDownloading={mediaStore.isDownloading}
             audioFiles={mediaStore.audioFiles}
           />
           <MediaSummary libraryItem={mediaStore.libraryItem} />
@@ -116,21 +101,21 @@ const MediaArtAndImportantInfo = ({
 
 const MediaActionsBar = ({
   libraryItem,
-  handleDownload,
-  isDownloading,
   audioFiles,
 }: {
   libraryItem: LibraryItemSchemaType;
-  handleDownload: () => void;
-  isDownloading: boolean;
   audioFiles: LibraryItemAudioFileSchemaType[];
 }) => {
   const { state: playbackState } = usePlaybackState();
+  const activeTrack = useActiveTrack();
+  const downloadStore = useDownloadStore();
+
   return (
     <View className="flex flex-row items-center justify-between">
       {/* TODO: Looks like Plex is using css grid to have 4 squares, the first col taking up a little over 1/3. This causes the art poster and play button to align */}
-      {isDownloading === false &&
-        playbackState !== State.Playing &&
+      {downloadStore.isDownloading(libraryItem.id) === false &&
+        (playbackState !== State.Playing ||
+          !audioFiles.find((af) => af.id === activeTrack?.id)) &&
         audioFiles.filter((a) => a.path).length > 0 && (
           <Link href={`/(player)/${libraryItem.id}`}>
             <View className="flex h-14 w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
@@ -139,15 +124,17 @@ const MediaActionsBar = ({
           </Link>
         )}
 
-      {isDownloading === false && playbackState === State.Playing && (
-        <Pressable
-          onPress={() => TrackPlayer.pause()}
-          className="flex h-14 w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
-          <Ionicons name="pause" size={40} color="white" />
-        </Pressable>
-      )}
+      {downloadStore.isDownloading(libraryItem.id) === false &&
+        playbackState === State.Playing &&
+        audioFiles.find((af) => af.id === activeTrack?.id) && (
+          <Pressable
+            onPress={() => TrackPlayer.pause()}
+            className="flex h-14 w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
+            <Ionicons name="pause" size={40} color="white" />
+          </Pressable>
+        )}
 
-      {isDownloading === false &&
+      {downloadStore.isDownloading(libraryItem.id) === false &&
         audioFiles.filter((a) => a.path).length === 0 && (
           <View className="flex h-14 w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
             <View className="animate-bounce">
@@ -155,13 +142,13 @@ const MediaActionsBar = ({
                 name="cloud-download-outline"
                 size={24}
                 color="white"
-                onPress={handleDownload}
+                onPress={() => handleDownload(libraryItem.id)}
               />
             </View>
           </View>
         )}
 
-      {isDownloading && (
+      {downloadStore.isDownloading(libraryItem.id) && (
         <View className="flex h-14 w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
           <View className="animate-spin">
             <FontAwesome6 name="circle-notch" size={24} color="white" />

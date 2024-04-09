@@ -28,7 +28,7 @@ export const getLibraryItem = async (libraryItemId: string) => {
 };
 
 export const downloadLibraryItem = async (
-  libraryItemId: string,
+  libraryItemRemoteId: string,
   fileId: string,
   filename: string,
 ) => {
@@ -74,34 +74,34 @@ export const downloadLibraryItem = async (
   // }
 
   try {
-    console.log(`downloading libraryItemId: ${libraryItemId}`);
+    // console.log(`downloading libraryItem remoteId: ${libraryItemRemoteId}`);
     const dirInfo = await FileSystem.getInfoAsync(
-      FileSystem.documentDirectory + libraryItemId,
+      FileSystem.documentDirectory + libraryItemRemoteId,
     );
     if (!dirInfo.exists) {
       // console.log("Gif directory doesn't exist, creating…");
       await FileSystem.makeDirectoryAsync(
-        FileSystem.documentDirectory + libraryItemId,
+        FileSystem.documentDirectory + libraryItemRemoteId,
         { intermediates: true },
       );
     }
 
     // delete previous version of the file
     const destination =
-      FileSystem.documentDirectory + libraryItemId + "/" + filename;
+      FileSystem.documentDirectory + libraryItemRemoteId + "/" + filename;
     const info = await FileSystem.getInfoAsync(destination);
     if (info.exists) {
       await FileSystem.deleteAsync(destination);
     }
 
     const result = await FileSystem.downloadAsync(
-      `${userSettings.serverUrl}/api/items/${libraryItemId}/file/${fileId}/download`,
+      `${userSettings.serverUrl}/api/items/${libraryItemRemoteId}/file/${fileId}/download`,
       destination,
       { headers: { Authorization: `Bearer ${userSettings.tokenId}` } },
     );
 
     if (result.status === 401) {
-      console.log({ result });
+      // console.log({ result });
       throw Error(
         "Failed to download item, result was login challenge. Are you logged in?",
       );
@@ -110,7 +110,7 @@ export const downloadLibraryItem = async (
     return result.uri;
   } catch (err) {
     console.error(
-      `Exception occurred while downloading library item: ${libraryItemId}, fileId: ${fileId}, filename: ${filename}`,
+      `Exception occurred while downloading library item remote id: ${libraryItemRemoteId}, fileId: ${fileId}, filename: ${filename}`,
       err,
     );
     throw err;
