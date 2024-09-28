@@ -5,8 +5,8 @@ import { useEffect, useRef } from "react";
 import { Pressable, SafeAreaView, ScrollView, Text, View } from "react-native";
 import { useActiveTrack } from "react-native-track-player";
 
-import BookLink from "@/components/BookLink";
-import MiniPlayer from "@/components/MiniPlayer";
+import BookLink from "@/app/_components/BookLink";
+import MiniPlayer from "@/app/_components/MiniPlayer";
 import { useLibraryStore } from "@/stores/libraryStore";
 
 export default function Library() {

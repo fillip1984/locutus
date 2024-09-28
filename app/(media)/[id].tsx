@@ -31,7 +31,7 @@ export default function Media() {
   useFocusEffect(
     useCallback(() => {
       mediaStore.refetch(parseInt(id as string, 10));
-    }, []),
+    }, [id]),
   );
 
   return (

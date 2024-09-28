@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import { SafeAreaView, ScrollView, Text, View } from "react-native";
 import { useActiveTrack } from "react-native-track-player";
 
-import BookLink from "@/components/BookLink";
-import MiniPlayer from "@/components/MiniPlayer";
+import BookLink from "@/app/_components/BookLink";
+import MiniPlayer from "@/app/_components/MiniPlayer";
 import { LibraryItemSchemaType } from "@/db/schema";
 import { useLibraryStore } from "@/stores/libraryStore";
 

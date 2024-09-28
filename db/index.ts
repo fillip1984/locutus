@@ -4,6 +4,7 @@ import { openDatabaseSync } from "expo-sqlite/next";
 
 import * as schema from "./schema";
 import migrations from "../drizzle/migrations";
+
 export const localDb = drizzle(openDatabaseSync("locutus.db"), { schema });
 
 const runMigrations = async () => {
