@@ -1,5 +1,6 @@
 import { Stack } from "expo-router";
 import { useEffect } from "react";
+import { StatusBar } from "react-native";
 import Toast from "react-native-toast-message";
 import TrackPlayer, { Capability } from "react-native-track-player";
 
@@ -43,6 +44,7 @@ export default function RootLayout() {
           }}
         />
       </Stack>
+      <StatusBar barStyle="light-content" />
       <Toast />
     </>
   );

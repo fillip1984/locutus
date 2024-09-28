@@ -12,10 +12,7 @@ export async function playbackService() {
   TrackPlayer.addEventListener(Event.RemotePlay, () => TrackPlayer.play());
   TrackPlayer.addEventListener(Event.RemotePause, () => TrackPlayer.pause());
   TrackPlayer.addEventListener(Event.RemoteNext, skipToNext);
-  TrackPlayer.addEventListener(
-    Event.RemotePrevious,
-    skipToPrevious,
-  );
+  TrackPlayer.addEventListener(Event.RemotePrevious, skipToPrevious);
   TrackPlayer.addEventListener(Event.RemoteJumpBackward, jumpBackward);
   TrackPlayer.addEventListener(Event.RemoteJumpForward, jumpForward);
 
