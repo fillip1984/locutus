@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "a0b72cf6-aa5e-4e0a-8475-51c20802325c",
+  "id": "16bc5bc3-c8aa-42e3-aa4b-ea697f30a245",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "libraryItemAudioFile": {
@@ -311,15 +311,16 @@
           "notNull": true,
           "autoincrement": false
         },
-        "tokenId": {
-          "name": "tokenId",
-          "type": "text",
+        "signInWithBiometrics": {
+          "name": "signInWithBiometrics",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": false
         },
-        "rate": {
-          "name": "rate",
+        "preferredPlaybackRate": {
+          "name": "preferredPlaybackRate",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,

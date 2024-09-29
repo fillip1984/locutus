@@ -2,6 +2,7 @@ import * as FileSystem from "expo-file-system";
 
 import { localDb } from "@/db";
 import { userSettingsSchema } from "@/db/schema";
+import { getToken } from "@/stores/sessionStore";
 
 export const downloadCoverArt = async (libraryItemId: string) => {
   const userSettings = (await localDb.select().from(userSettingsSchema))[0];
@@ -20,7 +21,7 @@ export const downloadCoverArt = async (libraryItemId: string) => {
     const result = await FileSystem.downloadAsync(
       `${userSettings.serverUrl}/api/items/${libraryItemId}/cover`,
       FileSystem.documentDirectory + libraryItemId + "/cover.webp",
-      { headers: { Authorization: `Bearer ${userSettings.tokenId}` } },
+      { headers: { Authorization: `Bearer ${getToken()}` } },
     );
     return result.uri;
   } catch (err) {

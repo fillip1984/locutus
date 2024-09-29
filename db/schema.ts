@@ -74,8 +74,12 @@ export type LibraryItemAudioFileSchemaType =
 
 export const userSettingsSchema = sqliteTable("userSettings", {
   serverUrl: text("serverUrl").notNull(),
-  tokenId: text("tokenId").notNull(),
-  rate: integer("rate").notNull().default(1),
+  signInWithBiometrics: integer("signInWithBiometrics", {
+    mode: "boolean",
+  })
+    .notNull()
+    .default(false),
+  preferredPlaybackRate: integer("preferredPlaybackRate").notNull().default(1),
   createdAt: integer("createdAt", { mode: "timestamp" }).$defaultFn(
     () => new Date(),
   ),

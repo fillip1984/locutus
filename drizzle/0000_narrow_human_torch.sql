@@ -44,8 +44,8 @@ CREATE TABLE `library` (
 --> statement-breakpoint
 CREATE TABLE `userSettings` (
 	`serverUrl` text NOT NULL,
-	`tokenId` text NOT NULL,
-	`rate` integer DEFAULT 1 NOT NULL,
+	`signInWithBiometrics` integer DEFAULT false NOT NULL,
+	`preferredPlaybackRate` integer DEFAULT 1 NOT NULL,
 	`createdAt` integer,
 	`updatedAt` integer
 );

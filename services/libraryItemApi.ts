@@ -3,6 +3,7 @@ import * as FileSystem from "expo-file-system";
 
 import { localDb } from "@/db";
 import { userSettingsSchema } from "@/db/schema";
+import { getToken } from "@/stores/sessionStore";
 
 export const getLibraryItem = async (libraryItemId: string) => {
   const userSettings = (await localDb.select().from(userSettingsSchema))[0];
@@ -13,7 +14,7 @@ export const getLibraryItem = async (libraryItemId: string) => {
       `${userSettings.serverUrl}/api/items/${libraryItemId}`,
       {
         headers: {
-          Authorization: `Bearer ${userSettings.tokenId}`,
+          Authorization: `Bearer ${getToken()}`,
         },
       },
     );
@@ -97,7 +98,7 @@ export const downloadLibraryItem = async (
     const result = await FileSystem.downloadAsync(
       `${userSettings.serverUrl}/api/items/${libraryItemRemoteId}/file/${fileId}/download`,
       destination,
-      { headers: { Authorization: `Bearer ${userSettings.tokenId}` } },
+      { headers: { Authorization: `Bearer ${getToken()}` } },
     );
 
     if (result.status === 401) {

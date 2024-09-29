@@ -2,6 +2,7 @@ import axios from "axios";
 
 import { localDb } from "@/db";
 import { userSettingsSchema } from "@/db/schema";
+import { getToken } from "@/stores/sessionStore";
 
 export const getLibraryItems = async (libraryId: string) => {
   const userSettings = (await localDb.select().from(userSettingsSchema))[0];
@@ -12,7 +13,7 @@ export const getLibraryItems = async (libraryId: string) => {
       `${userSettings.serverUrl}/api/libraries/${libraryId}/items`,
       {
         headers: {
-          Authorization: `Bearer ${userSettings.tokenId}`,
+          Authorization: `Bearer ${getToken()}`,
         },
       },
     );

@@ -34,6 +34,12 @@ export default function Home() {
       <View className="relative">
         {libraryStore && libraryStore.libraryItems && (
           <View className="flex h-screen bg-slate-800 p-2">
+            {libraryStore.libraryItems?.length === 0 && (
+              <View className="flex h-screen items-center justify-center">
+                <Text className="text-2xl text-white">Nothing to play</Text>
+              </View>
+            )}
+
             <ScrollView>
               <View className="flex gap-4">
                 {continueItems && continueItems.length > 0 && (

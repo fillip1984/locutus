@@ -3,6 +3,7 @@ import Toast from "react-native-toast-message";
 
 import { localDb } from "@/db";
 import { userSettingsSchema } from "@/db/schema";
+import { getToken } from "@/stores/sessionStore";
 
 export const getLibraries = async () => {
   const userSettings = (await localDb.select().from(userSettingsSchema))[0];
@@ -13,7 +14,7 @@ export const getLibraries = async () => {
       `${userSettings.serverUrl}/api/libraries`,
       {
         headers: {
-          Authorization: `Bearer ${userSettings.tokenId}`,
+          Authorization: `Bearer ${getToken()}`,
         },
       },
     );
