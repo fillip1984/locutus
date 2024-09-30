@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "16bc5bc3-c8aa-42e3-aa4b-ea697f30a245",
+  "id": "1f36c722-7b63-43ed-9c40-23c1dfe2b78b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "libraryItemAudioFile": {
@@ -68,7 +68,7 @@
           "name": "libraryItemId",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "createdAt": {
@@ -91,6 +91,86 @@
         "libraryItemAudioFile_libraryItemId_libraryItem_id_fk": {
           "name": "libraryItemAudioFile_libraryItemId_libraryItem_id_fk",
           "tableFrom": "libraryItemAudioFile",
+          "tableTo": "libraryItem",
+          "columnsFrom": [
+            "libraryItemId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "libraryItemEBookFile": {
+      "name": "libraryItemEBookFile",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "ino": {
+          "name": "ino",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "complete": {
+          "name": "complete",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "path": {
+          "name": "path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "libraryItemId": {
+          "name": "libraryItemId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "libraryItemEBookFile_libraryItemId_libraryItem_id_fk": {
+          "name": "libraryItemEBookFile_libraryItemId_libraryItem_id_fk",
+          "tableFrom": "libraryItemEBookFile",
           "tableTo": "libraryItem",
           "columnsFrom": [
             "libraryItemId"
@@ -141,6 +221,13 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false
+        },
+        "eBookFile": {
+          "name": "eBookFile",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         },
         "duration": {

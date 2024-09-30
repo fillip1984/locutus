@@ -18,7 +18,7 @@ export const getLibraryItem = async (libraryItemId: string) => {
         },
       },
     );
-    return response.data.media.audioFiles;
+    return response.data;
   } catch (err) {
     console.error(
       `Exception occurred while fetching library item with id: ${libraryItemId}`,

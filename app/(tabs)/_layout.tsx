@@ -4,6 +4,7 @@ import {
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
+import { Screen } from "expo-router/build/views/Screen";
 
 export default function TabLayout() {
   return (

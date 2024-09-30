@@ -6,14 +6,17 @@ import { useLibraryStore } from "./libraryStore";
 import { localDb } from "@/db";
 import {
   LibraryItemAudioFileSchemaType,
+  LibraryItemEBookFileSchemaType,
   LibraryItemSchemaType,
   libraryItemAudioFileSchema,
+  libraryItemEBookFileSchema,
   libraryItemSchema,
 } from "@/db/schema";
 
 export interface MediaStore {
   libraryItem: LibraryItemSchemaType | null;
   audioFiles: LibraryItemAudioFileSchemaType[] | null;
+  ebook: LibraryItemEBookFileSchemaType | null;
   refetch: (id: number) => void;
   deleteLibraryItem: (libraryItemId: number) => Promise<boolean>;
 }
@@ -21,6 +24,7 @@ export interface MediaStore {
 export const useMediaStore = create<MediaStore>()((set, get) => ({
   libraryItem: null,
   audioFiles: null,
+  ebook: null,
   refetch: async (id: number) => {
     // console.log("fetching media Store");
     const result = await localDb
@@ -38,6 +42,13 @@ export const useMediaStore = create<MediaStore>()((set, get) => ({
       .from(libraryItemAudioFileSchema)
       .where(eq(libraryItemAudioFileSchema.libraryItemId, id));
     set(() => ({ audioFiles: audioResults }));
+
+    const ebookResults =
+      await localDb.query.libraryItemEBookFileSchema.findFirst({
+        where: eq(libraryItemEBookFileSchema.libraryItemId, id),
+      });
+
+    set(() => ({ ebook: ebookResults }));
 
     // refresh ajacent store
     useLibraryStore.getState().refetch();

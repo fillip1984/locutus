@@ -6,7 +6,11 @@ import { useLibraryStore } from "./libraryStore";
 import { useMediaStore } from "./mediaStore";
 
 import { localDb } from "@/db";
-import { libraryItemAudioFileSchema, libraryItemSchema } from "@/db/schema";
+import {
+  libraryItemAudioFileSchema,
+  libraryItemEBookFileSchema,
+  libraryItemSchema,
+} from "@/db/schema";
 import { downloadLibraryItem } from "@/services/libraryItemApi";
 
 export interface DownloadStore {
@@ -39,11 +43,29 @@ export const useDownloadStore = create<DownloadStore>()((set, get) => ({
             `Unable to download audio files for library item id: ${libraryItemId}`,
           );
         }
-        const toDownload =
+        const ebookToDownload =
+          await localDb.query.libraryItemEBookFileSchema.findFirst({
+            where: eq(libraryItemEBookFileSchema.libraryItemId, libraryItem.id),
+          });
+        if (ebookToDownload) {
+          const ebookFile = await downloadLibraryItem(
+            libraryItem.remoteId,
+            ebookToDownload.remoteId,
+            ebookToDownload.name,
+          );
+          console.log({ ebookFile });
+          await localDb
+            .update(libraryItemEBookFileSchema)
+            .set({ path: ebookFile })
+            .where(
+              eq(libraryItemEBookFileSchema.remoteId, ebookToDownload.remoteId),
+            );
+        }
+        const audioFilesToDownload =
           await localDb.query.libraryItemAudioFileSchema.findMany({
             where: eq(libraryItemAudioFileSchema.libraryItemId, libraryItem.id),
           });
-        for (const audioFile of toDownload) {
+        for (const audioFile of audioFilesToDownload) {
           // console.log(`downloading audioFile: ${audioFile.name}`);
           const file = await downloadLibraryItem(
             libraryItem.remoteId,
@@ -107,7 +129,7 @@ export const handleDownload = async (libraryItemId: number) => {
   const downloadStore = useDownloadStore.getState();
   Toast.show({
     type: "info",
-    text1: "Downloading audio files",
+    text1: "Downloading files",
     position: "bottom",
   });
   downloadStore.add(libraryItemId);

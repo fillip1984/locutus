@@ -7,7 +7,19 @@ CREATE TABLE `libraryItemAudioFile` (
 	`complete` integer DEFAULT false,
 	`name` text NOT NULL,
 	`path` text,
-	`libraryItemId` integer,
+	`libraryItemId` integer NOT NULL,
+	`createdAt` integer,
+	`updatedAt` integer,
+	FOREIGN KEY (`libraryItemId`) REFERENCES `libraryItem`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
+CREATE TABLE `libraryItemEBookFile` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`ino` text NOT NULL,
+	`complete` integer DEFAULT false,
+	`name` text NOT NULL,
+	`path` text,
+	`libraryItemId` integer NOT NULL,
 	`createdAt` integer,
 	`updatedAt` integer,
 	FOREIGN KEY (`libraryItemId`) REFERENCES `libraryItem`(`id`) ON UPDATE no action ON DELETE no action
@@ -19,6 +31,7 @@ CREATE TABLE `libraryItem` (
 	`title` text NOT NULL,
 	`authorName` text NOT NULL,
 	`numAudioFiles` integer NOT NULL,
+	`eBookFile` text,
 	`duration` integer NOT NULL,
 	`publishedYear` integer,
 	`description` text,

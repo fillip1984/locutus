@@ -6,6 +6,7 @@ import {
   LibraryItemSchemaType,
   LibrarySchemaType,
   libraryItemAudioFileSchema,
+  libraryItemEBookFileSchema,
   libraryItemSchema,
   librarySchema,
 } from "@/db/schema";
@@ -78,10 +79,10 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
 
       const items = await getLibraryItems(library.id);
       // filter down to audiobooks
-      const audiobookItems = items.filter(
-        (item) => item.media.numAudioFiles > 0,
-      );
-      for (const item of audiobookItems) {
+      // const audiobookItems = items.filter(
+      //   (item) => item.media.numAudioFiles > 0,
+      // );
+      for (const item of items) {
         const remoteId = item.id;
         let libraryItemId = null;
         const exists = await localDb
@@ -102,6 +103,7 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
             authorName: item.media.metadata.authorName,
             duration: item.media.duration,
             numAudioFiles: item.media.numAudioFiles,
+            ebookFileFormat: item.media.ebookFormat,
             description: item.media.metadata.description,
             publishedYear: item.media.metadata.publishedYear
               ? parseInt(item.media.metadata.publishedYear)
@@ -120,6 +122,7 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
               authorName: item.media.metadata.authorName,
               duration: item.media.duration,
               numAudioFiles: item.media.numAudioFiles,
+              ebookFileFormat: item.media.ebookFormat,
               coverArtPath,
               libraryId,
               remoteId: item.id,
@@ -127,8 +130,30 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
             .where(eq(libraryItemSchema.remoteId, item.id));
         }
 
-        const audioFiles = await getLibraryItem(remoteId);
-        for (const audioFile of audioFiles) {
+        const libraryItem = await getLibraryItem(remoteId);
+        if (libraryItem.media.ebookFile) {
+          const ebook = libraryItem.media.ebookFile;
+          const exists =
+            await localDb.query.libraryItemEBookFileSchema.findFirst({
+              where: eq(libraryItemEBookFileSchema.remoteId, ebook.ino),
+            });
+
+          if (!exists) {
+            await localDb.insert(libraryItemEBookFileSchema).values({
+              remoteId: ebook.ino,
+              name: ebook.metadata.filename,
+              libraryItemId,
+            });
+          } else {
+            await localDb
+              .update(libraryItemEBookFileSchema)
+              .set({
+                name: ebook.metadata.filename,
+              })
+              .where(eq(libraryItemEBookFileSchema.remoteId, ebook.ino));
+          }
+        }
+        for (const audioFile of libraryItem.media.audioFiles) {
           const exists =
             await localDb.query.libraryItemAudioFileSchema.findFirst({
               where: eq(libraryItemAudioFileSchema.remoteId, audioFile.ino),
@@ -153,6 +178,7 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
         }
       }
     }
+    console.log("refreshing library after sync with server");
     get().refetch();
     return true;
   },

@@ -27,6 +27,7 @@ export const libraryItemSchema = sqliteTable("libraryItem", {
   title: text("title").notNull(),
   authorName: text("authorName").notNull(),
   numAudioFiles: integer("numAudioFiles").notNull(),
+  ebookFileFormat: text("eBookFile"),
   duration: integer("duration").notNull(),
   publishedYear: integer("publishedYear"),
   description: text("description"),
@@ -58,9 +59,9 @@ export const libraryItemAudioFileSchema = sqliteTable("libraryItemAudioFile", {
   complete: integer("complete", { mode: "boolean" }).default(false),
   name: text("name").notNull(),
   path: text("path"),
-  libraryItemId: integer("libraryItemId").references(
-    () => libraryItemSchema.id,
-  ),
+  libraryItemId: integer("libraryItemId")
+    .notNull()
+    .references(() => libraryItemSchema.id),
   createdAt: integer("createdAt", { mode: "timestamp" }).$defaultFn(
     () => new Date(),
   ),
@@ -71,6 +72,29 @@ export const libraryItemAudioFileSchema = sqliteTable("libraryItemAudioFile", {
 
 export type LibraryItemAudioFileSchemaType =
   typeof libraryItemAudioFileSchema.$inferSelect;
+
+export const libraryItemEBookFileSchema = sqliteTable("libraryItemEBookFile", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  remoteId: text("ino").notNull(),
+  // index: integer("index").notNull(),
+  // duration: integer("duration").notNull(),
+  // progress: integer("progress"),
+  complete: integer("complete", { mode: "boolean" }).default(false),
+  name: text("name").notNull(),
+  path: text("path"),
+  libraryItemId: integer("libraryItemId")
+    .notNull()
+    .references(() => libraryItemSchema.id),
+  createdAt: integer("createdAt", { mode: "timestamp" }).$defaultFn(
+    () => new Date(),
+  ),
+  updatedAt: integer("updatedAt", { mode: "timestamp" }).$defaultFn(
+    () => new Date(),
+  ),
+});
+
+export type LibraryItemEBookFileSchemaType =
+  typeof libraryItemEBookFileSchema.$inferSelect;
 
 export const userSettingsSchema = sqliteTable("userSettings", {
   serverUrl: text("serverUrl").notNull(),

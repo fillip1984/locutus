@@ -18,6 +18,7 @@ import TrackPlayer, {
 
 import {
   LibraryItemAudioFileSchemaType,
+  LibraryItemEBookFileSchemaType,
   LibraryItemSchemaType,
 } from "@/db/schema";
 import { handleDownload, useDownloadStore } from "@/stores/downloadStore";
@@ -43,6 +44,7 @@ export default function Media() {
           <MediaActionsBar
             libraryItem={mediaStore.libraryItem}
             audioFiles={mediaStore.audioFiles}
+            ebook={mediaStore.ebook}
           />
           <MediaSummary libraryItem={mediaStore.libraryItem} />
           {mediaStore.audioFiles && (
@@ -102,16 +104,18 @@ const MediaArtAndImportantInfo = ({
 const MediaActionsBar = ({
   libraryItem,
   audioFiles,
+  ebook,
 }: {
   libraryItem: LibraryItemSchemaType;
   audioFiles: LibraryItemAudioFileSchemaType[];
+  ebook: LibraryItemEBookFileSchemaType | null;
 }) => {
   const { state: playbackState } = usePlaybackState();
   const activeTrack = useActiveTrack();
   const downloadStore = useDownloadStore();
 
   return (
-    <View className="flex flex-row items-center justify-between">
+    <View className="flex flex-row items-center gap-2">
       {/* TODO: Looks like Plex is using css grid to have 4 squares, the first col taking up a little over 1/3. This causes the art poster and play button to align */}
       {downloadStore.isDownloading(libraryItem.id) === false &&
         (playbackState !== State.Playing ||
@@ -138,17 +142,24 @@ const MediaActionsBar = ({
         )}
 
       {downloadStore.isDownloading(libraryItem.id) === false &&
-        audioFiles.filter((a) => a.path).length === 0 && (
-          <View className="flex h-14 w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
+        audioFiles.filter((a) => a.path).length === 0 &&
+        ebook?.path === null && (
+          <Pressable
+            onPress={() => handleDownload(libraryItem.id)}
+            className="flex h-14 w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
             <View className="animate-bounce">
-              <Ionicons
-                name="cloud-download-outline"
-                size={24}
-                color="white"
-                onPress={() => handleDownload(libraryItem.id)}
-              />
+              <Ionicons name="cloud-download-outline" size={24} color="white" />
             </View>
-          </View>
+          </Pressable>
+        )}
+
+      {downloadStore.isDownloading(libraryItem.id) === false &&
+        ebook?.path !== null && (
+          <Pressable
+            onPress={() => router.push(`/(reader)/${libraryItem.id}`)}
+            className="flex h-14 w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
+            <Text className="font-bont text-3xl text-white">Read</Text>
+          </Pressable>
         )}
 
       {downloadStore.isDownloading(libraryItem.id) && (
@@ -257,7 +268,10 @@ const Chapter = ({
   return (
     <Link
       disabled={!audioFile.path}
-      href={`/(player)/${audioFile.libraryItemId}?audioFileId=${audioFile.id}`}
+      href={{
+        pathname: "/(player)/[id]",
+        params: { id: audioFile.libraryItemId, audioFileId: audioFile.id },
+      }}
       asChild>
       <Pressable className="relative flex w-full">
         <View
