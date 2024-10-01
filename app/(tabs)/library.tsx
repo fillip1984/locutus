@@ -36,10 +36,6 @@ export default function Library() {
     }, []),
   );
 
-  useEffect(() => {
-    console.log({ len: libraryItems?.length });
-  }, [libraryItems]);
-
   // const track = useActiveTrack();
 
   // const libraryScrollViewRef = useRef<ScrollView>(null);

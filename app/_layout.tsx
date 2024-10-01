@@ -1,3 +1,4 @@
+import { ReaderProvider } from "@epubjs-react-native/core";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -21,10 +22,9 @@ import {
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
+import TrackPlayer, { Capability } from "react-native-track-player";
 
 import { setToken } from "@/stores/sessionStore";
-
-import TrackPlayer, { Capability } from "react-native-track-player";
 
 import "../global.css";
 import { playbackService } from "../services/playbackService";
@@ -62,7 +62,9 @@ export default function RootLayout() {
   if (authenticated) {
     return (
       <>
-        <MainLayout />
+        <ReaderProvider>
+          <MainLayout />
+        </ReaderProvider>
         <StatusBar barStyle="light-content" />
         <Toast />
       </>
@@ -105,7 +107,6 @@ const Login = ({
       console.log("fetchin");
       const fetchData = async () => {
         const result = await localDb.select().from(userSettingsSchema);
-        console.log({ result });
         // TODO: this is a mess, but working for now
         if (result.length > 0) {
           setServerUrl(result[0].serverUrl);
@@ -140,7 +141,6 @@ const Login = ({
         serverUrl,
         signInWithBiometrics: true,
       });
-      console.log({ updates });
       const bioAuthResult = await requestAndAuthenticateViaBiometrics();
       if (bioAuthResult) {
         setAuthenticated(true);
@@ -149,7 +149,7 @@ const Login = ({
         setAuthenticated(true);
       }
     } catch (e) {
-      console.log({ e });
+      console.error({ msg: "Failed to log in", e });
       if (e instanceof AxiosError) {
         if (e.response?.status === 401) {
           Toast.show({

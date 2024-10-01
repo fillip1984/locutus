@@ -101,6 +101,10 @@ export const downloadLibraryItem = async (
       { headers: { Authorization: `Bearer ${getToken()}` } },
     );
 
+    // console.log({ result });
+    // const postDownloadInfo = await FileSystem.getInfoAsync(destination);
+    // console.log({ postDownloadInfo });
+
     if (result.status === 401) {
       // console.log({ result });
       throw Error(

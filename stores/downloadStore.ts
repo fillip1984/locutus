@@ -53,7 +53,7 @@ export const useDownloadStore = create<DownloadStore>()((set, get) => ({
             ebookToDownload.remoteId,
             ebookToDownload.name,
           );
-          console.log({ ebookFile });
+
           await localDb
             .update(libraryItemEBookFileSchema)
             .set({ path: ebookFile })

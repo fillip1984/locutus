@@ -1,15 +1,33 @@
+import {
+  Location,
+  Reader,
+  Section,
+  Themes,
+  useReader,
+} from "@epubjs-react-native/core";
+import { useFileSystem } from "@epubjs-react-native/expo-file-system";
 import { eq } from "drizzle-orm";
 import { Stack, useLocalSearchParams } from "expo-router";
-import { useEffect } from "react";
-import { SafeAreaView, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Pressable, SafeAreaView, Text, View } from "react-native";
 import Toast from "react-native-toast-message";
 
 import { localDb } from "@/db";
 import { libraryItemEBookFileSchema, libraryItemSchema } from "@/db/schema";
 
-export default function Reader() {
+export default function EBookReader() {
   const { ebookFileId: ebookFileIdSearchParam, id: libraryItemIdSearchParam } =
     useLocalSearchParams();
+
+  const [ebookFileId, setEBookFileId] = useState<number>();
+  const [initialLocation, setInitialLocation] = useState<string | undefined>();
+  const [path, setPath] = useState<string | undefined | null>();
+  const { toc, goNext, goPrevious } = useReader();
+
+  useEffect(() => {
+    // TODO: build out a table of contents
+    // console.log({ toc });
+  }, [toc]);
 
   useEffect(() => {
     const ebookFileId = parseInt(ebookFileIdSearchParam as string, 10);
@@ -32,16 +50,65 @@ export default function Reader() {
         await localDb.query.libraryItemEBookFileSchema.findFirst({
           where: eq(libraryItemEBookFileSchema.libraryItemId, libraryItemId),
         });
+      if (ebookFile) {
+        setEBookFileId(ebookFile.id);
+        setInitialLocation(ebookFile.currentLocation ?? undefined);
+        setPath(ebookFile.path);
+      } else {
+        console.error("Unable to find ebook path");
+      }
     };
 
     fetchData();
   }, []);
 
+  // const [currentPage, setCurrentPage] = useState(0);
+  // const [totalPages, setTotalPages] = useState(0);
+  const updateProgress = async (currentLocation: Location) => {
+    // console.log({ progress, currentLocation: currentLocation.start.cfi });
+    if (!ebookFileId) {
+      console.warn(
+        "Unable to update progress due to not having an ebookFileId",
+      );
+      return;
+    }
+
+    await localDb
+      .update(libraryItemEBookFileSchema)
+      .set({ currentLocation: currentLocation.start.cfi })
+      .where(eq(libraryItemEBookFileSchema.id, ebookFileId));
+  };
   return (
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
       <View className="flex h-screen gap-2 bg-slate-800 p-2">
         <Stack.Screen options={{ gestureDirection: "vertical" }} />
-        <Text>EbookReader</Text>
+        <View className="flex flex-row items-center justify-between">
+          <Pressable onPress={() => goPrevious()} className="bg-sky-400 p-4">
+            <Text>Previous</Text>
+          </Pressable>
+          <Pressable onPress={() => goNext()} className="bg-sky-400 p-4">
+            <Text>Next</Text>
+          </Pressable>
+        </View>
+        {/* See: https://github.com/victorsoares96/epubjs-react-native/blob/master/example-expo/examples/FullExample/index.tsx */}
+
+        {path && (
+          <Reader
+            src={path}
+            fileSystem={useFileSystem}
+            height="95%"
+            width="100%"
+            defaultTheme={Themes.DARK}
+            initialLocation={initialLocation}
+            // (totalLocations: number, currentLocation: Location, progress: number, currentSection: Section | null)
+            onLocationChange={(
+              totalLocations: number,
+              currentLocation: Location,
+              progress: number,
+              currentSection: Section | null,
+            ) => updateProgress(currentLocation)}
+          />
+        )}
         {/* <TopActionsBar /> */}
         {/* <View className="h-1/2">
           <MediaArt />

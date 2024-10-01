@@ -6,9 +6,9 @@ export const ping = async (url: string) => {
     // TODO: finish this if we're going to keep it
     console.log("ping server");
     const response = await axios.get(`${url}/ping`);
-    console.log({ stat: response.status, t: response.statusText });
+
     // if (response.status)
-    console.log({ response });
+
     return response.data;
   } catch (err) {
     console.error("Exception occurred while pinging server", err);

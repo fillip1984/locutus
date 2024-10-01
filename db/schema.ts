@@ -76,9 +76,8 @@ export type LibraryItemAudioFileSchemaType =
 export const libraryItemEBookFileSchema = sqliteTable("libraryItemEBookFile", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   remoteId: text("ino").notNull(),
-  // index: integer("index").notNull(),
-  // duration: integer("duration").notNull(),
-  // progress: integer("progress"),
+  currentLocation: text("currentLocation"),
+  progress: integer("progress"),
   complete: integer("complete", { mode: "boolean" }).default(false),
   name: text("name").notNull(),
   path: text("path"),
