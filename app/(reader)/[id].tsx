@@ -22,7 +22,7 @@ export default function EBookReader() {
   const [ebookFileId, setEBookFileId] = useState<number>();
   const [initialLocation, setInitialLocation] = useState<string | undefined>();
   const [path, setPath] = useState<string | undefined | null>();
-  const { toc, goNext, goPrevious } = useReader();
+  const { toc, goNext, goPrevious, currentLocation, progress } = useReader();
 
   useEffect(() => {
     // TODO: build out a table of contents
@@ -62,10 +62,16 @@ export default function EBookReader() {
     fetchData();
   }, []);
 
-  // const [currentPage, setCurrentPage] = useState(0);
-  // const [totalPages, setTotalPages] = useState(0);
-  const updateProgress = async (currentLocation: Location) => {
-    // console.log({ progress, currentLocation: currentLocation.start.cfi });
+  useEffect(() => {
+    console.log({ currentLocation, progress });
+  }, [currentLocation, progress]);
+
+  const updateProgress = async (
+    progress: number,
+    currentLocation: Location,
+  ) => {
+    console.log({ progress, currentLocation: currentLocation.start.cfi });
+    // console.log({ currentLocation: currentLocation.start.cfi });
     if (!ebookFileId) {
       console.warn(
         "Unable to update progress due to not having an ebookFileId",
@@ -75,7 +81,10 @@ export default function EBookReader() {
 
     await localDb
       .update(libraryItemEBookFileSchema)
-      .set({ currentLocation: currentLocation.start.cfi })
+      .set({
+        currentLocation: currentLocation.start.cfi,
+        progress: progress / 100,
+      })
       .where(eq(libraryItemEBookFileSchema.id, ebookFileId));
   };
   return (
@@ -100,13 +109,14 @@ export default function EBookReader() {
             width="100%"
             defaultTheme={Themes.DARK}
             initialLocation={initialLocation}
+            enableSwipe
             // (totalLocations: number, currentLocation: Location, progress: number, currentSection: Section | null)
             onLocationChange={(
               totalLocations: number,
               currentLocation: Location,
               progress: number,
               currentSection: Section | null,
-            ) => updateProgress(currentLocation)}
+            ) => updateProgress(progress, currentLocation)}
           />
         )}
         {/* <TopActionsBar /> */}

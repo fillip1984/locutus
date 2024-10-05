@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import { integer, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
 
 export const librarySchema = sqliteTable(
@@ -95,6 +96,8 @@ export const libraryItemEBookFileSchema = sqliteTable("libraryItemEBookFile", {
 export type LibraryItemEBookFileSchemaType =
   typeof libraryItemEBookFileSchema.$inferSelect;
 
+// export const LibraryItemEBookRelations = relations(libraryItemEBookFileSchema, ({many})=>({libraryItemSchema => many(libraryItemSchema)}))
+
 export const userSettingsSchema = sqliteTable("userSettings", {
   serverUrl: text("serverUrl").notNull(),
   signInWithBiometrics: integer("signInWithBiometrics", {
@@ -103,6 +106,7 @@ export const userSettingsSchema = sqliteTable("userSettings", {
     .notNull()
     .default(false),
   preferredPlaybackRate: integer("preferredPlaybackRate").notNull().default(1),
+  lastServerSync: integer("lastServerSync", { mode: "timestamp" }),
   createdAt: integer("createdAt", { mode: "timestamp" }).$defaultFn(
     () => new Date(),
   ),
@@ -110,5 +114,12 @@ export const userSettingsSchema = sqliteTable("userSettings", {
     () => new Date(),
   ),
 });
+
+// export const libraryItemRelationships = relations(
+//   libraryItemSchema,
+//   ({ many }) => ({
+//     libraryItemEBookFileSchema: many(libraryItemEBookFileSchema),
+//   }),
+// );
 
 export type UserSettingsSchemaType = typeof userSettingsSchema.$inferSelect;

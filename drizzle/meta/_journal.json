@@ -15,6 +15,13 @@
       "when": 1727744891887,
       "tag": "0001_legal_lyja",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1728069296401,
+      "tag": "0002_sharp_redwing",
+      "breakpoints": true
     }
   ]
 }

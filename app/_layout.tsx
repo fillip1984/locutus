@@ -24,14 +24,14 @@ import {
 import Toast from "react-native-toast-message";
 import TrackPlayer, { Capability } from "react-native-track-player";
 
-import { setToken } from "@/stores/sessionStore";
-
 import "../global.css";
 import { playbackService } from "../services/playbackService";
 
 import { localDb } from "@/db";
 import { userSettingsSchema } from "@/db/schema";
 import { login } from "@/services/loginApi";
+import { syncProgressWithServer } from "@/services/progressService";
+import { setToken } from "@/stores/sessionStore";
 
 export default function RootLayout() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -116,6 +116,7 @@ const Login = ({
             const bioAuthResult = await requestAndAuthenticateViaBiometrics();
             if (bioAuthResult) {
               setAuthenticated(true);
+              await syncProgressWithServer();
             }
           }
         }
