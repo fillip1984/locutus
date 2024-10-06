@@ -7,7 +7,7 @@ import {
 } from "@epubjs-react-native/core";
 import { useFileSystem } from "@epubjs-react-native/expo-file-system";
 import { eq } from "drizzle-orm";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, SafeAreaView, Text, View } from "react-native";
 import Toast from "react-native-toast-message";
@@ -91,10 +91,17 @@ export default function EBookReader() {
   return (
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
       <View className="flex h-screen gap-2 bg-slate-800 p-2">
-        <Stack.Screen options={{ gestureDirection: "vertical" }} />
+        <Stack.Screen
+          options={{ gestureEnabled: false, gestureDirection: "vertical" }}
+        />
         <View className="flex flex-row items-center justify-between">
           <Pressable onPress={() => goPrevious()} className="bg-sky-400 p-4">
             <Text>Previous</Text>
+          </Pressable>
+          <Pressable onPress={() => router.dismiss()}>
+            <Text className="rounded border border-sky-300 p-1 text-sky-300">
+              Back
+            </Text>
           </Pressable>
           <Pressable onPress={() => goNext()} className="bg-sky-400 p-4">
             <Text>Next</Text>
@@ -110,8 +117,6 @@ export default function EBookReader() {
             width="100%"
             defaultTheme={Themes.DARK}
             initialLocation={initialLocation}
-            enableSwipe
-            // (totalLocations: number, currentLocation: Location, progress: number, currentSection: Section | null)
             onLocationChange={(
               totalLocations: number,
               currentLocation: Location,
