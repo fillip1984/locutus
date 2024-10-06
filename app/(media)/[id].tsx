@@ -43,12 +43,14 @@ export default function Media() {
       {mediaStore.libraryItem && mediaStore.audioFiles && (
         <View className="flex h-screen gap-2 bg-slate-800 p-2">
           <TopActionsBar />
-          <MediaArtAndImportantInfo libraryItem={mediaStore.libraryItem} />
-          <MediaActionsBar
-            libraryItem={mediaStore.libraryItem}
-            audioFiles={mediaStore.audioFiles}
-            ebook={mediaStore.ebook}
-          />
+          <View className="flex flex-row gap-2">
+            <MediaArt libraryItem={mediaStore.libraryItem} />
+            <MediaActionsBar
+              libraryItem={mediaStore.libraryItem}
+              audioFiles={mediaStore.audioFiles}
+              ebook={mediaStore.ebook}
+            />
+          </View>
           <MediaSummary libraryItem={mediaStore.libraryItem} />
           {mediaStore.audioFiles && (
             <MediaTracks
@@ -72,34 +74,29 @@ const TopActionsBar = () => {
   );
 };
 
-// cloned from flex page shown after selecting a movie
-const MediaArtAndImportantInfo = ({
-  libraryItem,
-}: {
-  libraryItem: LibraryItemSchemaType;
-}) => {
+const MediaArt = ({ libraryItem }: { libraryItem: LibraryItemSchemaType }) => {
   return (
     <View className="flex flex-row gap-2">
-      <View className="flex h-60 w-36">
+      <View className="h-[250px] w-[250px] overflow-hidden rounded-lg">
         <Image
-          key={libraryItem.id}
           source={libraryItem.coverArtPath}
-          style={{ flex: 1 }}
-          contentFit="cover"
-          transition={1000}
+          contentFit="fill"
+          transition={300}
+          style={{ width: 250, height: 250 }}
         />
       </View>
-      <View className="flex justify-end">
-        {/* TODO: figure out how to wrap text, usual tricks ain't working */}
+
+      {/* <View className="flex justify-end">
+        
         <Text className="text-lg font-bold text-white">
           {libraryItem.title}
         </Text>
-        {/* TODO: complete */}
+        
         <Text className="text-lg text-stone-400">
           {libraryItem.publishedYear} * 1hr 25m * TV-PG
         </Text>
         <Text className="text-stone-400">GoodReads rating</Text>
-      </View>
+      </View> */}
     </View>
   );
 };
@@ -126,68 +123,71 @@ const MediaActionsBar = ({
   };
 
   return (
-    <View className="flex flex-row items-center gap-2">
-      {/* TODO: Looks like Plex is using css grid to have 4 squares, the first col taking up a little over 1/3. This causes the art poster and play button to align */}
-      {downloadStore.isDownloading(libraryItem.id) === false &&
-        (playbackState !== State.Playing ||
-          !audioFiles.find((af) => af.id === activeTrack?.id)) &&
-        audioFiles.filter((a) => a.path).length > 0 && (
-          <Pressable
-            onPress={() => {
-              TrackPlayer.play();
-              router.push(`/(player)/${libraryItem.id}`);
-            }}
-            className="flex h-14 w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
-            <Ionicons name="play-sharp" size={40} color="white" />
-          </Pressable>
-        )}
-
-      {downloadStore.isDownloading(libraryItem.id) === false &&
-        playbackState === State.Playing &&
-        audioFiles.find((af) => af.id === activeTrack?.id) && (
-          <Pressable
-            onPress={() => TrackPlayer.pause()}
-            className="flex h-14 w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
-            <Ionicons name="pause" size={40} color="white" />
-          </Pressable>
-        )}
-
-      {downloadStore.isDownloading(libraryItem.id) === false &&
+    <View className="flex flex-1 items-center gap-2">
+      {/* downloadable view */}
+      {!downloadStore.isDownloading(libraryItem.id) &&
         audioFiles.filter((a) => a.path).length === 0 &&
         ebook?.path === null && (
           <Pressable
             onPress={() => handleDownload(libraryItem.id)}
-            className="flex h-14 w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
             <View className="animate-bounce">
               <Ionicons name="cloud-download-outline" size={24} color="white" />
             </View>
           </Pressable>
         )}
 
-      {downloadStore.isDownloading(libraryItem.id) === false &&
-        ebook?.path !== null && (
-          <Pressable
-            onPress={() => handleRead()}
-            className="flex h-14 w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
-            <Text className="font-bont text-3xl text-white">Read</Text>
-          </Pressable>
-        )}
-
+      {/* downloading view */}
       {downloadStore.isDownloading(libraryItem.id) && (
-        <View className="flex h-14 w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
+        <View className="flex w-full items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
           <View className="animate-spin">
             <FontAwesome6 name="circle-notch" size={24} color="white" />
           </View>
         </View>
       )}
 
-      <View className="ml-auto mr-2 flex flex-row items-center justify-end gap-4">
-        {/* TODO: add actions that make sense, like add to reading queue/bookmark, download, mark as read */}
-        {/* TODO: need to work out sheet that slides up to reveal options */}
-        <Link href="/(media)/modal" asChild>
-          <FontAwesome6 name="ellipsis" size={24} color="white" />
-        </Link>
-      </View>
+      {/* Buttons to show after downloaded */}
+      {!downloadStore.isDownloading(libraryItem.id) && (
+        <>
+          {(playbackState !== State.Playing ||
+            !audioFiles.find((af) => af.id === activeTrack?.id)) &&
+            audioFiles.filter((a) => a.path).length > 0 && (
+              <Pressable
+                onPress={() => {
+                  TrackPlayer.play();
+                  router.push(`/(player)/${libraryItem.id}`);
+                }}
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
+                <Ionicons name="play-sharp" size={40} color="white" />
+              </Pressable>
+            )}
+
+          {playbackState === State.Playing &&
+            audioFiles.find((af) => af.id === activeTrack?.id) && (
+              <Pressable
+                onPress={() => TrackPlayer.pause()}
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
+                <Ionicons name="pause" size={40} color="white" />
+              </Pressable>
+            )}
+
+          {ebook && ebook.path && (
+            <Pressable
+              onPress={() => handleRead()}
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
+              <Text className="text-3xl font-bold text-white">Read</Text>
+            </Pressable>
+          )}
+
+          {/* TODO: add actions that make sense, like add to reading queue/bookmark, download, mark as read */}
+          {/* TODO: need to work out sheet that slides up to reveal options */}
+          <Pressable
+            onPress={() => router.push("/(media)/modal")}
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-sky-300 py-2">
+            <FontAwesome6 name="ellipsis" size={24} color="white" />
+          </Pressable>
+        </>
+      )}
     </View>
   );
 };

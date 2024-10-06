@@ -128,10 +128,10 @@ export default function Player() {
 
   return (
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
-      <View className="flex h-screen gap-2 bg-slate-800 p-2">
+      <View className="flex h-full gap-2 bg-slate-800 p-2">
         <Stack.Screen options={{ gestureDirection: "vertical" }} />
         <TopActionsBar />
-        <View className="h-1/2">
+        <View className="flex-1">
           <MediaArt />
           <MediaInfo />
         </View>
@@ -156,13 +156,15 @@ const TopActionsBar = () => {
 const MediaArt = () => {
   const track = useActiveTrack();
   return (
-    <View className="flex h-2/3 w-full">
-      <Image
-        source={track?.artwork}
-        style={{ flex: 1 }}
-        contentFit="cover"
-        transition={1000}
-      />
+    <View className="flex w-full items-center">
+      <View className="flex items-center overflow-hidden rounded-lg">
+        <Image
+          source={track?.artwork}
+          style={{ width: 350, height: 350 }}
+          contentFit="fill"
+          transition={1000}
+        />
+      </View>
     </View>
   );
 };
@@ -171,7 +173,7 @@ const MediaInfo = () => {
   const track = useActiveTrack();
 
   return (
-    <View>
+    <View className="my-8">
       <Text className="text-2xl text-white">{track?.album}</Text>
       <Text className="text-xl text-slate-400">{track?.title}</Text>
     </View>

@@ -67,11 +67,12 @@ export default function Library() {
                 estimatedItemSize={213}
                 data={libraryItems}
                 numColumns={2}
-                centerContent
                 ItemSeparatorComponent={() => (
                   <View style={{ height: 5, width: 10 }} />
                 )}
-                renderItem={({ item }) => <BookLink item={item} />}
+                renderItem={({ item }) => (
+                  <BookLink key={item.id} item={item} />
+                )}
                 ListEmptyComponent={
                   <View className="flex flex-1 items-center justify-center">
                     <Text className="text-4xl text-white">

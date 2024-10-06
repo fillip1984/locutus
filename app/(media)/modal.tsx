@@ -31,7 +31,6 @@ export default function MediaModal() {
           <Feather name="trash" size={40} color="red" />
           <Text className="text-lg text-red-500">Delete</Text>
         </Pressable>
-        {/* <View className="flex h-14 w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2"> */}
 
         <Pressable
           onPress={() => {
@@ -41,12 +40,7 @@ export default function MediaModal() {
             }
           }}
           className="flex min-w-[125px] items-center gap-2 rounded-lg border border-sky-300 p-4">
-          <Ionicons
-            name="cloud-download-outline"
-            size={40}
-            color="white"
-            // style={{ color: "white" }} // TODO: figure out how to style with nativeWind
-          />
+          <Ionicons name="cloud-download-outline" size={40} color="white" />
           <Text className="text-lg text-sky-300">Redownload</Text>
         </Pressable>
       </View>
