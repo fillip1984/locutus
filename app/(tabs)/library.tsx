@@ -3,7 +3,7 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { FlashList } from "@shopify/flash-list";
 import { Image } from "expo-image";
 import { Link, useFocusEffect } from "expo-router";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { Pressable, SafeAreaView, Text, View } from "react-native";
 
 import { LibraryItemSchemaType } from "@/db/schema";

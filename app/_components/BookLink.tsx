@@ -8,11 +8,16 @@ import { LibraryItemSchemaType } from "@/db/schema";
 export default function BookLink({ item }: { item: LibraryItemSchemaType }) {
   return (
     <Link href={`/(media)/${item.id}`}>
-      <View key={item.id} className="flex h-60 w-36">
+      <View key={item.id} className="flex h-[268px] w-[192px]">
         <Image
           source={item.coverArtPath}
-          style={{ flex: 1 }}
-          contentFit="cover"
+          style={{
+            objectFit: "fill",
+            overflow: "hidden",
+            width: 192,
+            height: 192,
+          }}
+          contentFit="fill"
           transition={300}
         />
         <Text className="text-white">{item.title}</Text>

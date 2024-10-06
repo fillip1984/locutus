@@ -72,7 +72,7 @@ export default function Home() {
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
       <View className="relative">
         {libraryStore && libraryStore.libraryItems && (
-          <View className="flex h-screen bg-slate-800 p-2">
+          <View className="flex h-screen bg-zinc-900 p-2">
             {libraryStore.libraryItems?.length === 0 && (
               <View className="flex h-screen items-center justify-center">
                 <Text className="text-2xl text-white">Nothing to play</Text>
@@ -82,15 +82,15 @@ export default function Home() {
             <ScrollView>
               <View className="flex gap-4">
                 {continueItems && continueItems.length > 0 && (
-                  <ContinueSection items={continueItems} />
+                  <Section label="Continue" items={continueItems} />
                 )}
 
                 {downloadedItems && downloadedItems.length > 0 && (
-                  <DownloadedSection items={downloadedItems} />
+                  <Section label="Downloaded" items={downloadedItems} />
                 )}
 
                 {revisitItems && revisitItems.length > 0 && (
-                  <RevisitSection items={revisitItems} />
+                  <Section label="Revisit" items={revisitItems} />
                 )}
               </View>
             </ScrollView>
@@ -100,7 +100,7 @@ export default function Home() {
         {/* TODO: Couldn't find a better way to afix to the bottom, try flex methods maybe? */}
         {track && (
           <View
-            className="absolute left-0 right-0 bg-slate-900"
+            className="absolute left-0 right-0 bg-zinc-800"
             style={{ bottom: bottomTabbarHeight + 59 }}>
             <MiniPlayer />
           </View>
@@ -110,41 +110,17 @@ export default function Home() {
   );
 }
 
-const ContinueSection = ({ items }: { items: LibraryItemSchemaType[] }) => {
+const Section = ({
+  label,
+  items,
+}: {
+  label: string;
+  items: LibraryItemSchemaType[];
+}) => {
   return (
     <>
-      <Text className="text-4xl text-white">Continue</Text>
-      <ScrollView horizontal>
-        <View className="flex flex-row gap-3">
-          {items.map((item) => (
-            <BookLink key={item.id} item={item} />
-          ))}
-        </View>
-      </ScrollView>
-    </>
-  );
-};
-
-const DownloadedSection = ({ items }: { items: LibraryItemSchemaType[] }) => {
-  return (
-    <>
-      <Text className="text-4xl text-white">Downloaded</Text>
-      <ScrollView horizontal>
-        <View className="flex flex-row gap-3">
-          {items.map((item) => (
-            <BookLink key={item.id} item={item} />
-          ))}
-        </View>
-      </ScrollView>
-    </>
-  );
-};
-
-const RevisitSection = ({ items }: { items: LibraryItemSchemaType[] }) => {
-  return (
-    <>
-      <Text className="text-4xl text-white">Revisit</Text>
-      <ScrollView horizontal>
+      <Text className="text-4xl text-white">{label}</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View className="flex flex-row gap-3">
           {items.map((item) => (
             <BookLink key={item.id} item={item} />
