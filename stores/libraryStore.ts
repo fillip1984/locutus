@@ -18,6 +18,7 @@ import { getLibraryItems } from "@/services/libraryItemsApi";
 export interface LibraryStore {
   libraries: LibrarySchemaType[] | null;
   libraryItems: LibraryItemSchemaType[] | null;
+  status: "loading" | "loaded";
 
   refetch: (sort?: Sort) => void;
   syncWithServer: () => Promise<boolean>;
@@ -30,7 +31,10 @@ export type Sort = "Alphabetically" | "LastTouched";
 export const useLibraryStore = create<LibraryStore>()((set, get) => ({
   libraries: null,
   libraryItems: null,
+  status: "loading",
   refetch: async (sort?: Sort) => {
+    console.log("refetching libraries");
+    set(() => ({ status: "loading" }));
     const freshLibraries = await localDb.select().from(librarySchema);
     set(() => ({ libraries: freshLibraries }));
     const freshLibraryItems = await localDb
@@ -41,7 +45,8 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
           ? libraryItemSchema.title
           : libraryItemSchema.title,
       );
-    set(() => ({ libraryItems: freshLibraryItems }));
+    set(() => ({ libraryItems: freshLibraryItems, status: "loaded" }));
+    console.log("refetched libraries");
   },
   syncWithServer: async () => {
     const libraries = await getLibraries();
@@ -141,7 +146,8 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
 
           if (!exists) {
             await localDb.insert(libraryItemEBookFileSchema).values({
-              id: ebook.ino,
+              // TODO: this limits us to only 1 ebook at a time
+              id: libraryItem.id,
               remoteId: ebook.ino,
               name: ebook.metadata.filename,
               libraryItemId: libraryItem.id,
@@ -168,6 +174,7 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
               name: audioFile.metadata.filename,
               duration: audioFile.duration,
               start: libraryItem.media.chapters[audioFile.index - 1].start,
+              end: libraryItem.media.chapters[audioFile.index - 1].end,
               libraryItemId: libraryItem.id,
             });
           } else {
@@ -177,6 +184,7 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
                 name: audioFile.metadata.filename,
                 duration: audioFile.duration,
                 start: libraryItem.media.chapters[audioFile.index - 1].start,
+                end: libraryItem.media.chapters[audioFile.index - 1].end,
               })
               .where(eq(libraryItemAudioFileSchema.remoteId, audioFile.ino));
           }

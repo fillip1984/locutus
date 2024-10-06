@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "78b2351d-cac1-4333-8477-4883dbc307e5",
+  "id": "5c4ed2df-d97c-49dc-9afa-f2bb73399be3",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "libraryItemAudioFile": {
@@ -40,8 +40,14 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": 0
+          "autoincrement": false
+        },
+        "end": {
+          "name": "end",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
         },
         "progress": {
           "name": "progress",
@@ -296,6 +302,13 @@
         },
         "lastPlayedId": {
           "name": "lastPlayedId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "lastEBookId": {
+          "name": "lastEBookId",
           "type": "text",
           "primaryKey": false,
           "notNull": false,

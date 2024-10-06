@@ -1,31 +1,70 @@
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import React, { useEffect, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
 import { SafeAreaView, ScrollView, Text, View } from "react-native";
 import { useActiveTrack } from "react-native-track-player";
 
 import BookLink from "@/app/_components/BookLink";
 import MiniPlayer from "@/app/_components/MiniPlayer";
-import { LibraryItemSchemaType } from "@/db/schema";
+import { localDb } from "@/db";
+import { LibraryItemSchemaType, userSettingsSchema } from "@/db/schema";
+import { getProgressFromServer } from "@/services/progressService";
+import { useDownloadStore } from "@/stores/downloadStore";
 import { useLibraryStore } from "@/stores/libraryStore";
 
 export default function Home() {
   const libraryStore = useLibraryStore();
-  useEffect(() => {
-    libraryStore.refetch("LastTouched");
-  }, []);
+  const downloadStore = useDownloadStore();
   const track = useActiveTrack();
 
+  useFocusEffect(
+    useCallback(() => {
+      // console.log("refetching");
+      libraryStore.refetch("LastTouched");
+    }, []),
+  );
+
   useEffect(() => {
-    setContinueItems(libraryStore.libraryItems?.filter((i) => i.lastPlayedId));
-    setDownloadedItems(libraryStore.libraryItems?.filter((i) => i.downloaded));
-    setRelistenItems(libraryStore.libraryItems?.filter((i) => i.complete));
-  }, [libraryStore]);
+    async function initView() {
+      if (
+        libraryStore.status === "loaded" &&
+        (libraryStore.libraries === undefined ||
+          libraryStore.libraries?.length === 0)
+      ) {
+        const result = await localDb.select().from(userSettingsSchema);
+        console.log("syncing libraries");
+        await libraryStore.syncWithServer();
+        const serverProgressUpdates = await getProgressFromServer(
+          result[0].serverUrl,
+          0,
+        );
+        for (const media of serverProgressUpdates) {
+          downloadStore.add(media.libraryItemId);
+        }
+        downloadStore.download();
+      }
+
+      setContinueItems(
+        libraryStore.libraryItems?.filter(
+          (i) => !i.complete && (i.lastPlayedId || i.lastEBookId),
+        ),
+      );
+      setDownloadedItems(
+        libraryStore.libraryItems?.filter((i) => i.downloaded),
+      );
+      setRevisitItems(libraryStore.libraryItems?.filter((i) => i.complete));
+    }
+
+    if (libraryStore.status === "loaded") {
+      initView();
+    }
+  }, [libraryStore.status]);
 
   // continue is a reserved word
   const [continueItems, setContinueItems] = useState<LibraryItemSchemaType[]>();
   const [downloadedItems, setDownloadedItems] =
     useState<LibraryItemSchemaType[]>();
-  const [relistenItems, setRelistenItems] = useState<LibraryItemSchemaType[]>();
+  const [revisitItems, setRevisitItems] = useState<LibraryItemSchemaType[]>();
 
   const bottomTabbarHeight = useBottomTabBarHeight();
 
@@ -50,8 +89,8 @@ export default function Home() {
                   <DownloadedSection items={downloadedItems} />
                 )}
 
-                {relistenItems && relistenItems.length > 0 && (
-                  <RelistenSection items={relistenItems} />
+                {revisitItems && revisitItems.length > 0 && (
+                  <RevisitSection items={revisitItems} />
                 )}
               </View>
             </ScrollView>
@@ -101,10 +140,10 @@ const DownloadedSection = ({ items }: { items: LibraryItemSchemaType[] }) => {
   );
 };
 
-const RelistenSection = ({ items }: { items: LibraryItemSchemaType[] }) => {
+const RevisitSection = ({ items }: { items: LibraryItemSchemaType[] }) => {
   return (
     <>
-      <Text className="text-4xl text-white">Relisten</Text>
+      <Text className="text-4xl text-white">Revisit</Text>
       <ScrollView horizontal>
         <View className="flex flex-row gap-3">
           {items.map((item) => (

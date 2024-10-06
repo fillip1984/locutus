@@ -1,4 +1,4 @@
-import { and, eq, gt, isNotNull } from "drizzle-orm";
+import { and, eq, gt, gte, isNotNull, lte } from "drizzle-orm";
 import Toast from "react-native-toast-message";
 
 import { ping } from "./pingApi";
@@ -7,13 +7,14 @@ import { localDb } from "@/db";
 import {
   libraryItemAudioFileSchema,
   libraryItemEBookFileSchema,
+  libraryItemSchema,
   userSettingsSchema,
 } from "@/db/schema";
-import { getToken } from "@/stores/sessionStore";
 import { getAxiosClient } from "@/utils/axiosClient";
 
 export const syncProgressWithServer = async () => {
   const userSettings = await localDb.query.userSettingsSchema.findFirst();
+
   if (!userSettings) {
     throw Error("unable to sync with server, was not able to find server url");
   }
@@ -27,31 +28,11 @@ export const syncProgressWithServer = async () => {
 
     const lastSync = userSettings?.lastServerSync?.getTime() ?? 0;
 
-    const response = (await getAxiosClient()).get<Root>(
-      `${userSettings.serverUrl}/api/me`,
-      {
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-        },
-      },
+    const progressUpdatesFromServer = await getProgressFromServer(
+      userSettings.serverUrl,
+      lastSync,
     );
-
-    const progressUpdatesFromServer = (await response).data.mediaProgress
-      .filter((media) => media.lastUpdate > lastSync)
-      .map((media) => {
-        return {
-          libraryItemId: media.libraryItemId,
-          ebookLocation: media.ebookLocation,
-          ebookProgress: media.ebookProgress,
-          currentTime: media.currentTime,
-          // TODO: figure out how to signal that item is complete
-          isFinished: media.isFinished,
-          updatedAt: media.lastUpdate,
-          source: "server",
-        } as MediaProgressUpdate;
-      });
-
-    // console.log({ progressUpdatesFromServer });
+    console.log({ progressUpdatesFromServer });
 
     const ebookProgressFromPhone =
       await localDb.query.libraryItemEBookFileSchema.findMany({
@@ -60,13 +41,18 @@ export const syncProgressWithServer = async () => {
           isNotNull(libraryItemEBookFileSchema.currentLocation),
         ),
       });
-    const ebookProgressUpdates: MediaProgressUpdate[] =
+    const ebookProgressUpdates: EBookProgressUpdate[] =
       ebookProgressFromPhone.map((ebook) => {
         return {
           libraryItemId: ebook.libraryItemId,
-          ebookLocation: ebook.currentLocation,
-          ebookProgress: ebook.progress,
+          // TODO: figure out how to get drizzle where clauses to shape data
+          ebookLocation: ebook.currentLocation
+            ? ebook.currentLocation
+            : "unknown",
+          // TODO: figure out how to get drizzle where clauses to shape data
+          ebookProgress: ebook.progress ? ebook.progress : -1,
           updatedAt: ebook.updatedAt.getTime(),
+          type: "ebook",
           source: "client",
           // TODO: figure out how to signal that item is complete
           // isFinished: audioBook.complete,
@@ -87,43 +73,50 @@ export const syncProgressWithServer = async () => {
           isNotNull(libraryItemAudioFileSchema.progress),
         ),
       });
-    const audioBookProgressUpdates: MediaProgressUpdate[] =
+    const audioBookProgressUpdates: AudioBookProgressUpdate[] =
       audioBookProgressFromPhone.map((audioBook) => {
         return {
           libraryItemId: audioBook.libraryItemId,
           // duration: 83110.977724, //doesn't appear to be necessary
           // TODO: figure out how to signal that item is complete
           // isFinished: audioBook.complete,
-          currentTime: audioBook.progress
-            ? audioBook.start + audioBook.progress
-            : null,
+          // TODO: figure out how to get drizzle where clauses to shape data
+          currentTime:
+            audioBook.start + (audioBook.progress ? audioBook.progress : 0),
           updatedAt: audioBook.updatedAt.getTime(),
+          type: "audioBook",
           source: "client",
         };
       });
 
-    const progressUpdates: MediaProgressUpdate[] = [
+    const progressUpdates: (EBookProgressUpdate | AudioBookProgressUpdate)[] = [
       ...ebookProgressUpdates,
       ...audioBookProgressUpdates,
       ...progressUpdatesFromServer,
-    ].reduce((acc: MediaProgressUpdate[], obj: MediaProgressUpdate) => {
-      const existingIndex = acc.findIndex(
-        (item) => item.libraryItemId === obj.libraryItemId,
-      );
+    ].reduce(
+      (
+        acc: (EBookProgressUpdate | AudioBookProgressUpdate)[],
+        obj: EBookProgressUpdate | AudioBookProgressUpdate,
+      ) => {
+        const existingIndex = acc.findIndex(
+          (item) => item.libraryItemId === obj.libraryItemId,
+        );
 
-      if (existingIndex === -1) {
-        acc.push(obj);
-      } else {
-        const existingDate = new Date(acc[existingIndex].updatedAt);
-        const newDate = new Date(obj.updatedAt);
+        if (existingIndex === -1) {
+          acc.push(obj);
+        } else {
+          const existingDate = new Date(acc[existingIndex].updatedAt);
+          const newDate = new Date(obj.updatedAt);
 
-        if (newDate > existingDate) {
-          acc[existingIndex] = obj;
+          if (newDate > existingDate) {
+            acc[existingIndex] = obj;
+          }
         }
-      }
 
-      return acc;
-    }, []);
+        return acc;
+      },
+      [],
+    );
 
     console.log({
       msg: "Updates from server",
@@ -140,27 +133,63 @@ export const syncProgressWithServer = async () => {
     await localDb.transaction(async (tx) => {
       // update client
       for (const ebook of progressUpdates.filter(
-        (i) => i.source === "server",
-      )) {
+        (i) => i.source === "server" && i.type === "ebook",
+      ) as EBookProgressUpdate[]) {
         await tx
           .update(libraryItemEBookFileSchema)
           .set({
             updatedAt: new Date(ebook.updatedAt),
             currentLocation: ebook.ebookLocation,
             progress: ebook.ebookProgress,
+            complete: ebook.isFinished,
           })
-          .where(
-            eq(libraryItemEBookFileSchema.libraryItemId, ebook.libraryItemId),
-          );
+          .where(eq(libraryItemEBookFileSchema.id, ebook.libraryItemId));
+        await tx
+          .update(libraryItemSchema)
+          .set({
+            updatedAt: new Date(ebook.updatedAt),
+            lastEBookId: ebook.libraryItemId,
+            complete: ebook.isFinished,
+          })
+          .where(eq(libraryItemSchema.id, ebook.libraryItemId));
       }
 
       for (const audioBook of progressUpdates.filter(
-        (i) => i.source === "server",
-      )) {
-        await tx.update(libraryItemAudioFileSchema).set({
-          updatedAt: new Date(audioBook.updatedAt),
-          progress: audioBook.currentTime,
-        });
+        (i) => i.source === "server" && i.type === "audioBook",
+      ) as AudioBookProgressUpdate[]) {
+        const audioBookItemToUpdate =
+          await localDb.query.libraryItemAudioFileSchema.findFirst({
+            where: and(
+              eq(
+                libraryItemAudioFileSchema.libraryItemId,
+                audioBook.libraryItemId,
+              ),
+              lte(libraryItemAudioFileSchema.start, audioBook.currentTime),
+              gte(libraryItemAudioFileSchema.end, audioBook.currentTime),
+            ),
+          });
+        if (!audioBookItemToUpdate) {
+          throw Error(
+            "Unable to find audio book item to update for currentTime: " +
+              audioBook.currentTime,
+          );
+        }
+        await tx
+          .update(libraryItemAudioFileSchema)
+          .set({
+            updatedAt: new Date(audioBook.updatedAt),
+            progress: audioBook.currentTime,
+            complete: audioBook.isFinished,
+          })
+          .where(eq(libraryItemAudioFileSchema.id, audioBookItemToUpdate.id));
+        await tx
+          .update(libraryItemSchema)
+          .set({
+            updatedAt: new Date(audioBook.updatedAt),
+            lastPlayedId: audioBookItemToUpdate?.id,
+            complete: audioBook.isFinished,
+          })
+          .where(eq(libraryItemSchema.id, audioBook.libraryItemId));
       }
 
       // update server
@@ -176,10 +205,6 @@ export const syncProgressWithServer = async () => {
       // update sync time
       await tx.update(userSettingsSchema).set({ lastServerSync: new Date() });
     });
-    // await localDb
-    //   .update(userSettingsSchema)
-    //   .set({ lastServerSync: new Date() });
-    // console.log({ msg: "Server sync status", status: updateResponse.status });
   } catch (err) {
     console.error("Exception occurred while fetching user sessions", err);
     Toast.show({
@@ -191,15 +216,61 @@ export const syncProgressWithServer = async () => {
   }
 };
 
+export const getProgressFromServer = async (
+  serverUrl: string,
+  lastSync: number,
+) => {
+  const response = (await getAxiosClient()).get<Root>(`${serverUrl}/api/me`);
+  const serverMediaProgressItems = (await response).data.mediaProgress.filter(
+    (media) => media.lastUpdate > lastSync,
+  );
+  const results: (EBookProgressUpdate | AudioBookProgressUpdate)[] = [];
+
+  for (const serverMedia of serverMediaProgressItems) {
+    //       // TODO: figure out how to signal that item is complete
+    //       isFinished: media.isFinished,
+    if (serverMedia.currentTime) {
+      results.push({
+        libraryItemId: serverMedia.libraryItemId,
+        currentTime: serverMedia.currentTime,
+        updatedAt: serverMedia.lastUpdate,
+        isFinished: serverMedia.isFinished,
+        type: "audioBook",
+        source: "server",
+      } as AudioBookProgressUpdate);
+    }
+
+    if (serverMedia.ebookLocation) {
+      results.push({
+        libraryItemId: serverMedia.libraryItemId,
+        ebookLocation: serverMedia.ebookLocation,
+        ebookProgress: serverMedia.ebookProgress,
+        updatedAt: serverMedia.lastUpdate,
+        isFinished: serverMedia.isFinished,
+        type: "ebook",
+        source: "server",
+      } as EBookProgressUpdate);
+    }
+  }
+  return results;
+};
+
 interface MediaProgressUpdate {
   libraryItemId: string;
-  ebookLocation?: string | null;
-  ebookProgress?: number | null;
-  duration?: number | null;
-  currentTime?: number | null;
   isFinished?: boolean;
   updatedAt: number;
+  type: "ebook" | "audioBook";
   source: "client" | "server";
+}
+
+interface EBookProgressUpdate extends MediaProgressUpdate {
+  ebookLocation: string;
+  ebookProgress: number;
+}
+
+interface AudioBookProgressUpdate extends MediaProgressUpdate {
+  // duration: number | null;
+  currentTime: number;
 }
 
 export interface Root {

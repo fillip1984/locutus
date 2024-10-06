@@ -1,4 +1,3 @@
-import { relations } from "drizzle-orm";
 import { integer, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
 
 export const librarySchema = sqliteTable(
@@ -38,6 +37,7 @@ export const libraryItemSchema = sqliteTable("libraryItem", {
   asin: text("asin"),
   coverArtPath: text("coverArtPath"),
   lastPlayedId: text("lastPlayedId"),
+  lastEBookId: text("lastEBookId"),
   downloaded: integer("downloaded", { mode: "boolean" }).default(false),
   complete: integer("complete", { mode: "boolean" }).default(false),
   libraryId: text("libraryId")
@@ -58,7 +58,8 @@ export const libraryItemAudioFileSchema = sqliteTable("libraryItemAudioFile", {
   remoteId: text("ino").notNull(),
   index: integer("index").notNull(),
   duration: integer("duration").notNull(),
-  start: integer("start").notNull().default(0),
+  start: integer("start").notNull(),
+  end: integer("end").notNull(),
   progress: integer("progress"),
   complete: integer("complete", { mode: "boolean" }).default(false),
   name: text("name").notNull(),
@@ -117,12 +118,5 @@ export const userSettingsSchema = sqliteTable("userSettings", {
     () => new Date(),
   ),
 });
-
-export const libraryItemAudioBookRelationships = relations(
-  libraryItemSchema,
-  ({ many }) => ({
-    libraryItemAudioBookRelationships: many(libraryItemAudioFileSchema),
-  }),
-);
 
 export type UserSettingsSchemaType = typeof userSettingsSchema.$inferSelect;

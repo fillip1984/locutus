@@ -12,6 +12,7 @@ import {
   libraryItemSchema,
 } from "@/db/schema";
 import { downloadLibraryItem } from "@/services/libraryItemApi";
+import { syncProgressWithServer } from "@/services/progressService";
 
 export interface DownloadStore {
   queue: string[];
@@ -106,8 +107,12 @@ export const useDownloadStore = create<DownloadStore>()((set, get) => ({
           downloading: false,
         }));
         if (get().queue.length !== 0) {
-          // console.log("queue still has items in it, going again for download");
+          console.log("queue still has items in it, going again for download");
           get().download();
+        } else {
+          console.log("queue is empty, sync progress with server");
+          await syncProgressWithServer();
+          useLibraryStore.getState().refetch();
         }
       }
     }

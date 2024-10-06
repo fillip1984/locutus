@@ -1,5 +1,6 @@
 import { FontAwesome, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import clsx from "clsx";
+import { eq } from "drizzle-orm";
 import { Image } from "expo-image";
 import {
   Link,
@@ -16,9 +17,11 @@ import TrackPlayer, {
   usePlaybackState,
 } from "react-native-track-player";
 
+import { localDb } from "@/db";
 import {
   LibraryItemAudioFileSchemaType,
   LibraryItemEBookFileSchemaType,
+  libraryItemSchema,
   LibraryItemSchemaType,
 } from "@/db/schema";
 import { handleDownload, useDownloadStore } from "@/stores/downloadStore";
@@ -114,6 +117,14 @@ const MediaActionsBar = ({
   const activeTrack = useActiveTrack();
   const downloadStore = useDownloadStore();
 
+  const handleRead = async () => {
+    await localDb
+      .update(libraryItemSchema)
+      .set({ lastEBookId: ebook?.id })
+      .where(eq(libraryItemSchema.id, libraryItem.id));
+    router.push(`/(reader)/${libraryItem.id}`);
+  };
+
   return (
     <View className="flex flex-row items-center gap-2">
       {/* TODO: Looks like Plex is using css grid to have 4 squares, the first col taking up a little over 1/3. This causes the art poster and play button to align */}
@@ -156,7 +167,7 @@ const MediaActionsBar = ({
       {downloadStore.isDownloading(libraryItem.id) === false &&
         ebook?.path !== null && (
           <Pressable
-            onPress={() => router.push(`/(reader)/${libraryItem.id}`)}
+            onPress={() => handleRead()}
             className="flex h-14 w-48 flex-row items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
             <Text className="font-bont text-3xl text-white">Read</Text>
           </Pressable>
