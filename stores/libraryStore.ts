@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import { create } from "zustand";
 
 import { localDb } from "@/db";
@@ -42,8 +42,8 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
       .from(libraryItemSchema)
       .orderBy(
         sort === "LastTouched"
-          ? libraryItemSchema.title
-          : libraryItemSchema.title,
+          ? desc(libraryItemSchema.updatedAt)
+          : asc(libraryItemSchema.title),
       );
     set(() => ({ libraryItems: freshLibraryItems, status: "loaded" }));
     console.log("refetched libraries");
