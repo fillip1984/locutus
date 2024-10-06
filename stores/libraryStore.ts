@@ -22,7 +22,7 @@ export interface LibraryStore {
   refetch: (sort?: Sort) => void;
   syncWithServer: () => Promise<boolean>;
   addLibrary: (library: LibrarySchemaType) => void;
-  removeLibrary: (id: number) => void;
+  removeLibrary: (id: string) => void;
 }
 
 export type Sort = "Alphabetically" | "LastTouched";
@@ -65,10 +65,10 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
       }
       if (!libraryId) {
         // console.log("adding library");
-        const result = await localDb
+        await localDb
           .insert(librarySchema)
-          .values({ name: library.name, remoteId: library.id });
-        libraryId = result.lastInsertRowId;
+          .values({ id: library.id, name: library.name, remoteId: library.id });
+        libraryId = library.id;
       } else {
         // console.log("updating library");
         await localDb
@@ -99,6 +99,7 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
         if (!libraryItemId) {
           // console.log("adding library item");
           const result = await localDb.insert(libraryItemSchema).values({
+            id: item.id,
             title: item.media.metadata.title,
             authorName: item.media.metadata.authorName,
             duration: item.media.duration,
@@ -112,7 +113,7 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
             libraryId,
             remoteId: item.id,
           });
-          libraryItemId = result.lastInsertRowId;
+          // libraryItemId = result.lastInsertRowId;
         } else {
           // console.log("updating library item");
           await localDb
@@ -140,9 +141,10 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
 
           if (!exists) {
             await localDb.insert(libraryItemEBookFileSchema).values({
+              id: ebook.ino,
               remoteId: ebook.ino,
               name: ebook.metadata.filename,
-              libraryItemId,
+              libraryItemId: libraryItem.id,
             });
           } else {
             await localDb
@@ -160,11 +162,13 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
             });
           if (!exists) {
             await localDb.insert(libraryItemAudioFileSchema).values({
+              id: audioFile.ino,
               remoteId: audioFile.ino,
               index: audioFile.index,
               name: audioFile.metadata.filename,
               duration: audioFile.duration,
-              libraryItemId,
+              start: libraryItem.media.chapters[audioFile.index - 1].start,
+              libraryItemId: libraryItem.id,
             });
           } else {
             await localDb
@@ -172,6 +176,7 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
               .set({
                 name: audioFile.metadata.filename,
                 duration: audioFile.duration,
+                start: libraryItem.media.chapters[audioFile.index - 1].start,
               })
               .where(eq(libraryItemAudioFileSchema.remoteId, audioFile.ino));
           }
@@ -184,12 +189,13 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
   },
   addLibrary: async (library: LibrarySchemaType) => {
     await localDb.insert(librarySchema).values({
+      id: library.id,
       name: library.name,
       remoteId: library.remoteId,
     });
     get().refetch();
   },
-  removeLibrary: async (id: number) => {
+  removeLibrary: async (id: string) => {
     await localDb.delete(librarySchema).where(eq(librarySchema.id, id));
     get().refetch();
   },

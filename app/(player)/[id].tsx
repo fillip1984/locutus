@@ -34,8 +34,8 @@ export default function Player() {
     useLocalSearchParams();
 
   useEffect(() => {
-    const audioFileId = parseInt(audioFileIdSearchParam as string, 10);
-    const libraryItemId = parseInt(libraryItemIdSearchParam as string, 10);
+    const audioFileId = audioFileIdSearchParam as string;
+    const libraryItemId = libraryItemIdSearchParam as string;
 
     const fetchData = async () => {
       const libraryItem = await localDb.query.libraryItemSchema.findFirst({

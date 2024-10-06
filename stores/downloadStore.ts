@@ -14,17 +14,17 @@ import {
 import { downloadLibraryItem } from "@/services/libraryItemApi";
 
 export interface DownloadStore {
-  queue: number[];
+  queue: string[];
   downloading: boolean;
-  add: (libraryItemId: number) => void;
+  add: (libraryItemId: string) => void;
   download: () => void;
-  isDownloading: (libraryItemId?: number) => boolean;
+  isDownloading: (libraryItemId?: string) => boolean;
 }
 
 export const useDownloadStore = create<DownloadStore>()((set, get) => ({
   queue: [],
   downloading: false,
-  add: (libraryItemId: number) => {
+  add: (libraryItemId: string) => {
     // console.log(`adding libraryItemId: ${libraryItemId} for download`);
     set((state) => ({ queue: [...state.queue, libraryItemId] }));
   },
@@ -112,7 +112,7 @@ export const useDownloadStore = create<DownloadStore>()((set, get) => ({
       }
     }
   },
-  isDownloading: (libraryItemId?: number) => {
+  isDownloading: (libraryItemId?: string) => {
     if (libraryItemId) {
       // console.log(
       //   `checking if library item is being downloaded. LibraryItemId: ${libraryItemId}`,
@@ -125,7 +125,7 @@ export const useDownloadStore = create<DownloadStore>()((set, get) => ({
 }));
 
 // TODO: not sure if I like this manner of triggering downloads but it works
-export const handleDownload = async (libraryItemId: number) => {
+export const handleDownload = async (libraryItemId: string) => {
   const downloadStore = useDownloadStore.getState();
   Toast.show({
     type: "info",

@@ -1,1 +1,0 @@
-ALTER TABLE userSettings ADD `lastServerSync` integer;

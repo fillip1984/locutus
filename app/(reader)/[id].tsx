@@ -19,7 +19,7 @@ export default function EBookReader() {
   const { ebookFileId: ebookFileIdSearchParam, id: libraryItemIdSearchParam } =
     useLocalSearchParams();
 
-  const [ebookFileId, setEBookFileId] = useState<number>();
+  const [ebookFileId, setEBookFileId] = useState<string>();
   const [initialLocation, setInitialLocation] = useState<string | undefined>();
   const [path, setPath] = useState<string | undefined | null>();
   const { toc, goNext, goPrevious, currentLocation, progress } = useReader();
@@ -30,8 +30,8 @@ export default function EBookReader() {
   }, [toc]);
 
   useEffect(() => {
-    const ebookFileId = parseInt(ebookFileIdSearchParam as string, 10);
-    const libraryItemId = parseInt(libraryItemIdSearchParam as string, 10);
+    const ebookFileId = ebookFileIdSearchParam as string;
+    const libraryItemId = libraryItemIdSearchParam as string;
 
     const fetchData = async () => {
       const libraryItem = await localDb.query.libraryItemSchema.findFirst({
@@ -84,6 +84,7 @@ export default function EBookReader() {
       .set({
         currentLocation: currentLocation.start.cfi,
         progress: progress / 100,
+        updatedAt: new Date(),
       })
       .where(eq(libraryItemEBookFileSchema.id, ebookFileId));
   };

@@ -4,7 +4,8 @@ import { integer, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
 export const librarySchema = sqliteTable(
   "library",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
+    id: text("id").primaryKey(),
+    // id: integer("id").primaryKey({ autoIncrement: true }),
     remoteId: text("remoteId").notNull(),
     name: text("name").notNull(),
     createdAt: integer("createdAt", { mode: "timestamp" }).$defaultFn(
@@ -22,7 +23,8 @@ export const librarySchema = sqliteTable(
 export type LibrarySchemaType = typeof librarySchema.$inferSelect;
 
 export const libraryItemSchema = sqliteTable("libraryItem", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+  // id: integer("id").primaryKey({ autoIncrement: true }),
+  id: text("id").primaryKey(),
   remoteId: text("remoteId").notNull(),
   // ino: text("ino").notNull(),
   title: text("title").notNull(),
@@ -35,10 +37,10 @@ export const libraryItemSchema = sqliteTable("libraryItem", {
   isbn: text("isbn"),
   asin: text("asin"),
   coverArtPath: text("coverArtPath"),
-  lastPlayedId: integer("lastPlayedId"),
+  lastPlayedId: text("lastPlayedId"),
   downloaded: integer("downloaded", { mode: "boolean" }).default(false),
   complete: integer("complete", { mode: "boolean" }).default(false),
-  libraryId: integer("libraryId")
+  libraryId: text("libraryId")
     .notNull()
     .references(() => librarySchema.id),
   createdAt: integer("createdAt", { mode: "timestamp" }).$defaultFn(
@@ -52,45 +54,46 @@ export const libraryItemSchema = sqliteTable("libraryItem", {
 export type LibraryItemSchemaType = typeof libraryItemSchema.$inferSelect;
 
 export const libraryItemAudioFileSchema = sqliteTable("libraryItemAudioFile", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+  id: text("id").primaryKey(),
   remoteId: text("ino").notNull(),
   index: integer("index").notNull(),
   duration: integer("duration").notNull(),
+  start: integer("start").notNull().default(0),
   progress: integer("progress"),
   complete: integer("complete", { mode: "boolean" }).default(false),
   name: text("name").notNull(),
   path: text("path"),
-  libraryItemId: integer("libraryItemId")
+  libraryItemId: text("libraryItemId")
     .notNull()
     .references(() => libraryItemSchema.id),
-  createdAt: integer("createdAt", { mode: "timestamp" }).$defaultFn(
-    () => new Date(),
-  ),
-  updatedAt: integer("updatedAt", { mode: "timestamp" }).$defaultFn(
-    () => new Date(),
-  ),
+  createdAt: integer("createdAt", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updatedAt", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
 });
 
 export type LibraryItemAudioFileSchemaType =
   typeof libraryItemAudioFileSchema.$inferSelect;
 
 export const libraryItemEBookFileSchema = sqliteTable("libraryItemEBookFile", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+  id: text("id").primaryKey(),
   remoteId: text("ino").notNull(),
   currentLocation: text("currentLocation"),
   progress: integer("progress"),
   complete: integer("complete", { mode: "boolean" }).default(false),
   name: text("name").notNull(),
   path: text("path"),
-  libraryItemId: integer("libraryItemId")
+  libraryItemId: text("libraryItemId")
     .notNull()
     .references(() => libraryItemSchema.id),
-  createdAt: integer("createdAt", { mode: "timestamp" }).$defaultFn(
-    () => new Date(),
-  ),
-  updatedAt: integer("updatedAt", { mode: "timestamp" }).$defaultFn(
-    () => new Date(),
-  ),
+  createdAt: integer("createdAt", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updatedAt", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
 });
 
 export type LibraryItemEBookFileSchemaType =
@@ -115,11 +118,11 @@ export const userSettingsSchema = sqliteTable("userSettings", {
   ),
 });
 
-// export const libraryItemRelationships = relations(
-//   libraryItemSchema,
-//   ({ many }) => ({
-//     libraryItemEBookFileSchema: many(libraryItemEBookFileSchema),
-//   }),
-// );
+export const libraryItemAudioBookRelationships = relations(
+  libraryItemSchema,
+  ({ many }) => ({
+    libraryItemAudioBookRelationships: many(libraryItemAudioFileSchema),
+  }),
+);
 
 export type UserSettingsSchemaType = typeof userSettingsSchema.$inferSelect;

@@ -22,9 +22,9 @@ export const getAxiosClient = async () => {
     },
   });
 
-  axiosClient.interceptors.request.use((request) => {
-    console.log({ d: request.data });
-    return request;
-  });
+  // axiosClient.interceptors.request.use((request) => {
+  //   console.log({ d: request.data });
+  //   return request;
+  // });
   return axiosClient;
 };

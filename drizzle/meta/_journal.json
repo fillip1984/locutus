@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1727657738464,
-      "tag": "0000_tiny_rage",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1727744891887,
-      "tag": "0001_legal_lyja",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1728069296401,
-      "tag": "0002_sharp_redwing",
+      "when": 1728222938148,
+      "tag": "0000_handy_blink",
       "breakpoints": true
     }
   ]

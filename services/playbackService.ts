@@ -67,7 +67,11 @@ export async function playbackService() {
           // );
           localDb
             .update(libraryItemSchema)
-            .set({ complete: false, lastPlayedId: audioFile.id })
+            .set({
+              complete: false,
+              lastPlayedId: audioFile.id,
+              updatedAt: new Date(),
+            })
             .where(eq(libraryItemSchema.id, libraryItem.id))
             .run();
         }
@@ -95,7 +99,7 @@ export const fetchInitialPosition = async (indexChange: number) => {
   }
 };
 
-export const fetchLibraryItemFromTrack = async (audioFileId: number) => {
+export const fetchLibraryItemFromTrack = async (audioFileId: string) => {
   const audioFile = await localDb.query.libraryItemAudioFileSchema.findFirst({
     where: eq(libraryItemAudioFileSchema.id, audioFileId),
   });
@@ -108,13 +112,13 @@ export const fetchLibraryItemFromTrack = async (audioFileId: number) => {
 };
 
 export const updateProgress = async (
-  audioFileId: number,
+  audioFileId: string,
   position: number,
   complete: boolean,
 ) => {
   localDb
     .update(libraryItemAudioFileSchema)
-    .set({ complete, progress: complete ? 0 : position })
+    .set({ complete, progress: complete ? 0 : position, updatedAt: new Date() })
     .where(eq(libraryItemAudioFileSchema.id, audioFileId))
     .run();
 };

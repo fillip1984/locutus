@@ -1,32 +1,35 @@
 CREATE TABLE `libraryItemAudioFile` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`id` text PRIMARY KEY NOT NULL,
 	`ino` text NOT NULL,
 	`index` integer NOT NULL,
 	`duration` integer NOT NULL,
+	`start` integer DEFAULT 0 NOT NULL,
 	`progress` integer,
 	`complete` integer DEFAULT false,
 	`name` text NOT NULL,
 	`path` text,
-	`libraryItemId` integer NOT NULL,
-	`createdAt` integer,
-	`updatedAt` integer,
+	`libraryItemId` text NOT NULL,
+	`createdAt` integer NOT NULL,
+	`updatedAt` integer NOT NULL,
 	FOREIGN KEY (`libraryItemId`) REFERENCES `libraryItem`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `libraryItemEBookFile` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`id` text PRIMARY KEY NOT NULL,
 	`ino` text NOT NULL,
+	`currentLocation` text,
+	`progress` integer,
 	`complete` integer DEFAULT false,
 	`name` text NOT NULL,
 	`path` text,
-	`libraryItemId` integer NOT NULL,
-	`createdAt` integer,
-	`updatedAt` integer,
+	`libraryItemId` text NOT NULL,
+	`createdAt` integer NOT NULL,
+	`updatedAt` integer NOT NULL,
 	FOREIGN KEY (`libraryItemId`) REFERENCES `libraryItem`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `libraryItem` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`id` text PRIMARY KEY NOT NULL,
 	`remoteId` text NOT NULL,
 	`title` text NOT NULL,
 	`authorName` text NOT NULL,
@@ -38,17 +41,17 @@ CREATE TABLE `libraryItem` (
 	`isbn` text,
 	`asin` text,
 	`coverArtPath` text,
-	`lastPlayedId` integer,
+	`lastPlayedId` text,
 	`downloaded` integer DEFAULT false,
 	`complete` integer DEFAULT false,
-	`libraryId` integer NOT NULL,
+	`libraryId` text NOT NULL,
 	`createdAt` integer,
 	`updatedAt` integer,
 	FOREIGN KEY (`libraryId`) REFERENCES `library`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `library` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`id` text PRIMARY KEY NOT NULL,
 	`remoteId` text NOT NULL,
 	`name` text NOT NULL,
 	`createdAt` integer,
@@ -59,6 +62,7 @@ CREATE TABLE `userSettings` (
 	`serverUrl` text NOT NULL,
 	`signInWithBiometrics` integer DEFAULT false NOT NULL,
 	`preferredPlaybackRate` integer DEFAULT 1 NOT NULL,
+	`lastServerSync` integer,
 	`createdAt` integer,
 	`updatedAt` integer
 );

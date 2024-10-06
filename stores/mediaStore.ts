@@ -17,15 +17,15 @@ export interface MediaStore {
   libraryItem: LibraryItemSchemaType | null;
   audioFiles: LibraryItemAudioFileSchemaType[] | null;
   ebook: LibraryItemEBookFileSchemaType | null;
-  refetch: (id: number) => void;
-  deleteLibraryItem: (libraryItemId: number) => Promise<boolean>;
+  refetch: (id: string) => void;
+  deleteLibraryItem: (libraryItemId: string) => Promise<boolean>;
 }
 
 export const useMediaStore = create<MediaStore>()((set, get) => ({
   libraryItem: null,
   audioFiles: null,
   ebook: null,
-  refetch: async (id: number) => {
+  refetch: async (id: string) => {
     // console.log("fetching media Store");
     const result = await localDb
       .select()
@@ -54,7 +54,7 @@ export const useMediaStore = create<MediaStore>()((set, get) => ({
     useLibraryStore.getState().refetch();
     // console.log("fetched media Store");
   },
-  deleteLibraryItem: async (libraryItemId: number) => {
+  deleteLibraryItem: async (libraryItemId: string) => {
     console.warn("Not yet implemented");
     return true;
   },
