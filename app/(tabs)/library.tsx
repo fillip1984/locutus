@@ -1,10 +1,10 @@
-import Feather from "@expo/vector-icons/Feather";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { FlashList } from "@shopify/flash-list";
-import { Image } from "expo-image";
-import { Link, useFocusEffect } from "expo-router";
-import React, { useCallback, useRef, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import React, { useCallback, useRef } from "react";
 import { Pressable, SafeAreaView, Text, View } from "react-native";
+
+import BookLink from "../_components/BookLink";
 
 import { LibraryItemSchemaType } from "@/db/schema";
 import { useLibraryStore } from "@/stores/libraryStore";
@@ -71,7 +71,7 @@ export default function Library() {
                 ItemSeparatorComponent={() => (
                   <View style={{ height: 5, width: 10 }} />
                 )}
-                renderItem={({ item }) => <ItemCard item={item} />}
+                renderItem={({ item }) => <BookLink item={item} />}
                 ListEmptyComponent={
                   <View className="flex flex-1 items-center justify-center">
                     <Text className="text-4xl text-white">
@@ -103,36 +103,3 @@ export default function Library() {
     </SafeAreaView>
   );
 }
-
-const ItemCard = ({ item }: { item: LibraryItemSchemaType }) => {
-  const [downloading, setDownloading] = useState(false);
-  const handleDownload = () => {};
-  return (
-    <Link href={`/(media)/${item.id}`}>
-      <View className="flex h-[268px] w-[192px]">
-        <Image
-          source={item.coverArtPath}
-          style={{
-            objectFit: "fill",
-            overflow: "hidden",
-            width: 192,
-            height: 192,
-          }}
-          contentFit="fill"
-          transition={300}
-        />
-        <Text className="line-clamp-1 font-bold text-white">{item.title}</Text>
-        <Text className="line-clamp-1 text-white/80">{item.authorName}</Text>
-        <View className="flex flex-row gap-2">
-          {item.numAudioFiles > 0 && (
-            <Feather name="volume-2" size={20} color="white" />
-          )}
-          {item.ebookFileFormat && (
-            <Feather name="book" size={20} color="white" />
-          )}
-          {/* <Feather name="book-open" size={24} color="white" /> */}
-        </View>
-      </View>
-    </Link>
-  );
-};

@@ -119,7 +119,7 @@ const Section = ({
 }) => {
   return (
     <>
-      <Text className="text-4xl text-white">{label}</Text>
+      <Text className="text-4xl font-bold text-white">{label}</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View className="flex flex-row gap-3">
           {items.map((item) => (

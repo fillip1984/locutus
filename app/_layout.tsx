@@ -6,6 +6,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { AxiosError } from "axios";
 import * as LocalAuthentication from "expo-local-authentication";
 import { Stack, useFocusEffect } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import {
   Dispatch,
   SetStateAction,
@@ -13,14 +14,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import {
-  Pressable,
-  SafeAreaView,
-  StatusBar,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Pressable, SafeAreaView, Text, TextInput, View } from "react-native";
 import Toast from "react-native-toast-message";
 import TrackPlayer, { Capability } from "react-native-track-player";
 
@@ -65,7 +59,7 @@ export default function RootLayout() {
         <ReaderProvider>
           <MainLayout />
         </ReaderProvider>
-        <StatusBar barStyle="light-content" />
+        <StatusBar style="light" />
         <Toast />
       </>
     );
@@ -73,7 +67,7 @@ export default function RootLayout() {
     return (
       <>
         <Login setAuthenticated={setAuthenticated} />
-        <StatusBar barStyle="light-content" />
+        <StatusBar style="light" />
         <Toast />
       </>
     );
