@@ -15,8 +15,10 @@ Other than UI imperfections (marked with TODO: tags), playback works and progres
 ## TODO
 
 * [ ] Enhance drizzle to simplify data queries (right now app doesn't pull in relationships)
+* [ ] REALLY learn how to use Zustand!
 * [ ] Resolve remaining UI issues, they're marked in some files
-* [ ] Figure out security (face id)
+  * [ ] Create book card when cover is not available (example: The Private Life of Genghis Khan)
+* [x] Figure out security (face id)
 * [X] Switch over audio player: <https://medium.com/@gionata.brunel/implementing-react-native-track-player-with-expo-including-lock-screen-part-1-ios-9552fea5178c>
 * [X] Enhance UI for download experience
 * [X] Finish out pushing the mini-player to the bottom when switching between player and library
