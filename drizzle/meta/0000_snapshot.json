@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "5c4ed2df-d97c-49dc-9afa-f2bb73399be3",
+  "id": "1769b8ba-321b-4f24-9b3a-18b4e9bbc48c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "libraryItemAudioFile": {
@@ -242,6 +242,13 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false
+        },
+        "authorNameLF": {
+          "name": "authorNameLF",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         },
         "numAudioFiles": {

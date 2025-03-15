@@ -106,7 +106,7 @@ export default function Player() {
               ({
                 id: af.id,
                 title: af.name,
-                artist: libraryItem.authorName,
+                artist: libraryItem.authorNameLF,
                 album: libraryItem.title,
                 artwork: libraryItem.coverArtPath ?? undefined,
                 url: af.path as string,

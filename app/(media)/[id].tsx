@@ -207,7 +207,7 @@ const MediaSummary = ({
       <View className="mt-4">
         <View className="flex flex-row items-center gap-4">
           <Text className="uppercase text-stone-400">AUTHOR</Text>
-          <Text className="text-stone-300">{libraryItem.authorName}</Text>
+          <Text className="text-stone-300">{libraryItem.authorNameLF}</Text>
         </View>
         <View className="flex flex-row items-center gap-4">
           <Text className="uppercase text-stone-400">PUBLISHED</Text>

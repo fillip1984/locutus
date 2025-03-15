@@ -193,6 +193,7 @@ const Login = ({
               onChangeText={(text) => setServerUrl(text)}
               placeholder="Server Url, i.e. http://192.168.0.10:13378"
               className="flex-1 rounded bg-white p-2 text-xl text-black"
+              autoCapitalize="none"
             />
           </View>
 
@@ -204,6 +205,7 @@ const Login = ({
                 onChangeText={(text) => setUsername(text)}
                 placeholder="Username"
                 className="flex-1 rounded bg-white p-2 text-xl text-black"
+                autoCapitalize="none"
               />
             </View>
 
@@ -215,6 +217,7 @@ const Login = ({
                 placeholder="Password"
                 secureTextEntry
                 className="flex-1 rounded bg-white p-2 text-xl text-black"
+                autoCapitalize="none"
               />
             </View>
           </View>

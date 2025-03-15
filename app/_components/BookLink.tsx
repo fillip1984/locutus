@@ -9,22 +9,22 @@ import { LibraryItemSchemaType } from "@/db/schema";
 export default function BookLink({ item }: { item: LibraryItemSchemaType }) {
   return (
     <Link key={item.id} href={`/(media)/${item.id}`}>
-      <View className="flex h-[285px] w-[192px]">
+      <View className="flex h-[265px] w-[172px]">
         <View className="overflow-hidden rounded-xl">
           <Image
             source={item.coverArtPath}
             style={{
               objectFit: "fill",
               overflow: "hidden",
-              width: 192,
-              height: 192,
+              width: 172,
+              height: 172,
             }}
             contentFit="fill"
             transition={300}
           />
         </View>
         <Text className="line-clamp-1 font-bold text-white">{item.title}</Text>
-        <Text className="line-clamp-1 text-white/80">{item.authorName}</Text>
+        <Text className="line-clamp-1 text-white/80">{item.authorNameLF}</Text>
         <View className="flex flex-row gap-2">
           {item.numAudioFiles > 0 && (
             <View className="flex flex-row items-center gap-1">

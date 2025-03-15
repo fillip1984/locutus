@@ -26,14 +26,14 @@ export interface LibraryStore {
   removeLibrary: (id: string) => void;
 }
 
-export type Sort = "Alphabetically" | "LastTouched";
+export type Sort = "Author" | "Title" | "LastTouched";
 
 export const useLibraryStore = create<LibraryStore>()((set, get) => ({
   libraries: null,
   libraryItems: null,
   status: "loading",
   refetch: async (sort?: Sort) => {
-    console.log("refetching libraries");
+    console.log("refetching libraries with sort order: " + sort);
     set(() => ({ status: "loading" }));
     const freshLibraries = await localDb.select().from(librarySchema);
     set(() => ({ libraries: freshLibraries }));
@@ -43,7 +43,9 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
       .orderBy(
         sort === "LastTouched"
           ? desc(libraryItemSchema.updatedAt)
-          : asc(libraryItemSchema.title),
+          : sort === "Author"
+            ? asc(libraryItemSchema.authorNameLF)
+            : asc(libraryItemSchema.title),
       );
     set(() => ({ libraryItems: freshLibraryItems, status: "loaded" }));
     console.log("refetched libraries");
@@ -107,6 +109,7 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
             id: item.id,
             title: item.media.metadata.title,
             authorName: item.media.metadata.authorName,
+            authorNameLF: item.media.metadata.authorNameLF,
             duration: item.media.duration,
             numAudioFiles: item.media.numAudioFiles,
             ebookFileFormat: item.media.ebookFormat,
@@ -126,6 +129,7 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
             .set({
               title: item.media.metadata.title,
               authorName: item.media.metadata.authorName,
+              authorNameLF: item.media.metadata.authorNameLF,
               duration: item.media.duration,
               numAudioFiles: item.media.numAudioFiles,
               ebookFileFormat: item.media.ebookFormat,

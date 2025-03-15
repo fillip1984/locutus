@@ -32,7 +32,7 @@ export default function Library() {
   const { refetch, libraryItems } = useLibraryStore();
   useFocusEffect(
     useCallback(() => {
-      refetch();
+      refetch("Author");
     }, []),
   );
 
@@ -67,9 +67,9 @@ export default function Library() {
                 estimatedItemSize={213}
                 data={libraryItems}
                 numColumns={2}
-                ItemSeparatorComponent={() => (
-                  <View style={{ height: 5, width: 10 }} />
-                )}
+                // ItemSeparatorComponent={() => (
+                //   <View style={{ height: 5, width: 10 }} />
+                // )}
                 renderItem={({ item }) => (
                   <BookLink key={item.id} item={item} />
                 )}

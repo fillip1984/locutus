@@ -28,6 +28,7 @@ export const libraryItemSchema = sqliteTable("libraryItem", {
   // ino: text("ino").notNull(),
   title: text("title").notNull(),
   authorName: text("authorName").notNull(),
+  authorNameLF: text("authorNameLF"),
   numAudioFiles: integer("numAudioFiles").notNull(),
   ebookFileFormat: text("eBookFile"),
   duration: integer("duration").notNull(),

@@ -34,6 +34,7 @@ CREATE TABLE `libraryItem` (
 	`remoteId` text NOT NULL,
 	`title` text NOT NULL,
 	`authorName` text NOT NULL,
+	`authorNameLF` text,
 	`numAudioFiles` integer NOT NULL,
 	`eBookFile` text,
 	`duration` integer NOT NULL,
