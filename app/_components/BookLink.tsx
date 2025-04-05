@@ -26,35 +26,16 @@ export default function BookLink({ item }: { item: LibraryItemSchemaType }) {
         <Text className="line-clamp-1 font-bold text-white">{item.title}</Text>
         <Text className="line-clamp-1 text-white/80">{item.authorNameLF}</Text>
         <View className="flex flex-row gap-2">
-          {item.numAudioFiles > 0 && (
-            <View className="flex flex-row items-center gap-1">
+          <View className="flex w-full flex-row items-center gap-1">
+            <Text className="mr-auto text-white">
+              {item.publishedYear ?? "Unknown"}
+            </Text>
+            {item.numAudioFiles > 0 && (
               <Feather name="volume-2" size={20} color="white" />
-              {/* <View className="relative flex-1">
-                <View className="h-2 rounded bg-gray-400" />
-                <View
-                  className="absolute left-0 h-2 rounded bg-yellow-400"
-                  style={{ width: "0%" }}
-                />
-              </View> */}
-            </View>
-          )}
-          <View className="flex flex-row items-center gap-1">
+            )}
             {item.ebookFileFormat && (
               <Feather name="book" size={20} color="white" />
             )}
-            {/* {item.ebookFileFormat && item.lastEBookId ? ( */}
-            {/* // <Feather name="book-open" size={20} color="white" /> */}
-            {/* ) : ( */}
-            {/* <Feather name="book" size={20} color="white" /> */}
-            {/* )} */}
-
-            {/* <View className="relative flex-1">
-              <View className="h-2 rounded bg-gray-400" />
-              <View
-                className="absolute left-0 h-2 rounded bg-yellow-400"
-                style={{ width: "0%" }}
-              />
-            </View> */}
           </View>
         </View>
       </View>
