@@ -19,8 +19,7 @@ export default function Home() {
 
   useFocusEffect(
     useCallback(() => {
-      // console.log("refetching");
-      libraryStore.refetch("LastTouched");
+      libraryStore.refetch({ sort: "Recent" });
     }, []),
   );
 

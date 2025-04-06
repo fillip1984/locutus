@@ -1,11 +1,7 @@
-import { useFocusEffect } from "expo-router";
-import { useCallback, useState } from "react";
-import { Pressable, SafeAreaView, Text, TextInput, View } from "react-native";
+import { Pressable, SafeAreaView, Text, View } from "react-native";
 import Toast from "react-native-toast-message";
 
-import { dropDatabase, localDb } from "@/db";
-import { userSettingsSchema } from "@/db/schema";
-import { login } from "@/services/loginApi";
+import { dropDatabase } from "@/db";
 import { useLibraryStore } from "@/stores/libraryStore";
 
 export default function Settings() {

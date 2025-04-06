@@ -1,4 +1,4 @@
-import { asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, gt, isNotNull, like, or } from "drizzle-orm";
 import { create } from "zustand";
 
 import { localDb } from "@/db";
@@ -15,40 +15,61 @@ import { getLibraries } from "@/services/libraryApi";
 import { getLibraryItem } from "@/services/libraryItemApi";
 import { getLibraryItems } from "@/services/libraryItemsApi";
 
+export interface LibraryStoreRefetchRequest {
+  search?: string;
+  sort?: LibraryItemSort;
+  eBookFilter?: boolean;
+  audioBookFilter?: boolean;
+}
+
 export interface LibraryStore {
   libraries: LibrarySchemaType[] | null;
   libraryItems: LibraryItemSchemaType[] | null;
   status: "loading" | "loaded";
 
-  refetch: (sort?: Sort) => void;
+  refetch: (request?: LibraryStoreRefetchRequest) => void;
   syncWithServer: () => Promise<boolean>;
   addLibrary: (library: LibrarySchemaType) => void;
   removeLibrary: (id: string) => void;
 }
 
-export type Sort = "Author" | "Title" | "LastTouched";
+export type LibraryItemSort = "Author" | "Title" | "Published" | "Recent";
 
 export const useLibraryStore = create<LibraryStore>()((set, get) => ({
   libraries: null,
   libraryItems: null,
   status: "loading",
-  refetch: async (sort?: Sort) => {
-    console.log("refetching libraries with sort order: " + sort);
+  refetch: async (request?: LibraryStoreRefetchRequest) => {
     set(() => ({ status: "loading" }));
-    const freshLibraries = await localDb.select().from(librarySchema);
-    set(() => ({ libraries: freshLibraries }));
     const freshLibraryItems = await localDb
       .select()
       .from(libraryItemSchema)
+      .where(
+        and(
+          request?.search
+            ? or(
+                like(libraryItemSchema.title, `%${request.search}%`),
+                like(libraryItemSchema.authorName, `%${request.search}%`),
+              )
+            : undefined,
+          request?.audioBookFilter
+            ? gt(libraryItemSchema.numAudioFiles, 0)
+            : undefined,
+          request?.eBookFilter
+            ? isNotNull(libraryItemSchema.ebookFileFormat)
+            : undefined,
+        ),
+      )
       .orderBy(
-        sort === "LastTouched"
-          ? desc(libraryItemSchema.updatedAt)
-          : sort === "Author"
-            ? asc(libraryItemSchema.authorNameLF)
-            : asc(libraryItemSchema.title),
+        request?.sort === "Title"
+          ? asc(libraryItemSchema.title)
+          : request?.sort === "Published"
+            ? desc(libraryItemSchema.publishedYear)
+            : request?.sort === "Recent"
+              ? desc(libraryItemSchema.updatedAt)
+              : asc(libraryItemSchema.authorNameLF), // all other states sort by author
       );
     set(() => ({ libraryItems: freshLibraryItems, status: "loaded" }));
-    console.log("refetched libraries");
   },
   syncWithServer: async () => {
     const libraries = await getLibraries();
@@ -105,7 +126,7 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
 
         if (!libraryItemId) {
           // console.log("adding library item");
-          const result = await localDb.insert(libraryItemSchema).values({
+          await localDb.insert(libraryItemSchema).values({
             id: item.id,
             title: item.media.metadata.title,
             authorName: item.media.metadata.authorName,
@@ -115,7 +136,7 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
             ebookFileFormat: item.media.ebookFormat,
             description: item.media.metadata.description,
             publishedYear: item.media.metadata.publishedYear
-              ? parseInt(item.media.metadata.publishedYear)
+              ? parseInt(item.media.metadata.publishedYear, 10)
               : null,
             coverArtPath,
             libraryId,

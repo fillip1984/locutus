@@ -1,4 +1,4 @@
-import { and, eq, gt, gte, isNotNull, lte } from "drizzle-orm";
+import { and, eq, gt, isNotNull } from "drizzle-orm";
 import Toast from "react-native-toast-message";
 
 import { ping } from "./pingApi";
@@ -132,6 +132,7 @@ export const syncProgressWithServer = async () => {
 
     await localDb.transaction(async (tx) => {
       // update client
+      console.log("updating ebooks");
       for (const ebook of progressUpdates.filter(
         (i) => i.source === "server" && i.type === "ebook",
       ) as EBookProgressUpdate[]) {
@@ -154,9 +155,11 @@ export const syncProgressWithServer = async () => {
           .where(eq(libraryItemSchema.id, ebook.libraryItemId));
       }
 
+      console.log("updating audiobooks");
       for (const audioBook of progressUpdates.filter(
         (i) => i.source === "server" && i.type === "audioBook",
       ) as AudioBookProgressUpdate[]) {
+        console.log(`updating audiobook ${audioBook.libraryItemId}`);
         const audioBookItemToUpdate =
           await localDb.query.libraryItemAudioFileSchema.findFirst({
             where: and(
@@ -164,8 +167,8 @@ export const syncProgressWithServer = async () => {
                 libraryItemAudioFileSchema.libraryItemId,
                 audioBook.libraryItemId,
               ),
-              lte(libraryItemAudioFileSchema.start, audioBook.currentTime),
-              gte(libraryItemAudioFileSchema.end, audioBook.currentTime),
+              //lte(libraryItemAudioFileSchema.start, audioBook.currentTime),
+              //gte(libraryItemAudioFileSchema.end, audioBook.currentTime),
             ),
           });
         if (!audioBookItemToUpdate) {
@@ -193,8 +196,9 @@ export const syncProgressWithServer = async () => {
       }
 
       // update server
+      console.log("updating server");
       if (progressUpdates.filter((i) => i.source === "client").length > 0) {
-        const updateResponse = await (
+        await (
           await getAxiosClient()
         ).patch(
           `${userSettings.serverUrl}/api/me/progress/batch/update`,
