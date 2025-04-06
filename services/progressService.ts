@@ -1,4 +1,4 @@
-import { and, eq, gt, isNotNull } from "drizzle-orm";
+import { and, eq, gt, gte, isNotNull, lte } from "drizzle-orm";
 import Toast from "react-native-toast-message";
 
 import { ping } from "./pingApi";
@@ -167,32 +167,35 @@ export const syncProgressWithServer = async () => {
                 libraryItemAudioFileSchema.libraryItemId,
                 audioBook.libraryItemId,
               ),
-              //lte(libraryItemAudioFileSchema.start, audioBook.currentTime),
-              //gte(libraryItemAudioFileSchema.end, audioBook.currentTime),
+              lte(libraryItemAudioFileSchema.start, audioBook.currentTime),
+              gte(libraryItemAudioFileSchema.end, audioBook.currentTime),
             ),
           });
-        if (!audioBookItemToUpdate) {
-          throw Error(
-            "Unable to find audio book item to update for currentTime: " +
-              audioBook.currentTime,
-          );
+        // TODO: there's a bug right here. If we ask the server for any updates on media we don't have downloaded then we get an error because we try to set the progress even though there are no files
+        // if (!audioBookItemToUpdate) {
+        //   throw Error(
+        //     "Unable to find audio book item to update for currentTime: " +
+        //       audioBook.currentTime,
+        //   );
+        // }
+        if (audioBookItemToUpdate) {
+          await tx
+            .update(libraryItemAudioFileSchema)
+            .set({
+              updatedAt: new Date(audioBook.updatedAt),
+              progress: audioBook.currentTime,
+              complete: audioBook.isFinished,
+            })
+            .where(eq(libraryItemAudioFileSchema.id, audioBookItemToUpdate.id));
+          await tx
+            .update(libraryItemSchema)
+            .set({
+              updatedAt: new Date(audioBook.updatedAt),
+              lastPlayedId: audioBookItemToUpdate?.id,
+              complete: audioBook.isFinished,
+            })
+            .where(eq(libraryItemSchema.id, audioBook.libraryItemId));
         }
-        await tx
-          .update(libraryItemAudioFileSchema)
-          .set({
-            updatedAt: new Date(audioBook.updatedAt),
-            progress: audioBook.currentTime,
-            complete: audioBook.isFinished,
-          })
-          .where(eq(libraryItemAudioFileSchema.id, audioBookItemToUpdate.id));
-        await tx
-          .update(libraryItemSchema)
-          .set({
-            updatedAt: new Date(audioBook.updatedAt),
-            lastPlayedId: audioBookItemToUpdate?.id,
-            complete: audioBook.isFinished,
-          })
-          .where(eq(libraryItemSchema.id, audioBook.libraryItemId));
       }
 
       // update server

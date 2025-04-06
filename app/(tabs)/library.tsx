@@ -71,33 +71,35 @@ export default function Library() {
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
       {/* container */}
       <View className="flex h-full w-full bg-zinc-900">
-        <TextInput
-          value={search}
-          onChangeText={(text) => setSearch(text)}
-          placeholder="Search..."
-          className="mx-2 rounded bg-white p-2 text-xl text-black"
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-        <View className="mx-2 mt-2 flex flex-row items-center justify-between">
-          <View className="flex flex-row items-center gap-3">
+        <View className="px-1 py-2">
+          <TextInput
+            value={search}
+            onChangeText={(text) => setSearch(text)}
+            placeholder="Search..."
+            className="mx-2 rounded bg-white p-2 text-xl text-black"
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          <View className="mx-2 my-3 flex flex-row items-center justify-between">
+            <View className="flex flex-row items-center gap-3">
+              <Pressable
+                onPress={() => setEBookFilter((prev) => !prev)}
+                className={`${eBookFilter ? "rounded-full bg-sky-600" : ""} p-1`}>
+                <Feather name="book" size={20} color="white" />
+              </Pressable>
+              <Pressable
+                onPress={() => setAudioBookFilter((prev) => !prev)}
+                className={`${audioBookFilter ? "rounded-full bg-sky-600" : ""} p-1`}>
+                <Feather name="volume-2" size={20} color="white" />
+              </Pressable>
+            </View>
             <Pressable
-              onPress={() => setEBookFilter((prev) => !prev)}
-              className={`${eBookFilter ? "rounded-full bg-sky-600" : ""} p-1`}>
-              <Feather name="book" size={20} color="white" />
-            </Pressable>
-            <Pressable
-              onPress={() => setAudioBookFilter((prev) => !prev)}
-              className={`${audioBookFilter ? "rounded-full bg-sky-600" : ""} p-1`}>
-              <Feather name="volume-2" size={20} color="white" />
+              onPress={handleSort}
+              className="flex flex-row items-center gap-2">
+              <Text className="text-white">{sort}</Text>
+              <FontAwesome6 name="sort" size={24} color="white" />
             </Pressable>
           </View>
-          <Pressable
-            onPress={handleSort}
-            className="flex flex-row items-center gap-2">
-            <Text className="text-white">{sort}</Text>
-            <FontAwesome6 name="sort" size={24} color="white" />
-          </Pressable>
         </View>
         {/* {loading && (
           <View className="flex flex-1 items-center justify-center">
