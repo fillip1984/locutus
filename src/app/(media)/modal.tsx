@@ -2,8 +2,8 @@ import { Feather, Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
-import { handleDownload } from "@/src/stores/downloadStore";
-import { useMediaStore } from "@/src/stores/mediaStore";
+import { handleDownload } from "@/stores/downloadStore";
+import { useMediaStore } from "@/stores/mediaStore";
 
 export default function MediaModal() {
   const navi = useNavigation();
@@ -27,7 +27,8 @@ export default function MediaModal() {
       <View className="flex flex-row gap-2">
         <Pressable
           onPress={handleDelete}
-          className="flex min-w-[125px] items-center gap-2 rounded-lg border border-red-500 p-4">
+          className="flex min-w-[125px] items-center gap-2 rounded-lg border border-red-500 p-4"
+        >
           <Feather name="trash" size={40} color="red" />
           <Text className="text-lg text-red-500">Delete</Text>
         </Pressable>
@@ -39,7 +40,8 @@ export default function MediaModal() {
               navi.goBack();
             }
           }}
-          className="flex min-w-[125px] items-center gap-2 rounded-lg border border-sky-300 p-4">
+          className="flex min-w-[125px] items-center gap-2 rounded-lg border border-sky-300 p-4"
+        >
           <Ionicons name="cloud-download-outline" size={40} color="white" />
           <Text className="text-lg text-sky-300">Redownload</Text>
         </Pressable>

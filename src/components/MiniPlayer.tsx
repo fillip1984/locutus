@@ -12,7 +12,7 @@ import TrackPlayer, {
 
 import { calc } from "@/app/(media)/[id]";
 import { LibraryItemSchemaType } from "@/db/schema";
-import { fetchLibraryItemFromTrack } from "@/src/services/playbackService";
+import { fetchLibraryItemFromTrack } from "@/services/playbackService";
 
 export default function MiniPlayer() {
   const [libraryItem, setLibraryItem] = useState<
@@ -40,7 +40,8 @@ export default function MiniPlayer() {
     <View className="relative flex w-full">
       <Pressable
         onPress={() => router.push(`/(player)/${libraryItem?.id}`)}
-        className="flex flex-row items-center gap-2 p-4">
+        className="flex flex-row items-center gap-2 p-4"
+      >
         {/* TODO: not sure what I'm fighting, either expo or nativewind but this worked and then didn't... now using styles */}
         <View style={{ width: 40, height: 40 }}>
           <Image
@@ -55,7 +56,7 @@ export default function MiniPlayer() {
           <Text className="text-white">{track?.artist}</Text>
         </View>
 
-        <View className="ml-auto mr-2">
+        <View className="mr-2 ml-auto">
           {playbackState === State.Playing ? (
             <Ionicons
               onPress={TrackPlayer.pause}

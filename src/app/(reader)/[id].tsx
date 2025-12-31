@@ -9,8 +9,9 @@ import { useFileSystem } from "@epubjs-react-native/expo-file-system";
 import { eq } from "drizzle-orm";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { Pressable, SafeAreaView, Text, View } from "react-native";
-import Toast from "react-native-toast-message";
+import { Pressable, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { toast } from "sonner-native";
 
 import { localDb } from "@/db";
 import { libraryItemEBookFileSchema, libraryItemSchema } from "@/db/schema";
@@ -40,10 +41,7 @@ export default function EBookReader() {
 
       if (!libraryItem) {
         const msg = `Unable to find library item for id: ${libraryItemId}`;
-        Toast.show({
-          type: "error",
-          text1: msg,
-        });
+        toast.error(msg);
         throw Error(msg);
       }
       const ebookFile =

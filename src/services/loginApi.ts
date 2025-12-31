@@ -1,5 +1,5 @@
 import axios from "axios";
-import Toast from "react-native-toast-message";
+import { toast } from "sonner-native";
 
 export const login = async (
   url: string,
@@ -15,11 +15,7 @@ export const login = async (
     return response.data;
   } catch (err) {
     console.error("Exception occurred while fetching libraries", err);
-    Toast.show({
-      position: "bottom",
-      type: "error",
-      text1: "Error while attempting to login",
-    });
+    toast.error("Error while attempting to login");
     throw err;
   }
 };

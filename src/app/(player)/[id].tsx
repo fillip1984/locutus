@@ -5,8 +5,9 @@ import { eq } from "drizzle-orm";
 import { Image } from "expo-image";
 import { Link, Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { Pressable, SafeAreaView, Text, View } from "react-native";
-import Toast from "react-native-toast-message";
+import { Pressable, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { toast } from "sonner-native";
 import TrackPlayer, {
   State,
   Track,
@@ -44,10 +45,7 @@ export default function Player() {
 
       if (!libraryItem) {
         const msg = `Unable to find library item for id: ${libraryItemId}`;
-        Toast.show({
-          type: "error",
-          text1: msg,
-        });
+        toast.error(msg);
         throw Error(msg);
       }
 
@@ -74,10 +72,7 @@ export default function Player() {
 
       if (!audioFile) {
         const msg = `Unable to find audio file to play for audio file id: ${audioFileId}`;
-        Toast.show({
-          type: "error",
-          text1: msg,
-        });
+        toast.error(msg);
         throw Error(msg);
       }
 

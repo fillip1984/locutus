@@ -1,9 +1,9 @@
 import axios from "axios";
-import Toast from "react-native-toast-message";
+import { toast } from "sonner-native";
 
 import { localDb } from "@/db";
 import { userSettingsSchema } from "@/db/schema";
-import { getToken } from "@/src/stores/sessionStore";
+import { getToken } from "@/stores/sessionStore";
 
 export const getLibraries = async () => {
   const userSettings = (await localDb.select().from(userSettingsSchema))[0];
@@ -21,11 +21,7 @@ export const getLibraries = async () => {
     return response.data.libraries;
   } catch (err) {
     console.error("Exception occurred while fetching libraries", err);
-    Toast.show({
-      position: "bottom",
-      type: "error",
-      text1: "Error while attempting to connect to server",
-    });
+    toast.error("Error while attempting to connect to server");
     throw err;
   }
 };

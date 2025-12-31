@@ -1,9 +1,9 @@
 import axios from "axios";
-import * as FileSystem from "expo-file-system";
+import { File, Directory, Paths } from "expo-file-system";
 
 import { localDb } from "@/db";
 import { userSettingsSchema } from "@/db/schema";
-import { getToken } from "@/src/stores/sessionStore";
+import { getToken } from "@/stores/sessionStore";
 
 export const getLibraryItem = async (libraryItemId: string) => {
   const userSettings = (await localDb.select().from(userSettingsSchema))[0];
@@ -76,26 +76,18 @@ export const downloadLibraryItem = async (
 
   try {
     // console.log(`downloading libraryItem remoteId: ${libraryItemRemoteId}`);
-    const dirInfo = await FileSystem.getInfoAsync(
-      FileSystem.documentDirectory + libraryItemRemoteId,
-    );
+    const dirInfo = new Directory(Paths.document, libraryItemRemoteId);
     if (!dirInfo.exists) {
-      // console.log("Gif directory doesn't exist, creating…");
-      await FileSystem.makeDirectoryAsync(
-        FileSystem.documentDirectory + libraryItemRemoteId,
-        { intermediates: true },
-      );
+      dirInfo.create();
     }
 
     // delete previous version of the file
-    const destination =
-      FileSystem.documentDirectory + libraryItemRemoteId + "/" + filename;
-    const info = await FileSystem.getInfoAsync(destination);
-    if (info.exists) {
-      await FileSystem.deleteAsync(destination);
+    const destination = new File(dirInfo, filename);
+    if (destination.exists) {
+      destination.delete();
     }
 
-    const result = await FileSystem.downloadAsync(
+    const result = await File.downloadFileAsync(
       `${userSettings.serverUrl}/api/items/${libraryItemRemoteId}/file/${fileId}/download`,
       destination,
       { headers: { Authorization: `Bearer ${getToken()}` } },
@@ -105,12 +97,12 @@ export const downloadLibraryItem = async (
     // const postDownloadInfo = await FileSystem.getInfoAsync(destination);
     // console.log({ postDownloadInfo });
 
-    if (result.status === 401) {
-      // console.log({ result });
-      throw Error(
-        "Failed to download item, result was login challenge. Are you logged in?",
-      );
-    }
+    // if (result.status === 401) {
+    //   // console.log({ result });
+    //   throw Error(
+    //     "Failed to download item, result was login challenge. Are you logged in?",
+    //   );
+    // }
 
     return result.uri;
   } catch (err) {

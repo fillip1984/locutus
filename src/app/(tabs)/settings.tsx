@@ -1,23 +1,16 @@
-import { Pressable, SafeAreaView, Text, View } from "react-native";
-import Toast from "react-native-toast-message";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Pressable, Text, View } from "react-native";
+import { toast } from "sonner-native";
 
 import { dropDatabase } from "@/db";
-import { useLibraryStore } from "@/src/stores/libraryStore";
+import { useLibraryStore } from "@/stores/libraryStore";
 
 export default function Settings() {
   const libraryStore = useLibraryStore();
   const handleSync = async () => {
-    Toast.show({
-      type: "info",
-      text1: "Syncing with server",
-      position: "bottom",
-    });
+    toast.info("Syncing with server");
     await libraryStore.syncWithServer();
-    Toast.show({
-      type: "success",
-      text1: "Libraries synchronized",
-      position: "bottom",
-    });
+    toast.success("Libraries synchronized");
   };
 
   const handleDropData = () => {
@@ -39,13 +32,15 @@ export default function Settings() {
           <Text className="text-3xl text-white">Data</Text>
           <Pressable
             onPress={handleSync}
-            className="flex w-full items-center justify-center rounded bg-sky-300 px-4 py-2">
+            className="flex w-full items-center justify-center rounded bg-sky-300 px-4 py-2"
+          >
             <Text className="text-2xl text-white">Sync</Text>
           </Pressable>
 
           <Pressable
             onPress={handleDropData}
-            className="flex w-full items-center justify-center rounded bg-red-300 px-4 py-2">
+            className="flex w-full items-center justify-center rounded bg-red-300 px-4 py-2"
+          >
             <Text className="text-2xl text-white">Drop data</Text>
           </Pressable>
         </View>

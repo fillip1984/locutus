@@ -1,16 +1,17 @@
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { SafeAreaView, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useActiveTrack } from "react-native-track-player";
 
-import BookLink from "@/app/_components/BookLink";
-import MiniPlayer from "@/app/_components/MiniPlayer";
+import BookLink from "@/components/BookLink";
+import MiniPlayer from "@/components/MiniPlayer";
 import { localDb } from "@/db";
 import { LibraryItemSchemaType, userSettingsSchema } from "@/db/schema";
-import { getProgressFromServer } from "@/src/services/progressService";
-import { useDownloadStore } from "@/src/stores/downloadStore";
-import { useLibraryStore } from "@/src/stores/libraryStore";
+import { getProgressFromServer } from "@/services/progressService";
+import { useDownloadStore } from "@/stores/downloadStore";
+import { useLibraryStore } from "@/stores/libraryStore";
 
 export default function Home() {
   const libraryStore = useLibraryStore();
@@ -99,8 +100,9 @@ export default function Home() {
         {/* TODO: Couldn't find a better way to afix to the bottom, try flex methods maybe? */}
         {track && (
           <View
-            className="absolute left-0 right-0 bg-zinc-800"
-            style={{ bottom: bottomTabbarHeight + 59 }}>
+            className="absolute right-0 left-0 bg-zinc-800"
+            style={{ bottom: bottomTabbarHeight + 59 }}
+          >
             <MiniPlayer />
           </View>
         )}

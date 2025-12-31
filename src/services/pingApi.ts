@@ -1,5 +1,5 @@
 import axios from "axios";
-import Toast from "react-native-toast-message";
+import { toast } from "sonner-native";
 
 export const ping = async (url: string) => {
   try {
@@ -12,11 +12,7 @@ export const ping = async (url: string) => {
     return response.data.success;
   } catch (err) {
     console.error("Exception occurred while pinging server", err);
-    Toast.show({
-      position: "bottom",
-      type: "error",
-      text1: "AudioBookShelf server is unreachable",
-    });
+    toast.error("AudioBookShelf server is unreachable");
     return false;
   }
 };

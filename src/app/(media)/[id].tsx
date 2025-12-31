@@ -24,8 +24,8 @@ import {
   libraryItemSchema,
   LibraryItemSchemaType,
 } from "@/db/schema";
-import { handleDownload, useDownloadStore } from "@/src/stores/downloadStore";
-import { useMediaStore } from "@/src/stores/mediaStore";
+import { handleDownload, useDownloadStore } from "@/stores/downloadStore";
+import { useMediaStore } from "@/stores/mediaStore";
 
 export default function Media() {
   const { id } = useLocalSearchParams();
@@ -130,7 +130,8 @@ const MediaActionsBar = ({
         ebook?.path === null && (
           <Pressable
             onPress={() => handleDownload(libraryItem.id)}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-sky-300 py-2"
+          >
             <View className="animate-bounce">
               <Ionicons name="cloud-download-outline" size={24} color="white" />
             </View>
@@ -157,7 +158,8 @@ const MediaActionsBar = ({
                   TrackPlayer.play();
                   router.push(`/(player)/${libraryItem.id}`);
                 }}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-sky-300 py-2"
+              >
                 <Ionicons name="play-sharp" size={40} color="white" />
               </Pressable>
             )}
@@ -166,7 +168,8 @@ const MediaActionsBar = ({
             audioFiles.find((af) => af.id === activeTrack?.id) && (
               <Pressable
                 onPress={() => TrackPlayer.pause()}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-sky-300 py-2"
+              >
                 <Ionicons name="pause" size={40} color="white" />
               </Pressable>
             )}
@@ -174,7 +177,8 @@ const MediaActionsBar = ({
           {ebook && ebook.path && (
             <Pressable
               onPress={() => handleRead()}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-sky-300 py-2">
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-sky-300 py-2"
+            >
               <Text className="text-3xl font-bold text-white">Read</Text>
             </Pressable>
           )}
@@ -183,7 +187,8 @@ const MediaActionsBar = ({
           {/* TODO: need to work out sheet that slides up to reveal options */}
           <Pressable
             onPress={() => router.push("/(media)/modal")}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-sky-300 py-2">
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-sky-300 py-2"
+          >
             <FontAwesome6 name="ellipsis" size={24} color="white" />
           </Pressable>
         </>
@@ -206,11 +211,11 @@ const MediaSummary = ({
       {/* TODO: looks like more CSS GRID would be a better fit here as well */}
       <View className="mt-4">
         <View className="flex flex-row items-center gap-4">
-          <Text className="uppercase text-stone-400">AUTHOR</Text>
+          <Text className="text-stone-400 uppercase">AUTHOR</Text>
           <Text className="text-stone-300">{libraryItem.authorNameLF}</Text>
         </View>
         <View className="flex flex-row items-center gap-4">
-          <Text className="uppercase text-stone-400">PUBLISHED</Text>
+          <Text className="text-stone-400 uppercase">PUBLISHED</Text>
           <Text className="text-stone-300">{libraryItem.publishedYear}</Text>
         </View>
       </View>
@@ -230,7 +235,7 @@ const MediaTracks = ({
   return (
     <View className="mt-4">
       <View className="flex flex-row justify-between">
-        <Text className="uppercase text-white">Chapters</Text>
+        <Text className="text-white uppercase">Chapters</Text>
         <Text className="text-stone-300">
           {audioFiles?.filter((a) => !a.complete).length}/{audioFiles?.length}{" "}
           remaining
@@ -248,7 +253,8 @@ const MediaTracks = ({
                     y: e.nativeEvent.layout.y - 10,
                   });
                 }
-              }}>
+              }}
+            >
               <Chapter
                 audioFile={audioFile}
                 isLastPlayed={libraryItem.lastPlayedId === audioFile.id}
@@ -260,7 +266,8 @@ const MediaTracks = ({
         <View className="flex items-center justify-center pb-[600px]">
           <Pressable
             onPress={() => tracksScrollViewRef.current?.scrollTo({ y: 0 })}
-            className="mt-8">
+            className="mt-8"
+          >
             <FontAwesome name="arrow-circle-up" size={48} color="white" />
           </Pressable>
         </View>
@@ -283,7 +290,8 @@ const Chapter = ({
         pathname: "/(player)/[id]",
         params: { id: audioFile.libraryItemId, audioFileId: audioFile.id },
       }}
-      asChild>
+      asChild
+    >
       <Pressable className="relative flex w-full">
         <View
           // className={`m-1 flex flex-row justify-between gap-2 rounded p-4 ${libraryItem.lastPlayedId === audioFile.id ? "bg-sky-300" : "bg-slate-400/30"}`}
@@ -294,12 +302,14 @@ const Chapter = ({
               "bg-slate-400/30": !isLastPlayed && !audioFile.complete,
               "bg-sky-300": isLastPlayed,
             },
-          )}>
+          )}
+        >
           <Text
             className={clsx("w-4/5 font-bold", {
               "text-slate-800": isLastPlayed,
               "text-white": !isLastPlayed,
-            })}>
+            })}
+          >
             {audioFile.name}
           </Text>
 

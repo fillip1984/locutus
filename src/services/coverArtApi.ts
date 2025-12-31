@@ -1,26 +1,21 @@
-import * as FileSystem from "expo-file-system";
+import { File, Directory, Paths } from "expo-file-system";
 
 import { localDb } from "@/db";
 import { userSettingsSchema } from "@/db/schema";
-import { getToken } from "@/src/stores/sessionStore";
+import { getToken } from "@/stores/sessionStore";
 
 export const downloadCoverArt = async (libraryItemId: string) => {
   const userSettings = (await localDb.select().from(userSettingsSchema))[0];
 
   try {
-    const dirInfo = await FileSystem.getInfoAsync(
-      FileSystem.documentDirectory + libraryItemId,
-    );
+    const dirInfo = new Directory(Paths.document, libraryItemId);
     if (!dirInfo.exists) {
-      await FileSystem.makeDirectoryAsync(
-        FileSystem.documentDirectory + libraryItemId,
-        { intermediates: true },
-      );
+      dirInfo.create();
     }
 
-    const result = await FileSystem.downloadAsync(
+    const result = await File.downloadFileAsync(
       `${userSettings.serverUrl}/api/items/${libraryItemId}/cover`,
-      FileSystem.documentDirectory + libraryItemId + "/cover.webp",
+      new File(dirInfo, "cover.webp"),
       { headers: { Authorization: `Bearer ${getToken()}` } },
     );
     return result.uri;

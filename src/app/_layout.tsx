@@ -14,44 +14,45 @@ import {
   useEffect,
   useState,
 } from "react";
-import { Pressable, SafeAreaView, Text, TextInput, View } from "react-native";
-import Toast from "react-native-toast-message";
-import TrackPlayer, { Capability } from "react-native-track-player";
+import { Toaster, toast } from "sonner-native";
+import { Pressable, Text, TextInput, View } from "react-native";
+// import TrackPlayer, { Capability } from "react-native-track-player";
 
-import "../global.css";
+import "@/styles/global.css";
 import { playbackService } from "../services/playbackService";
 
 import { localDb } from "@/db";
 import { userSettingsSchema } from "@/db/schema";
-import { login } from "@/src/services/loginApi";
-import { syncProgressWithServer } from "@/src/services/progressService";
-import { setToken } from "@/src/stores/sessionStore";
+import { login } from "@/services/loginApi";
+import { syncProgressWithServer } from "@/services/progressService";
+import { setToken } from "@/stores/sessionStore";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RootLayout() {
   const [authenticated, setAuthenticated] = useState(false);
   const [preferences, setPreferences] = useState();
 
-  const initializePlayer = async () => {
-    await TrackPlayer.setupPlayer();
-    await TrackPlayer.updateOptions({
-      capabilities: [
-        Capability.Play,
-        Capability.Pause,
-        Capability.SkipToPrevious,
-        Capability.SkipToNext,
-        Capability.JumpBackward,
-        Capability.JumpForward,
-      ],
-      forwardJumpInterval: 30,
-      backwardJumpInterval: 30,
-      progressUpdateEventInterval: 15,
-    });
-    TrackPlayer.registerPlaybackService(() => playbackService);
-  };
+  // const initializePlayer = async () => {
+  //   await TrackPlayer.setupPlayer();
+  //   await TrackPlayer.updateOptions({
+  //     capabilities: [
+  //       Capability.Play,
+  //       Capability.Pause,
+  //       Capability.SkipToPrevious,
+  //       Capability.SkipToNext,
+  //       Capability.JumpBackward,
+  //       Capability.JumpForward,
+  //     ],
+  //     forwardJumpInterval: 30,
+  //     backwardJumpInterval: 30,
+  //     progressUpdateEventInterval: 15,
+  //   });
+  //   TrackPlayer.registerPlaybackService(() => playbackService);
+  // };
 
-  useEffect(() => {
-    initializePlayer();
-  }, []);
+  // useEffect(() => {
+  //   initializePlayer();
+  // }, []);
 
   if (authenticated) {
     return (
@@ -60,7 +61,7 @@ export default function RootLayout() {
           <MainLayout />
         </ReaderProvider>
         <StatusBar style="light" />
-        <Toast />
+        <Toaster />
       </>
     );
   } else {
@@ -68,7 +69,7 @@ export default function RootLayout() {
       <>
         <Login setAuthenticated={setAuthenticated} />
         <StatusBar style="light" />
-        <Toast />
+        <Toaster />
       </>
     );
   }
@@ -79,7 +80,8 @@ const MainLayout = () => {
     <Stack
       screenOptions={{
         headerShown: false,
-      }}>
+      }}
+    >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen
         name="(media)/modal"
@@ -147,20 +149,12 @@ const Login = ({
       console.error({ msg: "Failed to log in", e });
       if (e instanceof AxiosError) {
         if (e.response?.status === 401) {
-          Toast.show({
-            type: "error",
-            text1: "Please try again",
-            text2: "Invalid username and or password",
-          });
+          toast.error("Invalid username and or password. Please try again.");
         } else {
-          Toast.show({
-            type: "error",
-            text1: "Error",
-            text2: "Unable to connect to server",
-          });
+          toast.error("Unable to connect to server");
         }
       } else {
-        Toast.show({ type: "error", text1: "Unknown error" });
+        toast.error("Unknown error");
       }
     } finally {
       setLoading(false);
@@ -225,7 +219,8 @@ const Login = ({
           <View className="flex flex-row items-center gap-4">
             <Pressable
               onPress={handleLogin}
-              className="flex flex-1 flex-row items-center justify-center gap-3 rounded bg-sky-300 px-4 py-2">
+              className="flex flex-1 flex-row items-center justify-center gap-3 rounded bg-sky-300 px-4 py-2"
+            >
               {loading && (
                 <View className="animate-spin">
                   <FontAwesome6 name="circle-notch" size={32} color="white" />

@@ -10,10 +10,10 @@ import {
   libraryItemSchema,
   librarySchema,
 } from "@/db/schema";
-import { downloadCoverArt } from "@/src/services/coverArtApi";
-import { getLibraries } from "@/src/services/libraryApi";
-import { getLibraryItem } from "@/src/services/libraryItemApi";
-import { getLibraryItems } from "@/src/services/libraryItemsApi";
+import { downloadCoverArt } from "@/services/coverArtApi";
+import { getLibraries } from "@/services/libraryApi";
+import { getLibraryItem } from "@/services/libraryItemApi";
+import { getLibraryItems } from "@/services/libraryItemsApi";
 
 export interface LibraryStoreRefetchRequest {
   search?: string;

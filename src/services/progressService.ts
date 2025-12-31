@@ -1,5 +1,5 @@
 import { and, eq, gt, gte, isNotNull, lte } from "drizzle-orm";
-import Toast from "react-native-toast-message";
+import { toast } from "sonner-native";
 
 import { ping } from "./pingApi";
 
@@ -214,11 +214,7 @@ export const syncProgressWithServer = async () => {
     });
   } catch (err) {
     console.error("Exception occurred while fetching user sessions", err);
-    Toast.show({
-      position: "bottom",
-      type: "error",
-      text1: "Error while attempting to retrieve user sessions",
-    });
+    toast.error("Error while attempting to retrieve user sessions");
     throw err;
   }
 };

@@ -3,12 +3,13 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { FlashList } from "@shopify/flash-list";
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useRef, useState } from "react";
-import { Pressable, SafeAreaView, Text, TextInput, View } from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import BookLink from "../_components/BookLink";
+import BookLink from "@/components/BookLink";
 
 import { LibraryItemSchemaType } from "@/db/schema";
-import { LibraryItemSort, useLibraryStore } from "@/src/stores/libraryStore";
+import { LibraryItemSort, useLibraryStore } from "@/stores/libraryStore";
 
 export default function Library() {
   // const [items, setItems] = useState<Result[]>([]);
@@ -84,18 +85,21 @@ export default function Library() {
             <View className="flex flex-row items-center gap-3">
               <Pressable
                 onPress={() => setEBookFilter((prev) => !prev)}
-                className={`${eBookFilter ? "rounded-full bg-sky-600" : ""} p-1`}>
+                className={`${eBookFilter ? "rounded-full bg-sky-600" : ""} p-1`}
+              >
                 <Feather name="book" size={20} color="white" />
               </Pressable>
               <Pressable
                 onPress={() => setAudioBookFilter((prev) => !prev)}
-                className={`${audioBookFilter ? "rounded-full bg-sky-600" : ""} p-1`}>
+                className={`${audioBookFilter ? "rounded-full bg-sky-600" : ""} p-1`}
+              >
                 <Feather name="volume-2" size={20} color="white" />
               </Pressable>
             </View>
             <Pressable
               onPress={handleSort}
-              className="flex flex-row items-center gap-2">
+              className="flex flex-row items-center gap-2"
+            >
               <Text className="text-white">{sort}</Text>
               <FontAwesome6 name="sort" size={24} color="white" />
             </Pressable>
@@ -141,7 +145,8 @@ export default function Library() {
                             animated: true,
                           })
                         }
-                        className="flex h-20 w-20 items-center justify-center rounded-full bg-sky-400">
+                        className="flex h-20 w-20 items-center justify-center rounded-full bg-sky-400"
+                      >
                         <FontAwesome6 name="arrow-up" size={36} color="white" />
                       </Pressable>
                     </View>

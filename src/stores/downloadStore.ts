@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import Toast from "react-native-toast-message";
+import { toast } from "sonner-native";
 import { create } from "zustand";
 
 import { useLibraryStore } from "./libraryStore";
@@ -11,8 +11,8 @@ import {
   libraryItemEBookFileSchema,
   libraryItemSchema,
 } from "@/db/schema";
-import { downloadLibraryItem } from "@/src/services/libraryItemApi";
-import { syncProgressWithServer } from "@/src/services/progressService";
+import { downloadLibraryItem } from "@/services/libraryItemApi";
+import { syncProgressWithServer } from "@/services/progressService";
 
 export interface DownloadStore {
   queue: string[];
@@ -89,11 +89,7 @@ export const useDownloadStore = create<DownloadStore>()((set, get) => ({
         }
         useLibraryStore.getState().refetch();
         // console.log(`downloaded libraryItemId: ${libraryItemId}`);
-        Toast.show({
-          type: "success",
-          text1: `Downloaded audio files for ${libraryItem.title}`,
-          position: "bottom",
-        });
+        toast.success(`Downloaded audio files for ${libraryItem.title}`);
         return true;
       } catch (err) {
         console.error(
@@ -132,11 +128,7 @@ export const useDownloadStore = create<DownloadStore>()((set, get) => ({
 // TODO: not sure if I like this manner of triggering downloads but it works
 export const handleDownload = async (libraryItemId: string) => {
   const downloadStore = useDownloadStore.getState();
-  Toast.show({
-    type: "info",
-    text1: "Downloading files",
-    position: "bottom",
-  });
+  toast.info("Downloading files");
   downloadStore.add(libraryItemId);
   if (!downloadStore.isDownloading()) {
     downloadStore.download();
