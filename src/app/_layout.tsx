@@ -1,3 +1,5 @@
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 import { ReaderProvider } from "@epubjs-react-native/core";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -56,21 +58,21 @@ export default function RootLayout() {
 
   if (authenticated) {
     return (
-      <>
+      <GestureHandlerRootView>
         <ReaderProvider>
           <MainLayout />
         </ReaderProvider>
         <StatusBar style="light" />
         <Toaster />
-      </>
+      </GestureHandlerRootView>
     );
   } else {
     return (
-      <>
+      <GestureHandlerRootView>
         <Login setAuthenticated={setAuthenticated} />
         <StatusBar style="light" />
         <Toaster />
-      </>
+      </GestureHandlerRootView>
     );
   }
 }
@@ -122,9 +124,9 @@ const Login = ({
     }, []),
   );
 
-  const [serverUrl, setServerUrl] = useState("");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [serverUrl, setServerUrl] = useState("http://192.168.68.68:13378");
+  const [username, setUsername] = useState("phil");
+  const [password, setPassword] = useState("Alea iacta est!1");
   const [preferBiometric, setPreferBiometric] = useState(false);
   const [loading, setLoading] = useState(false);
 
