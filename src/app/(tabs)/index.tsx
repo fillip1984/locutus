@@ -1,9 +1,9 @@
+import { useActiveTrack } from "@/utils/mockTrackPlayer";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useActiveTrack } from "react-native-track-player";
 
 import BookLink from "@/components/BookLink";
 import MiniPlayer from "@/components/MiniPlayer";

@@ -67,6 +67,7 @@
   "devDependencies": {
     "@babel/core": "^7.28.5",
     "@react-native-community/cli": "^20.0.2",
+    "@tailwindcss/postcss": "^4.1.18",
     "@types/jest": "^29.5.14",
     "@types/react": "~19.1.17",
     "@types/react-test-renderer": "^19.1.0",

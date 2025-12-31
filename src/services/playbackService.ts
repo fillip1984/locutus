@@ -1,12 +1,17 @@
 import { eq } from "drizzle-orm";
+// import TrackPlayer, {
+//   Event,
+//   PlaybackActiveTrackChangedEvent,
+//   PlaybackProgressUpdatedEvent,
+// } from "react-native-track-player";
+
+import { localDb } from "@/db";
+import { libraryItemAudioFileSchema, libraryItemSchema } from "@/db/schema";
 import TrackPlayer, {
   Event,
   PlaybackActiveTrackChangedEvent,
   PlaybackProgressUpdatedEvent,
-} from "react-native-track-player";
-
-import { localDb } from "@/db";
-import { libraryItemAudioFileSchema, libraryItemSchema } from "@/db/schema";
+} from "@/utils/mockTrackPlayer";
 
 export async function playbackService() {
   TrackPlayer.addEventListener(Event.RemotePlay, () => TrackPlayer.play());

@@ -9,12 +9,15 @@ import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { toast } from "sonner-native";
 import TrackPlayer, {
+  Event,
+  PlaybackActiveTrackChangedEvent,
+  PlaybackProgressUpdatedEvent,
   State,
   Track,
   useActiveTrack,
   usePlaybackState,
   useProgress,
-} from "react-native-track-player";
+} from "@/utils/mockTrackPlayer";
 
 import {
   jumpBackward,

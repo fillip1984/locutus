@@ -1,3 +1,8 @@
+import TrackPlayer, {
+  State,
+  useActiveTrack,
+  usePlaybackState,
+} from "@/utils/mockTrackPlayer";
 import { FontAwesome, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import clsx from "clsx";
 import { eq } from "drizzle-orm";
@@ -11,11 +16,6 @@ import {
 import { useCallback, useRef } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import TrackPlayer, {
-  State,
-  useActiveTrack,
-  usePlaybackState,
-} from "react-native-track-player";
 
 import { localDb } from "@/db";
 import {
