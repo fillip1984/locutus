@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build:production": "eas build -p ios -e production --local",
-    "db:generate": "drizzle-kit generate:sqlite",
+    "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio",
     "ios": "expo run:ios",
     "lint": "eslint \"**/*.{js,jsx,ts,tsx}\" && prettier -c \"**/*.{js,jsx,ts,tsx,json}\"",

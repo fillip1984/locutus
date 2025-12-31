@@ -1,14 +1,14 @@
-import { Ionicons } from "@expo/vector-icons";
-import { Image } from "expo-image";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
 import TrackPlayer, {
   State,
   useActiveTrack,
   usePlaybackState,
   useProgress,
-} from "react-native-track-player";
+} from "@/utils/mockTrackPlayer";
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import { Pressable, Text, View } from "react-native";
 
 import { calc } from "@/app/(media)/[id]";
 import { LibraryItemSchemaType } from "@/db/schema";

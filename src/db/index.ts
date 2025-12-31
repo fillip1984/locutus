@@ -3,7 +3,7 @@ import { migrate } from "drizzle-orm/expo-sqlite/migrator";
 import { openDatabaseSync } from "expo-sqlite";
 
 import * as schema from "./schema";
-import migrations from "../drizzle/migrations";
+import migrations from "../../drizzle/migrations";
 
 export const localDb = drizzle(openDatabaseSync("locutus.db"), { schema });
 

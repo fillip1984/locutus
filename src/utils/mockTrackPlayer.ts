@@ -11,22 +11,22 @@
 // };
 
 export default {
-  addEventListener: jest.fn(),
-  play: jest.fn(),
-  pause: jest.fn(),
-  skipToNext: jest.fn(),
-  skipToPrevious: jest.fn(),
-  seekBy: jest.fn(),
-  getActiveTrack: jest.fn().mockResolvedValue(undefined),
-  getActiveTrackIndex: jest.fn().mockResolvedValue(undefined),
-  getTrack: jest.fn().mockResolvedValue(undefined),
-  getQueue: jest.fn().mockResolvedValue([] as Track[]),
-  skip: jest.fn(),
-  reset: jest.fn(),
-  add: jest.fn(),
-  seekTo: jest.fn(),
-  getRate: jest.fn().mockResolvedValue(1),
-  setRate: jest.fn(),
+  addEventListener: () => {},
+  play: () => {},
+  pause: () => {},
+  skipToNext: () => {},
+  skipToPrevious: () => {},
+  seekBy: () => {},
+  getActiveTrack: () => {},
+  getActiveTrackIndex: () => {},
+  getTrack: () => {},
+  getQueue: () => {},
+  skip: () => {},
+  reset: () => {},
+  add: () => {},
+  seekTo: () => {},
+  getRate: () => {},
+  setRate: () => {},
 };
 
 export const Event = {
@@ -77,8 +77,10 @@ export type Track = {
   duration?: number;
 };
 
-export const useActiveTrack = jest.fn().mockReturnValue(undefined);
-export const useProgress = jest
-  .fn()
-  .mockReturnValue({ position: 0, duration: 0 });
-export const usePlaybackState = jest.fn().mockReturnValue(State.Paused);
+export const useActiveTrack = () => {};
+export const useProgress = () => {
+  return { position: 0, duration: 0 };
+};
+export const usePlaybackState = () => {
+  return { state: State.Paused };
+};
