@@ -2,7 +2,7 @@ import axios from "axios";
 
 import { localDb } from "@/db";
 import { userSettingsSchema } from "@/db/schema";
-import { getToken } from "@/stores/sessionStore";
+import { getToken } from "@/src/stores/sessionStore";
 
 export const getLibraryItems = async (libraryId: string) => {
   const userSettings = (await localDb.select().from(userSettingsSchema))[0];

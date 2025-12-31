@@ -23,9 +23,9 @@ import { playbackService } from "../services/playbackService";
 
 import { localDb } from "@/db";
 import { userSettingsSchema } from "@/db/schema";
-import { login } from "@/services/loginApi";
-import { syncProgressWithServer } from "@/services/progressService";
-import { setToken } from "@/stores/sessionStore";
+import { login } from "@/src/services/loginApi";
+import { syncProgressWithServer } from "@/src/services/progressService";
+import { setToken } from "@/src/stores/sessionStore";
 
 export default function RootLayout() {
   const [authenticated, setAuthenticated] = useState(false);

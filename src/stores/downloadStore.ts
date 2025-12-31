@@ -11,8 +11,8 @@ import {
   libraryItemEBookFileSchema,
   libraryItemSchema,
 } from "@/db/schema";
-import { downloadLibraryItem } from "@/services/libraryItemApi";
-import { syncProgressWithServer } from "@/services/progressService";
+import { downloadLibraryItem } from "@/src/services/libraryItemApi";
+import { syncProgressWithServer } from "@/src/services/progressService";
 
 export interface DownloadStore {
   queue: string[];

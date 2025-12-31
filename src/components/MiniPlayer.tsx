@@ -12,7 +12,7 @@ import TrackPlayer, {
 
 import { calc } from "@/app/(media)/[id]";
 import { LibraryItemSchemaType } from "@/db/schema";
-import { fetchLibraryItemFromTrack } from "@/services/playbackService";
+import { fetchLibraryItemFromTrack } from "@/src/services/playbackService";
 
 export default function MiniPlayer() {
   const [libraryItem, setLibraryItem] = useState<

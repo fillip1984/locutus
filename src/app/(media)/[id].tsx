@@ -24,8 +24,8 @@ import {
   libraryItemSchema,
   LibraryItemSchemaType,
 } from "@/db/schema";
-import { handleDownload, useDownloadStore } from "@/stores/downloadStore";
-import { useMediaStore } from "@/stores/mediaStore";
+import { handleDownload, useDownloadStore } from "@/src/stores/downloadStore";
+import { useMediaStore } from "@/src/stores/mediaStore";
 
 export default function Media() {
   const { id } = useLocalSearchParams();

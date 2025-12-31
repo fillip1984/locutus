@@ -2,7 +2,7 @@ import { Pressable, SafeAreaView, Text, View } from "react-native";
 import Toast from "react-native-toast-message";
 
 import { dropDatabase } from "@/db";
-import { useLibraryStore } from "@/stores/libraryStore";
+import { useLibraryStore } from "@/src/stores/libraryStore";
 
 export default function Settings() {
   const libraryStore = useLibraryStore();

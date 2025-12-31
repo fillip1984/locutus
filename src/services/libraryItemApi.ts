@@ -3,7 +3,7 @@ import * as FileSystem from "expo-file-system";
 
 import { localDb } from "@/db";
 import { userSettingsSchema } from "@/db/schema";
-import { getToken } from "@/stores/sessionStore";
+import { getToken } from "@/src/stores/sessionStore";
 
 export const getLibraryItem = async (libraryItemId: string) => {
   const userSettings = (await localDb.select().from(userSettingsSchema))[0];

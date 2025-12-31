@@ -3,7 +3,7 @@ import Toast from "react-native-toast-message";
 
 import { localDb } from "@/db";
 import { userSettingsSchema } from "@/db/schema";
-import { getToken } from "@/stores/sessionStore";
+import { getToken } from "@/src/stores/sessionStore";
 
 export const getLibraries = async () => {
   const userSettings = (await localDb.select().from(userSettingsSchema))[0];

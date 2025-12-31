@@ -8,9 +8,9 @@ import BookLink from "@/app/_components/BookLink";
 import MiniPlayer from "@/app/_components/MiniPlayer";
 import { localDb } from "@/db";
 import { LibraryItemSchemaType, userSettingsSchema } from "@/db/schema";
-import { getProgressFromServer } from "@/services/progressService";
-import { useDownloadStore } from "@/stores/downloadStore";
-import { useLibraryStore } from "@/stores/libraryStore";
+import { getProgressFromServer } from "@/src/services/progressService";
+import { useDownloadStore } from "@/src/stores/downloadStore";
+import { useLibraryStore } from "@/src/stores/libraryStore";
 
 export default function Home() {
   const libraryStore = useLibraryStore();

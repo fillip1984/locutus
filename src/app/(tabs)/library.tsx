@@ -8,7 +8,7 @@ import { Pressable, SafeAreaView, Text, TextInput, View } from "react-native";
 import BookLink from "../_components/BookLink";
 
 import { LibraryItemSchemaType } from "@/db/schema";
-import { LibraryItemSort, useLibraryStore } from "@/stores/libraryStore";
+import { LibraryItemSort, useLibraryStore } from "@/src/stores/libraryStore";
 
 export default function Library() {
   // const [items, setItems] = useState<Result[]>([]);

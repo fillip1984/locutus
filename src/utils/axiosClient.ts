@@ -1,7 +1,7 @@
 import axios from "axios";
 
 import { localDb } from "@/db";
-import { getToken } from "@/stores/sessionStore";
+import { getToken } from "@/src/stores/sessionStore";
 
 const serverUrl = async () => {
   const userSettings = await localDb.query.userSettingsSchema.findFirst();

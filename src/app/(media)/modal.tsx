@@ -2,8 +2,8 @@ import { Feather, Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
-import { handleDownload } from "@/stores/downloadStore";
-import { useMediaStore } from "@/stores/mediaStore";
+import { handleDownload } from "@/src/stores/downloadStore";
+import { useMediaStore } from "@/src/stores/mediaStore";
 
 export default function MediaModal() {
   const navi = useNavigation();
