@@ -7,6 +7,9 @@ const config = getDefaultConfig(__dirname);
 config.resolver.sourceExts.push("sql");
 
 module.exports = withNativeWind(config, {
-  input: "./global.css",
-  configPath: "./tailwind.config.ts",
+  input: "./src/styles/global.css",
+  // TODO: figure out if dirname and inlineRem are necessary
+  // configPath: "./tailwind.config.ts",
+  // __dirname,
+  // inlineRem: false,
 });
