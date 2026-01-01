@@ -148,7 +148,7 @@ const Login = ({
 
   const [serverUrl, setServerUrl] = useState("http://192.168.68.68:13378");
   const [username, setUsername] = useState("phil");
-  const [password, setPassword] = useState("Alea iacta est!1");
+  const [password, setPassword] = useState("1234");
   const [preferBiometric, setPreferBiometric] = useState(false);
   const [loading, setLoading] = useState(false);
 
