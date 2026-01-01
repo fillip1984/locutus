@@ -16,24 +16,34 @@ import {
   useEffect,
   useState,
 } from "react";
-import { Toaster, toast } from "sonner-native";
 import { Pressable, Text, TextInput, View } from "react-native";
+import { Toaster, toast } from "sonner-native";
 // import TrackPlayer, { Capability } from "react-native-track-player";
 
 import "@/styles/global.css";
-import { playbackService } from "../services/playbackService";
 
 import { localDb } from "@/db";
 import { userSettingsSchema } from "@/db/schema";
 import { login } from "@/services/loginApi";
 import { syncProgressWithServer } from "@/services/progressApi";
 import { setToken } from "@/stores/sessionStore";
+import { setAudioModeAsync } from "expo-audio";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useTrackPlayer } from "@/stores/trackPlayerStore";
 
 export default function RootLayout() {
   const [authenticated, setAuthenticated] = useState(false);
   const [preferences, setPreferences] = useState();
+
+  useEffect(() => {
+    const setAudioMode = async () => {
+      await setAudioModeAsync({
+        interruptionMode: "doNotMix",
+        playsInSilentMode: true,
+        shouldPlayInBackground: true,
+      });
+    };
+    setAudioMode();
+  }, []);
 
   // const { _player } = useTrackPlayer();
   // const initializePlayer = async () => {

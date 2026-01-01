@@ -73,6 +73,7 @@
     "@types/jest": "^29.5.14",
     "@types/react": "~19.1.17",
     "@types/react-test-renderer": "^19.1.0",
+    "babel-preset-expo": "^54.0.9",
     "drizzle-kit": "^0.31.8",
     "eslint": "^9.25.1",
     "eslint-config-expo": "~10.0.0",

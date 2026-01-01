@@ -100,6 +100,7 @@ export default function Player() {
                 uri: new File(Paths.document, `${libraryItemId}`, `${af.name}`)
                   .uri,
                 duration: af.duration,
+                libraryItemId: af.libraryItemId,
               }) as Track,
           ),
         );

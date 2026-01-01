@@ -1,17 +1,19 @@
-import { AudioPlayer, createAudioPlayer } from "expo-audio";
-import { create } from "zustand";
 import { localDb } from "@/db";
 import { libraryItemAudioFileSchema, libraryItemSchema } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { AudioPlayer, createAudioPlayer } from "expo-audio";
+import { create } from "zustand";
+import { File, Paths } from "expo-file-system";
 
 export interface Track {
   id: string;
   title: string;
   artist: string;
-  album?: string;
-  duration?: number; // in seconds
-  artwork?: string; // URL or local path to artwork image
+  album: string;
+  duration: number; // in seconds
+  artwork: string; // URL or local path to artwork image
   uri: string; // URL or local path to audio file
+  libraryItemId: string;
 }
 
 export interface TrackPlayerStore {
@@ -46,7 +48,27 @@ export const useTrackPlayer = create<TrackPlayerStore>()((set, get) => ({
     return get()._queue;
   },
   play: () => {
-    get()._player.play();
+    const activeTrack = get().activeTrack;
+    if (activeTrack) {
+      const artFile = new File(
+        Paths.document,
+        activeTrack.libraryItemId,
+        "cover.webp",
+      );
+      get()._player.play();
+      get()._player.setActiveForLockScreen(
+        true,
+        {
+          title: activeTrack.title,
+          albumTitle: activeTrack.album,
+          artist: activeTrack.artist,
+          artworkUrl: artFile.uri,
+        },
+        { showSeekBackward: true, showSeekForward: true },
+      );
+    } else {
+      console.log("No active track to play");
+    }
   },
   pause: () => {
     get()._player.pause();
@@ -76,7 +98,9 @@ export const useTrackPlayer = create<TrackPlayerStore>()((set, get) => ({
     }
   },
   reset: () => {
-    get()._player.pause();
+    const player = get()._player;
+    player.pause();
+    player.clearLockScreenControls();
     set({ activeTrack: null, _queue: [] });
   },
   add: (tracks: Track[]) => {
