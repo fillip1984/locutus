@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { File, Paths } from "expo-file-system";
 import { Image } from "expo-image";
 import { Link, Stack, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { toast } from "sonner-native";
 
@@ -20,7 +20,9 @@ import { useAudioPlayerStatus } from "expo-audio";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Player() {
-  const { activeTrack, getQueue, play, skip, add, reset } = useTrackPlayer();
+  const { activeTrack, getQueue, play, pause, skip, add, reset, _player } =
+    useTrackPlayer();
+  const { didJustFinish } = useAudioPlayerStatus(_player);
 
   const { audioFileId: audioFileIdSearchParam, id: libraryItemIdSearchParam } =
     useLocalSearchParams();
@@ -112,6 +114,23 @@ export default function Player() {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (didJustFinish && activeTrack) {
+      // console.log("didJustFinish changed:", didJustFinish);
+      const activeTrackIndex = getQueue().findIndex(
+        (q) => q.id === activeTrack.id,
+      );
+
+      if (activeTrackIndex + 1 > getQueue().length - 1) {
+        console.log("reached end of queue, not skipping to next track");
+        pause();
+      } else {
+        skip(activeTrackIndex + 1, 0);
+        play();
+      }
+    }
+  }, [didJustFinish]);
 
   return (
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>

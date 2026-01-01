@@ -8,7 +8,7 @@ import BookLink from "@/components/BookLink";
 import MiniPlayer from "@/components/MiniPlayer";
 import { localDb } from "@/db";
 import { LibraryItemSchemaType, userSettingsSchema } from "@/db/schema";
-import { getProgressFromServer } from "@/services/progressService";
+import { getProgressFromServer } from "@/services/progressApi";
 import { useDownloadStore } from "@/stores/downloadStore";
 import { useLibraryStore } from "@/stores/libraryStore";
 import { useTrackPlayer } from "@/stores/trackPlayerStore";
@@ -70,17 +70,17 @@ export default function Home() {
 
   return (
     <SafeAreaView style={{ backgroundColor: "rgb(30 41 59)" }}>
-      <View className="relative">
+      <View className="flex">
         {libraryStore && libraryStore.libraryItems && (
-          <View className="flex h-screen bg-zinc-900 p-2">
+          <View className="flex grow bg-zinc-900 p-2">
             {libraryStore.libraryItems?.length === 0 && (
-              <View className="flex h-screen items-center justify-center">
+              <View className="flex grow items-center justify-center">
                 <Text className="text-2xl text-white">Nothing to play</Text>
               </View>
             )}
 
-            <ScrollView>
-              <View className="flex gap-4">
+            <ScrollView className="flex grow">
+              <View className="flex grow gap-4">
                 {continueItems && continueItems.length > 0 && (
                   <Section label="Continue" items={continueItems} />
                 )}
@@ -99,12 +99,12 @@ export default function Home() {
         {/* TODO: not sure why, but I have to declare bg color here for it to take effect */}
         {/* TODO: Couldn't find a better way to afix to the bottom, try flex methods maybe? */}
         {activeTrack && (
-          <View
-            className="absolute right-0 left-0 bg-zinc-800"
-            style={{ bottom: bottomTabbarHeight + 59 }}
-          >
-            <MiniPlayer />
-          </View>
+          // <View
+          //   className="absolute right-0 left-0 bg-zinc-800"
+          //   style={{ bottom: bottomTabbarHeight + 59 }}
+          // >
+          <MiniPlayer />
+          // </View>
         )}
       </View>
     </SafeAreaView>

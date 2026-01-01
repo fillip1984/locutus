@@ -5,9 +5,6 @@ import { eq } from "drizzle-orm";
 //   PlaybackProgressUpdatedEvent,
 // } from "react-native-track-player";
 
-import { localDb } from "@/db";
-import { libraryItemAudioFileSchema, libraryItemSchema } from "@/db/schema";
-
 export async function playbackService() {
   // TrackPlayer.addEventListener(Event.RemotePlay, () => TrackPlayer.play());
   // TrackPlayer.addEventListener(Event.RemotePause, () => TrackPlayer.pause());
@@ -93,27 +90,3 @@ export async function playbackService() {
 //     }
 //   }
 // };
-
-export const fetchLibraryItemFromTrack = async (audioFileId: string) => {
-  const audioFile = await localDb.query.libraryItemAudioFileSchema.findFirst({
-    where: eq(libraryItemAudioFileSchema.id, audioFileId),
-  });
-  if (audioFile && audioFile.libraryItemId) {
-    const libraryItem = await localDb.query.libraryItemSchema.findFirst({
-      where: eq(libraryItemSchema.id, audioFile.libraryItemId),
-    });
-    return libraryItem;
-  }
-};
-
-export const updateProgress = async (
-  audioFileId: string,
-  position: number,
-  complete: boolean,
-) => {
-  localDb
-    .update(libraryItemAudioFileSchema)
-    .set({ complete, progress: complete ? 0 : position, updatedAt: new Date() })
-    .where(eq(libraryItemAudioFileSchema.id, audioFileId))
-    .run();
-};

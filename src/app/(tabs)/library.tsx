@@ -1,6 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import { FlashList } from "@shopify/flash-list";
+import { FlashList, FlashListRef } from "@shopify/flash-list";
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useRef, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
@@ -14,7 +14,7 @@ import { LibraryItemSort, useLibraryStore } from "@/stores/libraryStore";
 export default function Library() {
   // const [items, setItems] = useState<Result[]>([]);
   // const [loading, setLoading] = useState(true);
-  const itemsListRef = useRef<FlashList<LibraryItemSchemaType>>(null);
+  const itemsListRef = useRef<FlashListRef<LibraryItemSchemaType>>(null);
 
   // useFocusEffect(
   //   useCallback(() => {
@@ -119,7 +119,7 @@ export default function Library() {
               <FlashList
                 contentContainerStyle={{ padding: 8, paddingBottom: 30 }}
                 ref={itemsListRef}
-                estimatedItemSize={213}
+                // estimatedItemSize={213}
                 data={libraryItems}
                 numColumns={2}
                 // ItemSeparatorComponent={() => (

@@ -1,5 +1,8 @@
 import { AudioPlayer, createAudioPlayer } from "expo-audio";
 import { create } from "zustand";
+import { localDb } from "@/db";
+import { libraryItemAudioFileSchema, libraryItemSchema } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export interface Track {
   id: string;
@@ -108,3 +111,43 @@ export const useTrackPlayer = create<TrackPlayerStore>()((set, get) => ({
     player.seekTo(Math.min(player.duration, player.currentTime + seconds));
   },
 }));
+
+export const fetchLibraryItemFromTrack = async (audioFileId: string) => {
+  const audioFile = await localDb.query.libraryItemAudioFileSchema.findFirst({
+    where: eq(libraryItemAudioFileSchema.id, audioFileId),
+  });
+  if (audioFile && audioFile.libraryItemId) {
+    const libraryItem = await localDb.query.libraryItemSchema.findFirst({
+      where: eq(libraryItemSchema.id, audioFile.libraryItemId),
+    });
+    return libraryItem;
+  }
+};
+
+export const updateAudioFileProgress = async (
+  audioFileId: string,
+  position: number,
+  complete: boolean,
+) => {
+  localDb
+    .update(libraryItemAudioFileSchema)
+    .set({ complete, progress: complete ? 0 : position, updatedAt: new Date() })
+    .where(eq(libraryItemAudioFileSchema.id, audioFileId))
+    .run();
+};
+
+export const updateLibraryItemProgress = async (
+  libraryItemId: string,
+  complete: boolean,
+  lastPlayedId?: string,
+) => {
+  localDb
+    .update(libraryItemSchema)
+    .set({
+      complete,
+      lastPlayedId: lastPlayedId,
+      updatedAt: new Date(),
+    })
+    .where(eq(libraryItemSchema.id, libraryItemId))
+    .run();
+};

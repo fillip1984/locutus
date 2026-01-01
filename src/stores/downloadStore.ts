@@ -12,7 +12,7 @@ import {
   libraryItemSchema,
 } from "@/db/schema";
 import { downloadLibraryItem } from "@/services/libraryItemApi";
-import { syncProgressWithServer } from "@/services/progressService";
+import { syncProgressWithServer } from "@/services/progressApi";
 
 export interface DownloadStore {
   queue: string[];

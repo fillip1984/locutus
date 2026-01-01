@@ -26,13 +26,25 @@ import { playbackService } from "../services/playbackService";
 import { localDb } from "@/db";
 import { userSettingsSchema } from "@/db/schema";
 import { login } from "@/services/loginApi";
-import { syncProgressWithServer } from "@/services/progressService";
+import { syncProgressWithServer } from "@/services/progressApi";
 import { setToken } from "@/stores/sessionStore";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTrackPlayer } from "@/stores/trackPlayerStore";
 
 export default function RootLayout() {
   const [authenticated, setAuthenticated] = useState(false);
   const [preferences, setPreferences] = useState();
+
+  // const { _player } = useTrackPlayer();
+  // const initializePlayer = async () => {
+  //   _player.addListener("playbackStatusUpdate", (status) => {
+  //     console.log({ status });
+  //   });
+  // };
+
+  // useEffect(() => {
+  //   initializePlayer();
+  // }, []);
 
   // const initializePlayer = async () => {
   //   await TrackPlayer.setupPlayer();

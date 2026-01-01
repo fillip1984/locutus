@@ -6,8 +6,10 @@ import { Pressable, Text, View } from "react-native";
 
 import { calc } from "@/app/(media)/[id]";
 import { LibraryItemSchemaType } from "@/db/schema";
-import { fetchLibraryItemFromTrack } from "@/services/playbackService";
-import { useTrackPlayer } from "@/stores/trackPlayerStore";
+import {
+  fetchLibraryItemFromTrack,
+  useTrackPlayer,
+} from "@/stores/trackPlayerStore";
 import { useAudioPlayerStatus } from "expo-audio";
 
 export default function MiniPlayer() {
