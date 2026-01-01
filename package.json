@@ -32,6 +32,7 @@
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.45.1",
     "expo": "^54.0.30",
+    "expo-audio": "^1.1.1",
     "expo-constants": "~18.0.12",
     "expo-dev-client": "~6.0.20",
     "expo-file-system": "~19.0.21",

@@ -8,16 +8,7 @@ import { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { toast } from "sonner-native";
-import TrackPlayer, {
-  Event,
-  PlaybackActiveTrackChangedEvent,
-  PlaybackProgressUpdatedEvent,
-  State,
-  Track,
-  useActiveTrack,
-  usePlaybackState,
-  useProgress,
-} from "@/utils/mockTrackPlayer";
+import { AudioPlayer, useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 
 import {
   jumpBackward,
@@ -32,8 +23,15 @@ import {
   libraryItemAudioFileSchema,
   libraryItemSchema,
 } from "@/db/schema";
+import { Track } from "@/utils/mockTrackPlayer";
+import { File, Paths } from "expo-file-system";
 
 export default function Player() {
+  const trackPlayer = useAudioPlayer();
+
+  // const trackPlayerState = useAudioPlayerStatus(trackPlayer);
+
+  const [activeTrack, setActiveTrack] = useState<Track | null>(null);
   const { audioFileId: audioFileIdSearchParam, id: libraryItemIdSearchParam } =
     useLocalSearchParams();
 
@@ -79,47 +77,55 @@ export default function Player() {
         throw Error(msg);
       }
 
-      const activeTrack = await TrackPlayer.getActiveTrack();
+      console.log(`loading audio file: ${audioFile.name}`);
+      const f = new File(Paths.document, `${libraryItemId}/${audioFile.name}`);
+      if (!f.exists) {
+        throw Error(`file does not exist at path: ${f.uri}`);
+      } else {
+        console.log(`file exists at path: ${f.uri}`);
+        trackPlayer.replace(f);
+      }
 
       if (audioFile.id === activeTrack?.id) {
         // console.log("if audioFile matches activeTrack then do nothing");
-      } else if (
-        (await TrackPlayer.getQueue()).find((q) => q.id === audioFile?.id)
-      ) {
+        // } else if (
+        // (await TrackPlayer.getQueue()).find((q) => q.id === audioFile?.id)
+        // ) {
         // console.log("if audioFile is within queue, skip to audioFile");
-        const trackToLoadIndex = (await TrackPlayer.getQueue()).findIndex(
-          (q) => q.id === audioFile?.id,
-        );
+        // const trackToLoadIndex = (await TrackPlayer.getQueue()).findIndex(
+        //   (q) => q.id === audioFile?.id,
+        // );
         // console.log(
         //   `determining starting point based on progress: ${audioFile.progress}`,
         // );
-        await TrackPlayer.skip(trackToLoadIndex, audioFile.progress ?? 0);
-        await TrackPlayer.play();
-      } else {
+        // await TrackPlayer.skip(trackToLoadIndex, audioFile.progress ?? 0);
+        // await TrackPlayer.play();
+        // } else {
         // console.log("reset and reload the works");
-        await TrackPlayer.reset();
-        await TrackPlayer.add(
-          audioFiles.map(
-            (af) =>
-              ({
-                id: af.id,
-                title: af.name,
-                artist: libraryItem.authorNameLF,
-                album: libraryItem.title,
-                artwork: libraryItem.coverArtPath ?? undefined,
-                url: af.path as string,
-                duration: af.duration,
-              }) as Track,
-          ),
-        );
-
-        const trackToLoadIndex = (await TrackPlayer.getQueue()).findIndex(
-          (q) => q.id === audioFile?.id,
-        );
-        await TrackPlayer.skip(trackToLoadIndex, audioFile.progress ?? 0);
-        await TrackPlayer.play();
+        // await TrackPlayer.reset();
+        // await TrackPlayer.add(
+        // audioFiles.map(
+        //   (af) =>
+        //     ({
+        //       id: af.id,
+        //       title: af.name,
+        //       artist: libraryItem.authorNameLF,
+        //       album: libraryItem.title,
+        //       artwork: libraryItem.coverArtPath ?? undefined,
+        //       url: af.path as string,
+        //       duration: af.duration,
+        //     }) as Track,
+        // ),
+        // );
+        // const trackToLoadIndex = (await TrackPlayer.getQueue()).findIndex(
+        //   (q) => q.id === audioFile?.id,
+        // );
+        // await TrackPlayer.skip(trackToLoadIndex, audioFile.progress ?? 0);
+        // await TrackPlayer.play();
       }
     };
+
+    // trackPlayer.play();
 
     fetchData();
   }, []);
@@ -130,11 +136,11 @@ export default function Player() {
         <Stack.Screen options={{ gestureDirection: "vertical" }} />
         <TopActionsBar />
         <View className="flex-1">
-          <MediaArt />
-          <MediaInfo />
+          <MediaArt track={activeTrack!} />
+          <MediaInfo track={activeTrack!} />
         </View>
-        <TrackProgress />
-        <MediaControls />
+        {/* <TrackProgress /> */}
+        <MediaControls trackPlayer={trackPlayer} />
       </View>
     </SafeAreaView>
   );
@@ -151,8 +157,7 @@ const TopActionsBar = () => {
   );
 };
 
-const MediaArt = () => {
-  const track = useActiveTrack();
+const MediaArt = ({ track }: { track: Track }) => {
   return (
     <View className="flex w-full items-center">
       <View className="flex items-center overflow-hidden rounded-lg">
@@ -167,9 +172,7 @@ const MediaArt = () => {
   );
 };
 
-const MediaInfo = () => {
-  const track = useActiveTrack();
-
+const MediaInfo = ({ track }: { track: Track }) => {
   return (
     <View className="my-8">
       <Text className="text-2xl text-white">{track?.album}</Text>
@@ -178,48 +181,48 @@ const MediaInfo = () => {
   );
 };
 
-const TrackProgress = () => {
-  const progress = useProgress();
+// const TrackProgress = () => {
+//   const progress = useProgress();
 
-  return (
-    <View className="flex">
-      <Slider
-        // style={{ width: 100, height: 90 }}
-        minimumValue={0}
-        maximumValue={100}
-        value={Math.round((progress.position / progress.duration) * 100)}
-        onSlidingComplete={(newValue) => {
-          TrackPlayer.seekTo(newValue * 0.01 * progress.duration);
-        }}
-        minimumTrackTintColor="#FFFFFF"
-        maximumTrackTintColor="#000000"
-      />
-      <View className="flex flex-row justify-between">
-        <Text className="text-sky-300">
-          {format(progress.position * 1000, "mm:ss")}
-        </Text>
-        <Text className="text-slate-300">
-          {format((progress.duration - progress.position) * 1000, "mm:ss")}
-        </Text>
-      </View>
-    </View>
-  );
-};
+//   return (
+//     <View className="flex">
+//       <Slider
+//         // style={{ width: 100, height: 90 }}
+//         minimumValue={0}
+//         maximumValue={100}
+//         value={Math.round((progress.position / progress.duration) * 100)}
+//         onSlidingComplete={(newValue) => {
+//           TrackPlayer.seekTo(newValue * 0.01 * progress.duration);
+//         }}
+//         minimumTrackTintColor="#FFFFFF"
+//         maximumTrackTintColor="#000000"
+//       />
+//       <View className="flex flex-row justify-between">
+//         <Text className="text-sky-300">
+//           {format(progress.position * 1000, "mm:ss")}
+//         </Text>
+//         <Text className="text-slate-300">
+//           {format((progress.duration - progress.position) * 1000, "mm:ss")}
+//         </Text>
+//       </View>
+//     </View>
+//   );
+// };
 
-const MediaControls = () => {
-  const { state: playbackState } = usePlaybackState();
+const MediaControls = ({ trackPlayer }: { trackPlayer: AudioPlayer }) => {
+  // const { state: playbackState } = usePlaybackState();
   const [rate, setRate] = useState<number | undefined>();
   const handleSetRate = async () => {
     // increments in .25, cycles back to .5x if over 2x
-    const currentRate = await TrackPlayer.getRate();
+    const currentRate = trackPlayer.playbackRate;
     const newRate = currentRate + 0.25 > 2 ? 0.5 : currentRate + 0.25;
-    TrackPlayer.setRate(newRate);
+    trackPlayer.setPlaybackRate(newRate);
     setRate(newRate);
   };
 
   useEffect(() => {
     const init = async () => {
-      setRate(await TrackPlayer.getRate());
+      setRate(trackPlayer.playbackRate);
     };
     init();
   }, []);
@@ -239,16 +242,16 @@ const MediaControls = () => {
           size={30}
           color="white"
         />
-        {playbackState === State.Playing ? (
+        {trackPlayer.playing ? (
           <Ionicons
-            onPress={TrackPlayer.pause}
+            onPress={() => trackPlayer.pause()}
             name="pause"
             size={40}
             color="white"
           />
         ) : (
           <Ionicons
-            onPress={TrackPlayer.play}
+            onPress={() => trackPlayer.play()}
             name="play-sharp"
             size={40}
             color="white"
