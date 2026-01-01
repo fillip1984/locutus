@@ -13,67 +13,43 @@ export interface Track {
 
 export interface TrackPlayerStore {
   _player: AudioPlayer;
-  _activeTrack: Track | null;
   _queue: Track[];
+  activeTrack: Track | null;
 
-  getActiveTrack: () => Track | null;
   getQueue: () => Track[];
-  skipToNext: () => void;
-  skipToPrevious: () => void;
-  jumpBackward: (seconds: number) => void;
-  jumpForward: (seconds: number) => void;
-  isPlaying: () => boolean;
-
-  play: () => void;
-  pause: () => void;
-  resume: () => void;
-  skip: (index: number, position?: number) => void;
   reset: () => void;
   add: (tracks: Track[]) => void;
+  skipToNext: () => void;
+  skipToPrevious: () => void;
+
+  play: () => void;
+  skip: (index: number, position?: number) => void;
+
+  pause: () => void;
+
   seekTo: (position: number) => void;
-  progress: () => number;
-  duration: () => number;
+  jumpBackward: (seconds: number) => void;
+  jumpForward: (seconds: number) => void;
+
   getRate: () => number;
   setRate: (rate: number) => void;
 }
 
 export const useTrackPlayer = create<TrackPlayerStore>()((set, get) => ({
   _player: createAudioPlayer(),
-  _activeTrack: null,
+  activeTrack: null,
   _queue: [],
-  isPlaying: () => {
-    return get()._player.playing;
-  },
-  getActiveTrack: () => {
-    return get()._activeTrack;
-  },
   getQueue: () => {
     return get()._queue;
   },
   play: () => {
-    // if (track) {
-    //   set({ _activeTrack: track });
-    // }
-
-    // const player = get()._player;
-    // player.replace(track ? track.uri : get()._activeTrack?.uri || "");
     get()._player.play();
   },
   pause: () => {
     get()._player.pause();
   },
-
-  resume: () => {
-    get()._player.play();
-  },
   seekTo: (position: number) => {
     get()._player.seekTo(position);
-  },
-  progress: () => {
-    return get()._player.currentTime;
-  },
-  duration: () => {
-    return get()._player.duration;
   },
   getRate: () => {
     // Implementation to get the current playback rate
@@ -89,7 +65,7 @@ export const useTrackPlayer = create<TrackPlayerStore>()((set, get) => ({
       throw new Error("Index out of bounds");
     }
     const track = queue[index];
-    set({ _activeTrack: track });
+    set({ activeTrack: track });
     const player = get()._player;
     player.replace(track.uri);
     if (position !== undefined) {
@@ -97,9 +73,8 @@ export const useTrackPlayer = create<TrackPlayerStore>()((set, get) => ({
     }
   },
   reset: () => {
-    // Implementation to reset the player
-    set({ _activeTrack: null });
-    // Add logic to interface with actual audio playback library
+    get()._player.pause();
+    set({ activeTrack: null, _queue: [] });
   },
   add: (tracks: Track[]) => {
     // Implementation to add tracks to the queue
@@ -108,7 +83,7 @@ export const useTrackPlayer = create<TrackPlayerStore>()((set, get) => ({
   },
   skipToNext: () => {
     const queue = get()._queue;
-    const activeTrack = get()._activeTrack;
+    const activeTrack = get().activeTrack;
     if (!activeTrack) return;
     const currentIndex = queue.findIndex((t) => t.id === activeTrack.id);
     if (currentIndex >= 0 && currentIndex < queue.length - 1) {
@@ -117,7 +92,7 @@ export const useTrackPlayer = create<TrackPlayerStore>()((set, get) => ({
   },
   skipToPrevious: () => {
     const queue = get()._queue;
-    const activeTrack = get()._activeTrack;
+    const activeTrack = get().activeTrack;
     if (!activeTrack) return;
     const currentIndex = queue.findIndex((t) => t.id === activeTrack.id);
     if (currentIndex > 0) {

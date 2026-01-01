@@ -1,4 +1,3 @@
-import { useActiveTrack } from "@/utils/mockTrackPlayer";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
@@ -12,11 +11,12 @@ import { LibraryItemSchemaType, userSettingsSchema } from "@/db/schema";
 import { getProgressFromServer } from "@/services/progressService";
 import { useDownloadStore } from "@/stores/downloadStore";
 import { useLibraryStore } from "@/stores/libraryStore";
+import { useTrackPlayer } from "@/stores/trackPlayerStore";
 
 export default function Home() {
   const libraryStore = useLibraryStore();
   const downloadStore = useDownloadStore();
-  const track = useActiveTrack();
+  const { activeTrack } = useTrackPlayer();
 
   useFocusEffect(
     useCallback(() => {
@@ -98,7 +98,7 @@ export default function Home() {
         )}
         {/* TODO: not sure why, but I have to declare bg color here for it to take effect */}
         {/* TODO: Couldn't find a better way to afix to the bottom, try flex methods maybe? */}
-        {track && (
+        {activeTrack && (
           <View
             className="absolute right-0 left-0 bg-zinc-800"
             style={{ bottom: bottomTabbarHeight + 59 }}

@@ -1,8 +1,3 @@
-import TrackPlayer, {
-  State,
-  useActiveTrack,
-  usePlaybackState,
-} from "@/utils/mockTrackPlayer";
 import { FontAwesome, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import clsx from "clsx";
 import { eq } from "drizzle-orm";
@@ -26,6 +21,8 @@ import {
 } from "@/db/schema";
 import { handleDownload, useDownloadStore } from "@/stores/downloadStore";
 import { useMediaStore } from "@/stores/mediaStore";
+import { useTrackPlayer } from "@/stores/trackPlayerStore";
+import { useAudioPlayerStatus } from "expo-audio";
 
 export default function Media() {
   const { id } = useLocalSearchParams();
@@ -110,8 +107,8 @@ const MediaActionsBar = ({
   audioFiles: LibraryItemAudioFileSchemaType[];
   ebook: LibraryItemEBookFileSchemaType | null;
 }) => {
-  const { state: playbackState } = usePlaybackState();
-  const activeTrack = useActiveTrack();
+  const { activeTrack, play, pause, _player } = useTrackPlayer();
+  const { playing } = useAudioPlayerStatus(_player);
   const downloadStore = useDownloadStore();
 
   const handleRead = async () => {
@@ -150,12 +147,11 @@ const MediaActionsBar = ({
       {/* Buttons to show after downloaded */}
       {!downloadStore.isDownloading(libraryItem.id) && (
         <>
-          {(playbackState !== State.Playing ||
-            !audioFiles.find((af) => af.id === activeTrack?.id)) &&
+          {(!playing || !audioFiles.find((af) => af.id === activeTrack?.id)) &&
             audioFiles.filter((a) => a.path).length > 0 && (
               <Pressable
                 onPress={() => {
-                  TrackPlayer.play();
+                  play();
                   router.push(`/(player)/${libraryItem.id}`);
                 }}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-sky-300 py-2"
@@ -164,15 +160,14 @@ const MediaActionsBar = ({
               </Pressable>
             )}
 
-          {playbackState === State.Playing &&
-            audioFiles.find((af) => af.id === activeTrack?.id) && (
-              <Pressable
-                onPress={() => TrackPlayer.pause()}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-sky-300 py-2"
-              >
-                <Ionicons name="pause" size={40} color="white" />
-              </Pressable>
-            )}
+          {playing && audioFiles.find((af) => af.id === activeTrack?.id) && (
+            <Pressable
+              onPress={() => pause()}
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-sky-300 py-2"
+            >
+              <Ionicons name="pause" size={40} color="white" />
+            </Pressable>
+          )}
 
           {ebook && ebook.path && (
             <Pressable

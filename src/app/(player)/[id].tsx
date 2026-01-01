@@ -2,12 +2,12 @@ import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import { format } from "date-fns";
 import { eq } from "drizzle-orm";
+import { File, Paths } from "expo-file-system";
 import { Image } from "expo-image";
 import { Link, Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { toast } from "sonner-native";
-import { File, Paths } from "expo-file-system";
 
 import { localDb } from "@/db";
 import {
@@ -16,11 +16,11 @@ import {
   libraryItemSchema,
 } from "@/db/schema";
 import { Track, useTrackPlayer } from "@/stores/trackPlayerStore";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useAudioPlayerStatus } from "expo-audio";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Player() {
-  const { getActiveTrack, getQueue, play, skip, reset, add } = useTrackPlayer();
+  const { activeTrack, getQueue, play, skip, add, reset } = useTrackPlayer();
 
   const { audioFileId: audioFileIdSearchParam, id: libraryItemIdSearchParam } =
     useLocalSearchParams();
@@ -68,8 +68,6 @@ export default function Player() {
         toast.error(msg);
         throw Error(msg);
       }
-
-      const activeTrack = getActiveTrack();
 
       if (audioFile.id === activeTrack?.id) {
         console.log("if audioFile matches activeTrack then do nothing");
@@ -143,14 +141,13 @@ const TopActionsBar = () => {
 };
 
 const MediaArt = () => {
-  const { getActiveTrack } = useTrackPlayer();
-  const track = getActiveTrack();
+  const { activeTrack } = useTrackPlayer();
 
   return (
     <View className="flex w-full items-center">
       <View className="flex items-center overflow-hidden rounded-lg">
         <Image
-          source={track?.artwork}
+          source={activeTrack?.artwork}
           style={{ width: 350, height: 350 }}
           contentFit="fill"
           transition={1000}
@@ -161,13 +158,12 @@ const MediaArt = () => {
 };
 
 const MediaInfo = () => {
-  const { getActiveTrack } = useTrackPlayer();
-  const track = getActiveTrack();
+  const { activeTrack } = useTrackPlayer();
 
   return (
     <View className="my-8">
-      <Text className="text-2xl text-white">{track?.album}</Text>
-      <Text className="text-xl text-slate-400">{track?.title}</Text>
+      <Text className="text-2xl text-white">{activeTrack?.album}</Text>
+      <Text className="text-xl text-slate-400">{activeTrack?.title}</Text>
     </View>
   );
 };
@@ -195,7 +191,10 @@ const TrackProgress = () => {
           {format(currentTime * 1000, "mm:ss")}
         </Text>
         <Text className="text-slate-300">
-          {format((duration - currentTime) * 1000, "mm:ss")}
+          {/* TODO: when changing tracks, duration briefly becomes NaN */}
+          {duration
+            ? format((duration - currentTime) * 1000, "mm:ss")
+            : "00:00"}
         </Text>
       </View>
     </View>

@@ -7,11 +7,6 @@ import { eq } from "drizzle-orm";
 
 import { localDb } from "@/db";
 import { libraryItemAudioFileSchema, libraryItemSchema } from "@/db/schema";
-import TrackPlayer, {
-  Event,
-  PlaybackActiveTrackChangedEvent,
-  PlaybackProgressUpdatedEvent,
-} from "@/utils/mockTrackPlayer";
 
 export async function playbackService() {
   // TrackPlayer.addEventListener(Event.RemotePlay, () => TrackPlayer.play());
@@ -99,41 +94,26 @@ export async function playbackService() {
 //   }
 // };
 
-// export const fetchLibraryItemFromTrack = async (audioFileId: string) => {
-//   const audioFile = await localDb.query.libraryItemAudioFileSchema.findFirst({
-//     where: eq(libraryItemAudioFileSchema.id, audioFileId),
-//   });
-//   if (audioFile && audioFile.libraryItemId) {
-//     const libraryItem = await localDb.query.libraryItemSchema.findFirst({
-//       where: eq(libraryItemSchema.id, audioFile.libraryItemId),
-//     });
-//     return libraryItem;
-//   }
-// };
+export const fetchLibraryItemFromTrack = async (audioFileId: string) => {
+  const audioFile = await localDb.query.libraryItemAudioFileSchema.findFirst({
+    where: eq(libraryItemAudioFileSchema.id, audioFileId),
+  });
+  if (audioFile && audioFile.libraryItemId) {
+    const libraryItem = await localDb.query.libraryItemSchema.findFirst({
+      where: eq(libraryItemSchema.id, audioFile.libraryItemId),
+    });
+    return libraryItem;
+  }
+};
 
-// export const updateProgress = async (
-//   audioFileId: string,
-//   position: number,
-//   complete: boolean,
-// ) => {
-//   localDb
-//     .update(libraryItemAudioFileSchema)
-//     .set({ complete, progress: complete ? 0 : position, updatedAt: new Date() })
-//     .where(eq(libraryItemAudioFileSchema.id, audioFileId))
-//     .run();
-// };
-
-// export const skipToNext = async () => {
-//   TrackPlayer.skipToNext((await fetchInitialPosition(1)) ?? 0);
-// };
-
-// export const skipToPrevious = async () => {
-//   TrackPlayer.skipToPrevious((await fetchInitialPosition(-1)) ?? 0);
-// };
-
-// export const jumpBackward = () => {
-//   TrackPlayer.seekBy(-30);
-// };
-// export const jumpForward = () => {
-//   TrackPlayer.seekBy(30);
-// };
+export const updateProgress = async (
+  audioFileId: string,
+  position: number,
+  complete: boolean,
+) => {
+  localDb
+    .update(libraryItemAudioFileSchema)
+    .set({ complete, progress: complete ? 0 : position, updatedAt: new Date() })
+    .where(eq(libraryItemAudioFileSchema.id, audioFileId))
+    .run();
+};
