@@ -185,8 +185,7 @@ const Login = ({
             <View className="flex flex-row items-center gap-4">
               <Pressable
                 onPress={handleLogin}
-                className="flex flex-1 flex-row items-center justify-center gap-3 rounded bg-sky-300 px-4 py-2"
-              >
+                className="flex flex-1 flex-row items-center justify-center gap-3 rounded bg-sky-300 px-4 py-2">
                 {loading && (
                   <View className="animate-spin">
                     {/* <FontAwesome6 name="circle-notch" size={32} color="white" /> */}

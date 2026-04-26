@@ -147,7 +147,7 @@ export default function RecentPage() {
   if (isViewEmpty) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-        <View className="flex grow justify-center items-center gap-2">
+        <View className="flex grow items-center justify-center gap-2">
           <Text className="text-4xl font-bold text-white">No recent items</Text>
           <Text className="text-xl font-bold text-white">
             Please visit your library
@@ -165,14 +165,13 @@ export default function RecentPage() {
             <LibraryShelf label="Continue" items={continueItems} />
           )}
 
-{downloadedItems && downloadedItems.length > 0 && (
-  <LibraryShelf label="Downloaded" items={downloadedItems} />
-)}
-  
+          {downloadedItems && downloadedItems.length > 0 && (
+            <LibraryShelf label="Downloaded" items={downloadedItems} />
+          )}
+
           {newItems && newItems.length > 0 && (
             <LibraryShelf label="New" items={newItems} />
           )}
-
 
           {revisitItems && revisitItems.length > 0 && (
             <LibraryShelf label="Revisit" items={revisitItems} />
