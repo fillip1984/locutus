@@ -4,58 +4,39 @@
     "slug": "locutus",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "icon": "./src/assets/images/icon.png",
+    "scheme": "locutus",
     "userInterfaceStyle": "automatic",
-    "splash": {
-      "image": "./assets/images/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.illizen.locutus",
+      "bundleIdentifier": "com.fillip1984.locutus",
       "infoPlist": {
-        "UIBackgroundModes": ["audio"],
         "ITSAppUsesNonExemptEncryption": false
       }
     },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "package": "com.illizen.locutus",
-      "permissions": [
-        "android.permission.USE_BIOMETRIC",
-        "android.permission.USE_FINGERPRINT"
-      ]
-    },
-    "web": {
-      "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
-    },
     "plugins": [
       "expo-font",
+      "expo-image",
       "expo-router",
       "expo-secure-store",
       [
-        "expo-local-authentication",
+        "expo-splash-screen",
         {
-          "faceIDPermission": "Allow $(PRODUCT_NAME) to use Face ID, so you don't have to type in your username/password every time."
+          "backgroundColor": "#000000",
+          "image": "./src/assets/images/splash.png",
+          "resizeMode": "contain",
+          "imageWidth": "100%" //1284
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      "expo-web-browser"
     ],
     "experiments": {
-      "typedRoutes": true
+      "typedRoutes": true,
+      "reactCompiler": true
     },
     "extra": {
-      "router": {
-        "origin": false
-      },
+      "router": {},
       "eas": {
         "projectId": "a8edd52f-3b55-4242-a39b-ee31d35f807c"
       }

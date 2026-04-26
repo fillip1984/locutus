@@ -1,17 +1,19 @@
 {
   "cli": {
-    "version": ">= 7.6.0"
+    "version": ">= 18.7.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal",
-      "ios": {
-        "simulator": true
-      }
+      "distribution": "internal"
     },
     "production": {
+      "autoIncrement": true,
       "distribution": "internal"
     }
+  },
+  "submit": {
+    "production": {}
   }
 }
