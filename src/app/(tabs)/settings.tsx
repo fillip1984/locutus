@@ -1,12 +1,13 @@
-import { colors } from "@/components/ui/colors";
-import { pingBackend } from "@/services/pingApi";
 import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { toast } from "sonner-native";
 
+import { colors } from "@/components/ui/colors";
+import { pingBackend } from "@/services/pingApi";
 import { syncProgressWithServer } from "@/services/progressService";
 import { useLibraryStore } from "@/stores/library-store";
 import { FontAwesome6 } from "@expo/vector-icons";
+import { toast } from "sonner-native";
+
 export default function SettingsPage() {
   const { status, syncWithServer } = useLibraryStore();
 
@@ -46,14 +47,14 @@ export default function SettingsPage() {
           <Text className="text-3xl text-white">Server</Text>
           <Pressable
             onPress={handlePing}
-            className={`flex flex-row gap-2 w-full items-center justify-center rounded bg-transparent border border-white ${status === "loading" ? "opacity-40" : ""} px-4 py-2`}
+            className={`flex w-full flex-row items-center justify-center gap-2 rounded border border-white bg-transparent ${status === "loading" ? "opacity-40" : ""} px-4 py-2`}
           >
             <Text className="text-2xl text-white">Ping server</Text>
           </Pressable>
 
           <Pressable
             onPress={handleSyncProgress}
-            className={`flex flex-row gap-2 w-full items-center justify-center rounded bg-green-300 border border-white ${status === "loading" ? "opacity-40" : ""} px-4 py-2`}
+            className={`flex w-full flex-row items-center justify-center gap-2 rounded border border-white bg-green-300 ${status === "loading" ? "opacity-40" : ""} px-4 py-2`}
           >
             <Text className="text-2xl text-white">Sync Progress</Text>
           </Pressable>
@@ -61,7 +62,7 @@ export default function SettingsPage() {
           <Pressable
             onPress={handleSync}
             disabled={status === "loading"}
-            className={`flex flex-row gap-2 w-full items-center justify-center rounded bg-sky-300 ${status === "loading" ? "opacity-40" : ""} px-4 py-2`}
+            className={`flex w-full flex-row items-center justify-center gap-2 rounded bg-sky-300 ${status === "loading" ? "opacity-40" : ""} px-4 py-2`}
           >
             {status === "loading" && (
               <FontAwesome6 name="spinner" size={24} color="white" />
@@ -72,7 +73,7 @@ export default function SettingsPage() {
           <Pressable
             onPress={handleDropData}
             disabled={status === "loading"}
-            className={`flex flex-row gap-2 w-full items-center justify-center rounded bg-red-300 ${status === "loading" ? "opacity-40" : ""} px-4 py-2`}
+            className={`flex w-full flex-row items-center justify-center gap-2 rounded bg-red-300 ${status === "loading" ? "opacity-40" : ""} px-4 py-2`}
           >
             {status === "loading" && (
               <FontAwesome6 name="spinner" size={24} color="white" />

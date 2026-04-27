@@ -1,18 +1,17 @@
-import { Stack } from "expo-router";
-import { toast, Toaster } from "sonner-native";
-
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-
 import { useEffect, useState } from "react";
+import { Pressable, Text, TextInput, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useNowPlaying } from "react-native-nitro-player";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Stack } from "expo-router";
 
 import { db } from "@/db";
 import { userSettingsSchema } from "@/db/schema";
 import { login } from "@/services/loginApi";
 import { markComplete, recordProgress } from "@/services/progressService";
 import { getToken } from "@/stores/session-store";
-import { Pressable, Text, TextInput, View } from "react-native";
-import { useNowPlaying } from "react-native-nitro-player";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { toast, Toaster } from "sonner-native";
+
 import "../global.css";
 
 export type TrackPlayerExtraPayload = {
@@ -185,7 +184,8 @@ const Login = ({
             <View className="flex flex-row items-center gap-4">
               <Pressable
                 onPress={handleLogin}
-                className="flex flex-1 flex-row items-center justify-center gap-3 rounded bg-sky-300 px-4 py-2">
+                className="flex flex-1 flex-row items-center justify-center gap-3 rounded bg-sky-300 px-4 py-2"
+              >
                 {loading && (
                   <View className="animate-spin">
                     {/* <FontAwesome6 name="circle-notch" size={32} color="white" /> */}
