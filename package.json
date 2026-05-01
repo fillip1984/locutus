@@ -22,6 +22,8 @@
     "babel-plugin-inline-import": "^3.0.0",
     "drizzle-orm": "^1.0.0-beta.22",
     "expo": "^55.0.0",
+    "expo-asset": "~55.0.16",
+    "expo-audio": "~55.0.14",
     "expo-constants": "~55.0.14",
     "expo-dev-client": "^55.0.27",
     "expo-font": "~55.0.6",
@@ -64,7 +66,7 @@
     "eslint-config-expo": "~55.0.0",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.8.3",
-    "prettier-plugin-tailwindcss": "^0.7.3",
+    "prettier-plugin-tailwindcss": "^0.8.0",
     "typescript": "~5.9.2"
   },
   "private": true

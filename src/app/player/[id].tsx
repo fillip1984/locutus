@@ -1,17 +1,3 @@
-import { FontAwesome6, Ionicons } from "@expo/vector-icons";
-import Slider from "@react-native-community/slider";
-
-import { colors } from "@/components/ui/colors";
-import { generateGradientFromImageUrl } from "@/components/ui/graident-colors";
-import { db } from "@/db";
-import {
-  audiobookSchemaType,
-  libraryItemWithFilesSchemaType,
-} from "@/db/schema";
-
-import { Image } from "expo-image";
-import { LinearGradient } from "expo-linear-gradient";
-import { Link, Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import {
@@ -23,6 +9,20 @@ import {
   useOnPlaybackStateChange,
 } from "react-native-nitro-player";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
+import { Link, Stack, useLocalSearchParams } from "expo-router";
+
+import { FontAwesome6, Ionicons } from "@expo/vector-icons";
+import Slider from "@react-native-community/slider";
+
+import { colors } from "@/components/ui/colors";
+import { generateGradientFromImageUrl } from "@/components/ui/graident-colors";
+import { db } from "@/db";
+import {
+  audiobookSchemaType,
+  libraryItemWithFilesSchemaType,
+} from "@/db/schema";
 import { TrackPlayerExtraPayload } from "../_layout";
 
 export default function Player() {
@@ -64,10 +64,10 @@ export default function Player() {
   const [audioFiles, setAudioFiles] = useState<audiobookSchemaType[]>([]);
   useEffect(() => {
     async function setupTrackPlayer() {
-      await TrackPlayer.configure({
-        showInNotification: true,
-        carPlayEnabled: true,
-      });
+      //   await TrackPlayer.configure({
+      //     showInNotification: true,
+      //     carPlayEnabled: true,
+      //   });
       const id = await PlayerQueue.createPlaylist(
         "Default Playlist",
         "Default queue",
@@ -223,7 +223,7 @@ const TrackProgress = () => {
   };
 
   return (
-    <View className="flex mx-4">
+    <View className="mx-4 flex">
       <Slider
         minimumValue={0}
         maximumValue={100}
@@ -303,7 +303,7 @@ const MediaControls = () => {
           color="white"
         />
       </View>
-      <View className="flex w-full items-end mb-4">
+      <View className="mb-4 flex w-full items-end">
         <Pressable onPress={handleSetRate} className="rounded-md p-2">
           <Text className="text-2xl text-white">{rate}x</Text>
         </Pressable>

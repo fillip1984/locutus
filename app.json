@@ -25,11 +25,19 @@
           "backgroundColor": "#000000",
           "image": "./src/assets/images/splash.png",
           "resizeMode": "contain",
-          "imageWidth": "100%" //1284
+          "imageWidth": "100%"
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "enableBackgroundPlayback": true
         }
       ],
       "expo-sqlite",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-audio",
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true,
