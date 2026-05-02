@@ -1,6 +1,12 @@
+import { useState } from "react";
 import { NativeTabs } from "expo-router/build/native-tabs";
 
+import MiniPlayer from "@/components/mini-player";
+
 export default function TabLayout() {
+  // State must be stored outside BottomAccessory
+  const [isPlaying, setIsPlaying] = useState(false);
+
   return (
     <>
       <NativeTabs minimizeBehavior="onScrollDown">
@@ -19,6 +25,12 @@ export default function TabLayout() {
         <NativeTabs.Trigger name="search" role="search">
           <NativeTabs.Trigger.Label>Search</NativeTabs.Trigger.Label>
         </NativeTabs.Trigger>
+        <NativeTabs.BottomAccessory>
+          <MiniPlayer
+            isPlaying={isPlaying}
+            onToggle={() => setIsPlaying(!isPlaying)}
+          />
+        </NativeTabs.BottomAccessory>
       </NativeTabs>
     </>
   );

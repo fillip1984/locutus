@@ -86,7 +86,7 @@ const MainLayout = () => {
     }
   }, [currentTrack, currentPosition]);
   useEffect(() => {
-    // on change of state (play or pause), record progress
+    console.log("on change of state (play or pause), record progress");
     if (currentTrack) {
       recordProgress(currentTrack, currentPosition);
     }
