@@ -19,8 +19,6 @@ I'm currently working to rebuild the same functionality that was previously show
   - [ ] Try to ping the server (and get local network permission access) just after entering server url
   - [ ] Create book card when cover is not available (example: The Private Life of Genghis Khan)
 - [ ] Re-implement security (face id)
-- [ ] Enhance UI for download experience
-  - There is a bug where after downloading it doesn't show as playable
 - [ ] Finish out pushing the mini-player to the bottom when switching between player and library
 - [x] Finish flow from playlist to player (expo-router)
 - [x] Figure tabs (expo-router native tabs are still in beta)
@@ -28,6 +26,7 @@ I'm currently working to rebuild the same functionality that was previously show
 - [x] Figure out how to import files from elsewhere (AudioBookShelf Apis to the rescue)
 - [x] Figure out how to distribute without app store (--local and internal/ad hoc distribution, apple developer subscription required)
 - [ ] Figure out how to get it to play in the background
+  - [?] - I think I have to also include expo-audio and set app.json expo-audio -> enableBackgroundPlayback to true???
 - [x] Figure out how to integrate into Apple now playing experiences
 - [x] Figure out how to integrate into Apple lock screen
 - [x] Figure out how to integrate with Apple Carplay

@@ -151,7 +151,7 @@ export default function Player() {
       end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}
     >
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+      <SafeAreaView style={{ flex: 1 }}>
         <View className="flex h-full gap-2 p-2">
           <Stack.Screen options={{ gestureDirection: "vertical" }} />
           <TopActionsBar />
@@ -248,6 +248,13 @@ const TrackProgress = () => {
 
 const MediaControls = () => {
   const [rate, setRate] = useState<number>(1);
+  useEffect(() => {
+    const fetchPlaybackSpeed = async () => {
+      const currentRate = await TrackPlayer.getPlaybackSpeed();
+      setRate(currentRate);
+    };
+    fetchPlaybackSpeed();
+  }, []);
   const handleSetRate = async () => {
     // increments in .25, cycles back to .5x if over 3x
     const currentRate = await TrackPlayer.getPlaybackSpeed();

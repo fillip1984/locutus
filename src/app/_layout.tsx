@@ -17,11 +17,7 @@ import { TrackPlayer, useNowPlaying } from "react-native-nitro-player";
 
 import { useFileExplorerDevTools } from "file-explorer-expo-dev-plugin";
 
-import {
-  isAudioFileNearEnd,
-  markComplete,
-  recordProgress,
-} from "@/services/progressService";
+import { markComplete, recordProgress } from "@/services/progressService";
 
 export type TrackPlayerExtraPayload = {
   libraryItemId: string;
@@ -65,6 +61,7 @@ const MainLayout = () => {
     setupPlayer();
   }, []);
 
+  // setup progres and complete hooks
   const { currentTrack, currentPosition, currentState } = useNowPlaying();
 
   useEffect(() => {
@@ -72,8 +69,7 @@ const MainLayout = () => {
       currentTrack &&
       (currentTrack.extraPayload as TrackPlayerExtraPayload).previousTrack !==
         null &&
-      Math.round(currentPosition) === 0 &&
-      isAudioFileNearEnd(currentPosition, currentTrack.duration)
+      Math.round(currentPosition) === 0
     ) {
       // TODO: couldn't get either useOnPlaybackStateChange.reason nor useOnChangeTrack.reason to tell me when the file ended
       const previousTrack = (

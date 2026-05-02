@@ -27,11 +27,13 @@ import {
   libraryItemWithFilesSchemaType,
 } from "@/db/schema";
 import { handleDownload, useDownloadStore } from "@/stores/download-store";
+import { useLibraryStore } from "@/stores/library-store";
 
 export default function MediaPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [libraryItem, setLibraryItem] =
     useState<libraryItemWithFilesSchemaType | null>(null);
+  const { status: libraryStatus } = useLibraryStore();
 
   useFocusEffect(
     useCallback(() => {
@@ -52,10 +54,12 @@ export default function MediaPage() {
         }
       };
 
-      if (id) {
+      // libraryStatus check is necessary for file download, after it completes downloading this is what triggers a reload of library item media
+      if (id || libraryStatus === "loaded") {
+        console.log("Fetching library item with id:", id);
         fetchLibraryItem();
       }
-    }, [id]),
+    }, [id, libraryStatus]),
   );
 
   // gradient colors for the background, default to background color

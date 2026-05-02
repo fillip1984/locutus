@@ -15,26 +15,16 @@ import { getLibraries } from "@/services/libraryApi";
 import { getLibraryItem, Root } from "@/services/libraryItemApi";
 import { getLibraryItems } from "@/services/libraryItemsApi";
 
-// export interface LibraryStoreRefetchRequest {
-//   search?: string;
-//   sort?: libraryItemSort;
-//   eBookFilter?: boolean;
-//   audioBookFilter?: boolean;
-// }
-
 export interface LibraryStore {
   libraries: librarySchemaType[] | null;
   libraryItems: libraryItemSchemaType[] | null;
   status: "loading" | "loaded";
 
-  // refetch: (request?: LibraryStoreRefetchRequest) => void;
   refetch: () => void;
   syncWithServer: () => Promise<boolean>;
   addLibrary: (library: librarySchemaType) => void;
   removeLibrary: (id: string) => void;
 }
-
-export type libraryItemSort = "Author" | "Title" | "Published" | "Recent";
 
 export const useLibraryStore = create<LibraryStore>()((set, get) => ({
   libraries: null,
@@ -46,6 +36,7 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
       .select()
       .from(libraryItemSchema)
       .orderBy(asc(libraryItemSchema.title));
+    // TODO: add back other filters?
     // .where(
     //   and(
     //     request?.search

@@ -69,15 +69,19 @@ export const markComplete = async ({
   // TODO: update the library item as complete as well if this was the last file
 };
 
-export const isAudioFileNearEnd = (
-  currentPosition: number,
-  duration: number,
-) => {
-  // TODO: consider it near the end if within the last 1 minutes or 5% remaining of the total duration, whichever is less
-  // const timeThreshold = Math.min(60, duration * 0.05);
-  const timeThreshold = 60;
-  return currentPosition >= duration - timeThreshold;
-};
+// export const isAudioFileNearEnd = (
+//   currentPosition: number,
+//   duration: number,
+// ) => {
+//   // TODO: consider it near the end if within the last 1 minutes or 5% remaining of the total duration, whichever is less
+//   // const timeThreshold = Math.min(60, duration * 0.05);
+//   const timeThreshold = 60;
+//   const nearEnd = currentPosition >= duration - timeThreshold;
+//   console.log(
+//     `is audio file near end? currentPosition: ${currentPosition}, duration: ${duration}, timeThreshold: ${timeThreshold}, nearEnd: ${nearEnd}`,
+//   );
+//   return nearEnd;
+// };
 
 export const syncProgressWithServer = async () => {
   const userSettings = await db.query.userSettingsSchema.findFirst();
