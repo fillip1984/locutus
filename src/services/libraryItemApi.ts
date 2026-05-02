@@ -1,7 +1,8 @@
+import { Directory, File, Paths } from "expo-file-system";
+
 import { db } from "@/db";
 import { userSettingsSchema } from "@/db/schema";
 import { getToken } from "@/stores/session-store";
-import { Directory, File, Paths } from "expo-file-system";
 import { audiobookShelfFetch } from "./audiobookShelfBaseClient";
 
 export const getLibraryItem = async (libraryItemId: string) => {
@@ -31,46 +32,6 @@ export const downloadLibraryItem = async (
   fileId: string,
   filename: string,
 ) => {
-  // try {
-  //   console.log(
-  //     `downloading library item: ${libraryItemId} and fileId: ${fileId}`,
-  //   );
-  //   const response = await axios.get(
-  //     `http://192.168.68.68:13378/api/items/${libraryItemId}/file/${fileId}/download`,
-  //     {
-  //       headers: {
-  //         Authorization: `Bearer ${audiobookshelf_token}`,
-  //       },
-  //       responseType: "arraybuffer",
-  //     },
-  //   );
-  //   const filename = response.headers["content-disposition"]
-  //     .split("filename=")[1]
-  //     .split(".")[0];
-  //   const extension = response.headers["content-disposition"]
-  //     .split(".")[1]
-  //     .split(";")[0];
-  //   const file =
-  //     FileSystem.documentDirectory + `${encodeURI(filename + "." + extension)}`;
-
-  //   console.log({ filename, extension, file });
-
-  //   const buffer = Buffer.from(response.data, "base64");
-  //   const base64Encoded = buffer.toString("base64");
-  //   await FileSystem.writeAsStringAsync(file, base64Encoded, {
-  //     encoding: FileSystem.EncodingType.Base64,
-  //   });
-  //   // FileSystem.documentDirectory + "test.mp3";
-  //   // await FileSystem.wr;
-  //   console.log(`downloaded ${file}`);
-  //   return file;
-  // } catch (err) {
-  //   console.error(
-  //     `Exception occurred while downloading library item: ${libraryItemId} and fileId: ${fileId}`,
-  //   );
-  //   throw err;
-  // }
-
   try {
     console.log(`downloading libraryItem remoteId: ${libraryItemRemoteId}`);
     const settings = (await db.select().from(userSettingsSchema))[0];
@@ -95,7 +56,7 @@ export const downloadLibraryItem = async (
       idempotent: true,
     });
 
-    return result.uri;
+    return relativePathUri(result);
   } catch (err) {
     console.error(
       `Exception occurred while downloading library item remote id: ${libraryItemRemoteId}, fileId: ${fileId}, filename: ${filename}`,
@@ -103,6 +64,24 @@ export const downloadLibraryItem = async (
     );
     throw err;
   }
+};
+
+// TODO: move to file-utils?
+export const relativePathUri = (file: File) => {
+  const documentDir = Paths.document;
+  if (!file.uri.startsWith(documentDir.uri)) {
+    throw new Error(
+      `File path: ${file.uri} is not within document directory: ${documentDir.uri}`,
+    );
+  }
+  return file.uri.substring(documentDir.uri.length);
+};
+
+export const absolutePathUri = (relativePath: string | null) => {
+  if (!relativePath) {
+    return "";
+  }
+  return new File(`${Paths.document.uri}/${relativePath}`).uri;
 };
 
 export interface Root {

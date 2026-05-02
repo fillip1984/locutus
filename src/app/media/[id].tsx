@@ -1,21 +1,3 @@
-import { colors } from "@/components/ui/colors";
-import { generateGradientFromImageUrl } from "@/components/ui/graident-colors";
-import { db } from "@/db";
-import {
-  audiobookSchemaType,
-  libraryItemWithFilesSchemaType,
-} from "@/db/schema";
-import { handleDownload, useDownloadStore } from "@/stores/download-store";
-import { FontAwesome6 } from "@expo/vector-icons";
-
-import { Image } from "expo-image";
-import { LinearGradient } from "expo-linear-gradient";
-import {
-  Link,
-  router,
-  useFocusEffect,
-  useLocalSearchParams,
-} from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Pressable,
@@ -26,6 +8,25 @@ import {
 } from "react-native";
 import { useNowPlaying } from "react-native-nitro-player";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
+import {
+  Link,
+  router,
+  useFocusEffect,
+  useLocalSearchParams,
+} from "expo-router";
+
+import { FontAwesome6 } from "@expo/vector-icons";
+
+import { colors } from "@/components/ui/colors";
+import { generateGradientFromImageUrl } from "@/components/ui/graident-colors";
+import { db } from "@/db";
+import {
+  audiobookSchemaType,
+  libraryItemWithFilesSchemaType,
+} from "@/db/schema";
+import { handleDownload, useDownloadStore } from "@/stores/download-store";
 
 export default function MediaPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -136,14 +137,14 @@ export default function MediaPage() {
               <Text className="text-2xl font-bold text-white">
                 {libraryItem.title}
               </Text>
-              <Text className="text-white/80 text-lg">
+              <Text className="text-lg text-white/80">
                 {libraryItem.authorName}
               </Text>
               <Text className="text-white/80">{libraryItem.publishedYear}</Text>
               <Controls libraryItem={libraryItem} />
               {/* TODO: https://docs.swmansion.com/react-native-reanimated/examples/accordion */}
               <Text
-                className={`text-white tracking-tighter mt-1 ${expandDescription ? "" : "line-clamp-6"}`}
+                className={`mt-1 tracking-tighter text-white ${expandDescription ? "" : "line-clamp-6"}`}
                 onPress={() => setExpandDescription((prev) => !prev)}
               >
                 {hideHtmlTags(libraryItem.description ?? "")}
@@ -217,7 +218,7 @@ const Controls = ({
   ]);
 
   return (
-    <View className="flex-row items-center gap-4 mt-2">
+    <View className="mt-2 flex-row items-center gap-4">
       {isResumable ? (
         <TouchableOpacity
           onPress={() =>
@@ -230,20 +231,20 @@ const Controls = ({
               },
             })
           }
-          className="rounded-full w-full flex justify-center items-center flex-row bg-white/20 px-4 py-4"
+          className="flex w-full flex-row items-center justify-center rounded-full bg-white/20 px-4 py-4"
         >
-          <Text className="text-white font-semibold">Resume</Text>
+          <Text className="font-semibold text-white">Resume</Text>
         </TouchableOpacity>
       ) : isDownloadable ? (
         <TouchableOpacity
           onPress={() => handleDownload(libraryItem.id)}
-          className="rounded-full w-full flex justify-center items-center flex-row bg-white/20 px-4 py-4"
+          className="flex w-full flex-row items-center justify-center rounded-full bg-white/20 px-4 py-4"
         >
-          <Text className="text-white font-semibold">Download</Text>
+          <Text className="font-semibold text-white">Download</Text>
         </TouchableOpacity>
       ) : isDownloading ? (
-        <TouchableOpacity className="rounded-full w-full flex justify-center items-center flex-row bg-white/20 px-4 py-4">
-          <Text className="text-white font-semibold">Downloading...</Text>
+        <TouchableOpacity className="flex w-full flex-row items-center justify-center rounded-full bg-white/20 px-4 py-4">
+          <Text className="font-semibold text-white">Downloading...</Text>
         </TouchableOpacity>
       ) : isPlayable ? (
         <TouchableOpacity
@@ -257,9 +258,9 @@ const Controls = ({
               },
             })
           }
-          className="rounded-full w-full flex justify-center items-center flex-row bg-white/10 px-4 py-4"
+          className="flex w-full flex-row items-center justify-center rounded-full bg-white/10 px-4 py-4"
         >
-          <Text className="text-white/50 font-semibold">Play</Text>
+          <Text className="font-semibold text-white/50">Play</Text>
         </TouchableOpacity>
       ) : isReadable ? (
         <TouchableOpacity
@@ -273,16 +274,16 @@ const Controls = ({
               },
             })
           }
-          className="rounded-full w-full flex justify-center items-center flex-row bg-white/10 px-4 py-4"
+          className="flex w-full flex-row items-center justify-center rounded-full bg-white/10 px-4 py-4"
         >
-          <Text className="text-white/50 font-semibold">Read</Text>
+          <Text className="font-semibold text-white/50">Read</Text>
         </TouchableOpacity>
       ) : (
         <TouchableOpacity
           disabled
-          className="rounded-full w-full flex justify-center items-center flex-row bg-white/10 px-4 py-4"
+          className="flex w-full flex-row items-center justify-center rounded-full bg-white/10 px-4 py-4"
         >
-          <Text className="text-white/30 font-semibold">
+          <Text className="font-semibold text-white/30">
             No media available
           </Text>
         </TouchableOpacity>
@@ -301,7 +302,7 @@ const MediaTracks = ({
   return (
     <View className="mt-4">
       <View className="flex flex-row justify-between">
-        <Text className="uppercase text-white">Chapters</Text>
+        <Text className="text-white uppercase">Chapters</Text>
         <Text className="text-stone-300">
           {libraryItem.audioFiles?.filter((a) => !a.complete).length}/
           {libraryItem.audioFiles?.length} remaining
@@ -354,9 +355,9 @@ const Chapter = ({
       asChild
     >
       <Pressable
-        className={`rounded-lg overflow-hidden ${audioFile.complete ? "border border-white opacity-50" : isLastPlayed ? "bg-sky-300" : "bg-slate-400/30"}`}
+        className={`overflow-hidden rounded-lg ${audioFile.complete ? "border border-white opacity-50" : isLastPlayed ? "bg-sky-300" : "bg-slate-400/30"}`}
       >
-        <View className="px-4 pt-3 pb-2 flex flex-row justify-between gap-2">
+        <View className="flex flex-row justify-between gap-2 px-4 pt-3 pb-2">
           <Text className="w-4/5 font-bold text-white">{audioFile.name}</Text>
 
           {audioFile.path && audioFile.complete && (

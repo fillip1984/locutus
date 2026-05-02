@@ -60,6 +60,7 @@ export const audioFileSchema = sqliteTable("audioFile", {
   progress: integer(),
   complete: integer({ mode: "boolean" }).default(false),
   name: text().notNull(),
+  // path is relative uri actually, a little tricky to reconsitute the path but it works like this: new File(Paths.document, audioFile.path)
   path: text(),
   libraryItemId: text()
     .notNull()

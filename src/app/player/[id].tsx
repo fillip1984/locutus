@@ -23,6 +23,7 @@ import {
   audiobookSchemaType,
   libraryItemWithFilesSchemaType,
 } from "@/db/schema";
+import { absolutePathUri } from "@/services/libraryItemApi";
 import { TrackPlayerExtraPayload } from "../_layout";
 
 export default function Player() {
@@ -77,7 +78,7 @@ export default function Player() {
           artist: libraryItem?.authorName ?? "Unknown Author",
           album: libraryItem?.title ?? "Unknown Title",
           duration: audioFile.duration ?? 0,
-          url: audioFile.path ?? "",
+          url: absolutePathUri(audioFile.path),
           artwork: libraryItem?.coverArtPath ?? undefined,
           extraPayload: {
             libraryItemId: libraryItem?.id ?? "",

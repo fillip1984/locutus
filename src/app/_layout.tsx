@@ -15,6 +15,8 @@ import "../global.css";
 
 import { TrackPlayer, useNowPlaying } from "react-native-nitro-player";
 
+import { useFileExplorerDevTools } from "file-explorer-expo-dev-plugin";
+
 import {
   isAudioFileNearEnd,
   markComplete,
@@ -31,6 +33,7 @@ export type TrackPlayerExtraPayload = {
 };
 
 export default function RootLayout() {
+  useFileExplorerDevTools();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   useEffect(() => {
     const checkAuth = async () => {
