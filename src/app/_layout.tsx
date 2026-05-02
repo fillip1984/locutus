@@ -13,7 +13,13 @@ import { getToken } from "@/stores/session-store";
 
 import "../global.css";
 
-import { TrackPlayer } from "react-native-nitro-player";
+import { TrackPlayer, useNowPlaying } from "react-native-nitro-player";
+
+import {
+  isAudioFileNearEnd,
+  markComplete,
+  recordProgress,
+} from "@/services/progressService";
 
 export type TrackPlayerExtraPayload = {
   libraryItemId: string;
@@ -38,6 +44,14 @@ export default function RootLayout() {
     checkAuth();
   }, []);
 
+  if (isLoggedIn) {
+    return <MainLayout />;
+  }
+
+  return <Login setIsLoggedIn={setIsLoggedIn} />;
+}
+
+const MainLayout = () => {
   useEffect(() => {
     const setupPlayer = async () => {
       await TrackPlayer.configure({
@@ -48,45 +62,38 @@ export default function RootLayout() {
     setupPlayer();
   }, []);
 
-  // const { currentTrack, currentPosition, currentState } = useNowPlaying();
+  const { currentTrack, currentPosition, currentState } = useNowPlaying();
 
-  // useEffect(() => {
-  //   // on playing a new track, mark previous track as complete
-  //   // every 15 seconds, record progress
-  //   if (
-  //     currentTrack &&
-  //     (currentTrack.extraPayload as TrackPlayerExtraPayload).previousTrack !==
-  //       null &&
-  //     Math.round(currentPosition) === 0
-  //   ) {
-  //     // TODO: couldn't get either useOnPlaybackStateChange.reason nor useOnChangeTrack.reason to tell me when the file ended
-  //     const previousTrack = (
-  //       currentTrack.extraPayload as TrackPlayerExtraPayload
-  //     ).previousTrack!;
-  //     markComplete({
-  //       track: previousTrack.audioFileId,
-  //       duration: previousTrack.duration,
-  //     });
-  //   } else if (currentTrack && Math.round(currentPosition) % 15 === 0) {
-  //     recordProgress(currentTrack, currentPosition);
-  //   }
-  // }, [currentTrack, currentPosition]);
-  // useEffect(() => {
-  //   // on change of state (play or pause), record progress
-  //   if (currentTrack) {
-  //     recordProgress(currentTrack, currentPosition);
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [currentState]);
+  useEffect(() => {
+    if (
+      currentTrack &&
+      (currentTrack.extraPayload as TrackPlayerExtraPayload).previousTrack !==
+        null &&
+      Math.round(currentPosition) === 0 &&
+      isAudioFileNearEnd(currentPosition, currentTrack.duration)
+    ) {
+      // TODO: couldn't get either useOnPlaybackStateChange.reason nor useOnChangeTrack.reason to tell me when the file ended
+      const previousTrack = (
+        currentTrack.extraPayload as TrackPlayerExtraPayload
+      ).previousTrack!;
+      console.log("on playing a new track, mark previous track as complete");
+      markComplete({
+        track: previousTrack.audioFileId,
+        duration: previousTrack.duration,
+      });
+    } else if (currentTrack && Math.round(currentPosition) % 15 === 0) {
+      console.log("every 15 seconds, record progress");
+      recordProgress(currentTrack, currentPosition);
+    }
+  }, [currentTrack, currentPosition]);
+  useEffect(() => {
+    // on change of state (play or pause), record progress
+    if (currentTrack) {
+      recordProgress(currentTrack, currentPosition);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentState]);
 
-  if (isLoggedIn) {
-    return <MainLayout />;
-  }
-
-  return <Login setIsLoggedIn={setIsLoggedIn} />;
-}
-
-const MainLayout = () => {
   return (
     <GestureHandlerRootView>
       <Stack>

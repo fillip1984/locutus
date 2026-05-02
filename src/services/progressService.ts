@@ -1,3 +1,7 @@
+import { TrackItem } from "react-native-nitro-player";
+
+import { and, eq, gt, isNotNull, lte } from "drizzle-orm";
+
 import { TrackPlayerExtraPayload } from "@/app/_layout";
 import { db } from "@/db";
 import {
@@ -7,8 +11,6 @@ import {
   userSettingsSchema,
 } from "@/db/schema";
 import { getToken } from "@/stores/session-store";
-import { and, eq, gt, isNotNull, lte } from "drizzle-orm";
-import { TrackItem } from "react-native-nitro-player";
 import { audiobookShelfFetch } from "./audiobookShelfBaseClient";
 import { pingBackend } from "./pingApi";
 
@@ -44,6 +46,7 @@ export const recordProgress = async (
     .where(eq(libraryItemSchema.id, libraryItemId))
     .run();
 };
+
 export const markComplete = async ({
   track,
   duration,
@@ -64,6 +67,16 @@ export const markComplete = async ({
     .run();
 
   // TODO: update the library item as complete as well if this was the last file
+};
+
+export const isAudioFileNearEnd = (
+  currentPosition: number,
+  duration: number,
+) => {
+  // TODO: consider it near the end if within the last 1 minutes or 5% remaining of the total duration, whichever is less
+  // const timeThreshold = Math.min(60, duration * 0.05);
+  const timeThreshold = 60;
+  return currentPosition >= duration - timeThreshold;
 };
 
 export const syncProgressWithServer = async () => {

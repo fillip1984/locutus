@@ -62,12 +62,10 @@ export default function Player() {
   }, [libraryItemId]);
 
   const [audioFiles, setAudioFiles] = useState<audiobookSchemaType[]>([]);
+
   useEffect(() => {
-    async function setupTrackPlayer() {
-      //   await TrackPlayer.configure({
-      //     showInNotification: true,
-      //     carPlayEnabled: true,
-      //   });
+    async function setupPlaylist() {
+      console.log("Setting up playlist with audio files", audioFiles.length);
       const id = await PlayerQueue.createPlaylist(
         "Default Playlist",
         "Default queue",
@@ -98,6 +96,7 @@ export default function Player() {
       await PlayerQueue.loadPlaylist(id);
 
       // if resuming, skip to the correct track and position
+      // or if user selected specific track to play, skip to that track and position
       const audioFile = audioFiles.find((file) => file.id === audioFileId);
       if (audioFile) {
         await TrackPlayer.skipToIndex(
@@ -110,8 +109,8 @@ export default function Player() {
       await TrackPlayer.play();
     }
 
-    if (mode === "play") {
-      setupTrackPlayer();
+    if (mode === "play" && audioFiles.length > 0) {
+      setupPlaylist();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioFiles]);

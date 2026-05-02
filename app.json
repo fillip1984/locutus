@@ -15,6 +15,13 @@
       }
     },
     "plugins": [
+      "expo-asset",
+      [
+        "expo-audio",
+        {
+          "enableBackgroundPlayback": true
+        }
+      ],
       "expo-font",
       "expo-image",
       "expo-router",
@@ -28,16 +35,8 @@
           "imageWidth": "100%"
         }
       ],
-      [
-        "expo-audio",
-        {
-          "enableBackgroundPlayback": true
-        }
-      ],
       "expo-sqlite",
-      "expo-web-browser",
-      "expo-audio",
-      "expo-asset"
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
