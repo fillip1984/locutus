@@ -17,6 +17,7 @@ export const getToken = () => {
 export interface SessionStore {
   isAuthenticated: boolean;
   userSettings: UserSettingsSchemaType | null;
+  setPreferredPlaybackRate: (rate: number) => Promise<void>;
   logIn: (
     serverUrl: string,
     username: string,
@@ -29,6 +30,18 @@ export interface SessionStore {
 export const useSessionStore = create<SessionStore>((set, get) => ({
   isAuthenticated: false,
   userSettings: null,
+  setPreferredPlaybackRate: async (rate: number) => {
+    if (!get().userSettings) return;
+    const userSettingsId = get().userSettings?.id as string;
+    const userSettings = (
+      await db
+        .update(userSettingsSchema)
+        .set({ preferredPlaybackRate: rate })
+        .where(eq(userSettingsSchema.id, userSettingsId))
+        .returning()
+    )[0];
+    set({ userSettings });
+  },
   logIn: async (serverUrl: string, username: string, password: string) => {
     console.log("Logging in...", serverUrl, username);
     const token = await login(serverUrl, username, password);
@@ -56,7 +69,10 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
         existingSettings = results[0];
       }
       await SecureStore.setItemAsync(key, token);
-      set({ userSettings: existingSettings, isAuthenticated: true });
+      set({
+        userSettings: existingSettings,
+        isAuthenticated: true,
+      });
       return true;
     } else {
       return false;
@@ -65,7 +81,10 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
   logInWithBiometrics: async (biometricsResult: boolean) => {
     if (biometricsResult) {
       const result = await db.query.userSettingsSchema.findFirst();
-      set({ isAuthenticated: true, userSettings: result });
+      set({
+        isAuthenticated: true,
+        userSettings: result,
+      });
       return true;
     } else {
       return false;
@@ -73,6 +92,9 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
   },
   logOut: async () => {
     TrackPlayer.pause();
-    set({ isAuthenticated: false, userSettings: null });
+    set({
+      isAuthenticated: false,
+      userSettings: null,
+    });
   },
 }));

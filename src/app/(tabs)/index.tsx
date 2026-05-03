@@ -52,20 +52,21 @@ export default function RecentPage() {
 
       setContinueItems(
         libraryStore.libraryItems
+          ?.filter((i) => !i.complete && (i.lastPlayedId || i.lastEBookId))
           ?.sort((a, b) => {
             const aLastPlayed = a.lastPlayedId
-              ? new Date(a.publishedYear ?? 0, 0, 1).getTime()
+              ? (a.updatedAt?.getTime() ?? 0)
               : 0;
             const bLastPlayed = b.lastPlayedId
-              ? new Date(b.publishedYear ?? 0, 0, 1).getTime()
+              ? (b.updatedAt?.getTime() ?? 0)
               : 0;
             return bLastPlayed - aLastPlayed;
           })
-          ?.filter((i) => !i.complete && (i.lastPlayedId || i.lastEBookId))
           .slice(0, 20) ?? [],
       );
       setDownloadedItems(
         libraryStore.libraryItems
+          ?.filter((i) => i.downloaded)
           ?.sort((a, b) => {
             if (a.updatedAt && b.updatedAt) {
               return (
@@ -80,11 +81,11 @@ export default function RecentPage() {
               return 0;
             }
           })
-          .filter((i) => i.downloaded)
           .slice(0, 20) ?? [],
       );
       setRevisitItems(
         libraryStore.libraryItems
+          ?.filter((i) => i.complete)
           ?.sort((a, b) => {
             if (a.updatedAt && b.updatedAt) {
               return (
@@ -99,11 +100,14 @@ export default function RecentPage() {
               return 0;
             }
           })
-          .filter((i) => i.complete)
           .slice(0, 20) ?? [],
       );
       setNewItems(
         libraryStore.libraryItems
+          ?.filter(
+            (i) =>
+              !i.complete && !i.downloaded && !i.lastPlayedId && !i.lastEBookId,
+          )
           ?.sort((a, b) => {
             if (a.createdAt && b.createdAt) {
               return (
@@ -118,10 +122,6 @@ export default function RecentPage() {
               return 0;
             }
           })
-          .filter(
-            (i) =>
-              !i.complete && !i.downloaded && !i.lastPlayedId && !i.lastEBookId,
-          )
           .slice(0, 20) ?? [],
       );
     }

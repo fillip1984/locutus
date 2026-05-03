@@ -23,6 +23,7 @@ import {
   audiobookSchemaType,
   libraryItemWithFilesSchemaType,
 } from "@/db/schema";
+import { useSessionStore } from "@/stores/session-store";
 import { absolutePathUri } from "@/utils/file-utils";
 import { TrackPlayerExtraPayload } from "../_layout";
 
@@ -247,20 +248,13 @@ const TrackProgress = () => {
 };
 
 const MediaControls = () => {
-  const [rate, setRate] = useState<number>(1);
-  useEffect(() => {
-    const fetchPlaybackSpeed = async () => {
-      const currentRate = await TrackPlayer.getPlaybackSpeed();
-      setRate(currentRate);
-    };
-    fetchPlaybackSpeed();
-  }, []);
+  const { userSettings, setPreferredPlaybackRate } = useSessionStore();
   const handleSetRate = async () => {
     // increments in .25, cycles back to .5x if over 3x
     const currentRate = await TrackPlayer.getPlaybackSpeed();
     const newRate = currentRate + 0.25 > 3 ? 0.5 : currentRate + 0.25;
     TrackPlayer.setPlaybackSpeed(newRate);
-    setRate(newRate);
+    setPreferredPlaybackRate(newRate);
   };
 
   const { position: playbackPosition } = useOnPlaybackProgressChange();
@@ -326,7 +320,9 @@ const MediaControls = () => {
       </View>
       <View className="mb-4 flex w-full items-end">
         <Pressable onPress={handleSetRate} className="rounded-md p-2">
-          <Text className="text-2xl text-white">{rate}x</Text>
+          <Text className="text-2xl text-white">
+            {userSettings?.preferredPlaybackRate ?? 1}x
+          </Text>
         </Pressable>
       </View>
     </View>

@@ -232,7 +232,7 @@ export const syncProgressWithServer = async () => {
       db.update(libraryItemSchema)
         .set({
           updatedAt: new Date(ebook.updatedAt),
-          lastPlayedId: existingEBookFile.id,
+          lastEBookId: existingEBookFile.id,
           complete: ebook.isFinished,
         })
         .where(eq(libraryItemSchema.id, ebook.libraryItemId))
@@ -311,9 +311,9 @@ export const syncProgressWithServer = async () => {
         .update(libraryItemSchema)
         .set({
           updatedAt: new Date(),
-          lastPlayedId: progressUpdates[0]?.libraryItemId ?? null,
+          lastPlayedId: existingAudioFile.id,
         })
-        .where(eq(libraryItemSchema.id, existingAudioFile.id));
+        .where(eq(libraryItemSchema.id, existingAudioFile.libraryItemId));
     }
 
     console.log(
