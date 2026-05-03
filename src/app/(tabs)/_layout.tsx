@@ -1,11 +1,29 @@
-import { useState } from "react";
+import { useEffect } from "react";
+import { usePlaylist } from "react-native-nitro-player";
+import { router } from "expo-router";
 import { NativeTabs } from "expo-router/build/native-tabs";
 
 import MiniPlayer from "@/components/mini-player";
+import { useSessionStore } from "@/stores/session-store";
 
 export default function TabLayout() {
-  // State must be stored outside BottomAccessory
-  const [isPlaying, setIsPlaying] = useState(false);
+  const { authenticated } = useSessionStore();
+
+  useEffect(() => {
+    if (!authenticated) {
+      router.replace("/");
+    }
+  }, [authenticated]);
+
+  const { currentPlaylist } = usePlaylist();
+  useEffect(() => {
+    console.log(
+      "Current playlist:",
+      currentPlaylist?.name,
+      "length:",
+      currentPlaylist?.tracks.length ?? 0,
+    );
+  }, [currentPlaylist]);
 
   return (
     <>
@@ -25,12 +43,11 @@ export default function TabLayout() {
         <NativeTabs.Trigger name="search" role="search">
           <NativeTabs.Trigger.Label>Search</NativeTabs.Trigger.Label>
         </NativeTabs.Trigger>
-        <NativeTabs.BottomAccessory>
-          <MiniPlayer
-            isPlaying={isPlaying}
-            onToggle={() => setIsPlaying(!isPlaying)}
-          />
-        </NativeTabs.BottomAccessory>
+        {currentPlaylist && currentPlaylist.tracks.length > 0 && (
+          <NativeTabs.BottomAccessory>
+            <MiniPlayer />
+          </NativeTabs.BottomAccessory>
+        )}
       </NativeTabs>
     </>
   );

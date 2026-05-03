@@ -1,19 +1,15 @@
-import LibraryShelf from "@/components/book-shelf";
-import { colors } from "@/components/ui/colors";
-import { db } from "@/db";
-import { libraryItemSchemaType, userSettingsSchema } from "@/db/schema";
-import { getProgressFromServer } from "@/services/progressService";
-import { useDownloadStore } from "@/stores/download-store";
-import { useLibraryStore } from "@/stores/library-store";
-import { useFocusEffect } from "expo-router";
-
 import React, { useCallback, useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from "expo-router";
+
+import LibraryShelf from "@/components/book-shelf";
+import { colors } from "@/components/ui/colors";
+import { libraryItemSchemaType } from "@/db/schema";
+import { useLibraryStore } from "@/stores/library-store";
 
 export default function RecentPage() {
   const libraryStore = useLibraryStore();
-  const downloadStore = useDownloadStore();
 
   const [continueItems, setContinueItems] = useState<libraryItemSchemaType[]>(
     [],
@@ -35,24 +31,24 @@ export default function RecentPage() {
 
   useEffect(() => {
     async function initView() {
-      if (
-        libraryStore.status === "loaded" &&
-        (libraryStore.libraries === undefined ||
-          libraryStore.libraries?.length === 0)
-      ) {
-        const result = await db.select().from(userSettingsSchema);
-        console.log("syncing libraries");
-        await libraryStore.syncWithServer();
-        if (result[0] && result[0].lastServerSync) {
-          const serverProgressUpdates = await getProgressFromServer(
-            result[0].lastServerSync,
-          );
-          for (const media of serverProgressUpdates) {
-            downloadStore.add(media.libraryItemId);
-          }
-          downloadStore.download();
-        }
-      }
+      // if (
+      //   libraryStore.status === "loaded" &&
+      //   (libraryStore.libraries === undefined ||
+      //     libraryStore.libraries?.length === 0)
+      // ) {
+      //   const result = await db.select().from(userSettingsSchema);
+      //   console.log("syncing libraries");
+      //   await libraryStore.syncWithServer();
+      //   if (result[0] && result[0].lastServerSync) {
+      //     const serverProgressUpdates = await getProgressFromServer(
+      //       result[0].lastServerSync,
+      //     );
+      //     for (const media of serverProgressUpdates) {
+      //       downloadStore.add(media.libraryItemId);
+      //     }
+      //     downloadStore.download();
+      //   }
+      // }
 
       setContinueItems(
         libraryStore.libraryItems
@@ -133,6 +129,7 @@ export default function RecentPage() {
     if (libraryStore.status === "loaded") {
       initView();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [libraryStore.status]);
 
   useEffect(() => {

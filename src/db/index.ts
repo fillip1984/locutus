@@ -1,10 +1,10 @@
+import { openDatabaseSync } from "expo-sqlite";
+
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { migrate } from "drizzle-orm/expo-sqlite/migrator";
-import { openDatabaseSync } from "expo-sqlite";
 
 import { relations } from "@/db/relations";
 import * as schema from "@/db/schema";
-
 import migrations from "@/drizzle/migrations";
 
 const expo = openDatabaseSync("locutus.db");
@@ -21,6 +21,18 @@ const runMigrations = async () => {
       "Exception thrown while attempting to run database migration scripts",
       err,
     );
+  }
+};
+
+export const dropDB = async () => {
+  try {
+    console.log("dropping database");
+    await db.delete(schema.librarySchema);
+    await db.delete(schema.userSettingsSchema);
+    console.log("dropped database");
+  } catch (err) {
+    console.error({ err });
+    console.error("Exception thrown while attempting to drop database", err);
   }
 };
 

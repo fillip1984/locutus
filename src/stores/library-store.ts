@@ -67,7 +67,7 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
   syncWithServer: async () => {
     set(() => ({ status: "loading" }));
     const libraries = await getLibraries();
-    for (const library of libraries) {
+    for (const library of libraries ?? []) {
       // insert or update library
       // TODO: couldn't get this to work
       // await localDb
@@ -156,7 +156,13 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
         }
 
         const libraryItem = await getLibraryItem(remoteId);
-        if (libraryItem.media.ebookFile) {
+        if (!libraryItem) {
+          console.error(
+            `Failed to fetch library item with id: ${remoteId} after syncing libraries, skipping syncing related audio and ebook files for this item`,
+          );
+          continue;
+        }
+        if (libraryItem?.media.ebookFile) {
           const ebook = libraryItem.media.ebookFile;
           const exists = await db.query.eBookFileSchema.findFirst({
             where: {
@@ -181,7 +187,7 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
               .where(eq(eBookFileSchema.remoteId, ebook.ino));
           }
         }
-        for (const audioFile of libraryItem.media.audioFiles) {
+        for (const audioFile of libraryItem?.media.audioFiles ?? []) {
           const exists = await db.query.audioFileSchema.findFirst({
             where: {
               remoteId: audioFile.ino,

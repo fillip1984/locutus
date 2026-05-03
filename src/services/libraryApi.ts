@@ -1,11 +1,12 @@
 import { toast } from "sonner-native";
+
 import { audiobookShelfFetch } from "./audiobookShelfBaseClient";
 
 export const getLibraries = async () => {
   try {
     console.log("fetching libraries");
     const response = await audiobookShelfFetch<Root>("/api/libraries");
-    return response.libraries;
+    return response?.libraries;
   } catch (err) {
     console.error("Exception occurred while fetching libraries", err);
     toast.error("Error while attempting to connect to server");

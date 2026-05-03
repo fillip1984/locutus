@@ -95,3 +95,5 @@ export const userSettingsSchema = sqliteTable("userSettings", {
   preferredPlaybackRate: integer().notNull().default(1),
   lastServerSync: integer({ mode: "timestamp" }),
 });
+
+export type UserSettingsSchemaType = typeof userSettingsSchema.$inferSelect;

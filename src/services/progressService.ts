@@ -10,7 +10,6 @@ import {
   libraryItemSchema,
   userSettingsSchema,
 } from "@/db/schema";
-import { getToken } from "@/stores/session-store";
 import { audiobookShelfFetch } from "./audiobookShelfBaseClient";
 import { pingBackend } from "./pingApi";
 
@@ -100,7 +99,7 @@ export const syncProgressWithServer = async () => {
     const lastSync = userSettings?.lastServerSync?.getTime() ?? 0;
 
     const progressUpdatesFromServer = await getProgressFromServer(lastSync);
-    console.log({ progressUpdatesFromServer });
+    // console.log({ progressUpdatesFromServer });
 
     const ebookProgressFromPhone = await db
       .select()
@@ -137,21 +136,18 @@ export const syncProgressWithServer = async () => {
         complete: audioFileSchema.complete,
         updatedAt: audioFileSchema.updatedAt,
       })
-      .from(audioFileSchema);
-    // .findMany({
-    //   columns: {
-    //     libraryItemId: true,
-    //     start: true,
-    //     progress: true,
-    //     complete: true,
-    //     updatedAt: true,
-    //   },
-    and(
-      gt(audioFileSchema.updatedAt, new Date(lastSync)),
-      isNotNull(audioFileSchema.progress),
-    );
+      .from(audioFileSchema)
+      .where(
+        and(
+          gt(audioFileSchema.updatedAt, new Date(lastSync)),
+          gt(audioFileSchema.progress, 0),
+        ),
+      );
     const audioBookProgressUpdates: AudioBookProgressUpdate[] =
       audioBookProgressFromPhone.map((audioBook) => {
+        console.log(
+          `found audiobook progress update for library item ${audioBook.libraryItemId}, start: ${audioBook.start}, progress: ${audioBook.progress}, complete: ${audioBook.complete}, updatedAt: ${audioBook.updatedAt}`,
+        );
         return {
           libraryItemId: audioBook.libraryItemId,
           // duration: 83110.977724, //doesn't appear to be necessary
@@ -275,19 +271,19 @@ export const syncProgressWithServer = async () => {
       }
 
       // update server
-      console.log("updating server");
-      const token = getToken();
-      if (progressUpdates.filter((i) => i.source === "client").length > 0) {
-        await fetch("/api/me/progress/batch/update", {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(
-            progressUpdates.filter((i) => i.source === "client"),
-          ),
-        });
-      }
+      // console.log("updating server");
+      // const token = await getToken();
+      // if (progressUpdates.filter((i) => i.source === "client").length > 0) {
+      //   await fetch("/api/me/progress/batch/update", {
+      //     method: "PATCH",
+      //     headers: {
+      //       Authorization: `Bearer ${token}`,
+      //     },
+      //     body: JSON.stringify(
+      //       progressUpdates.filter((i) => i.source === "client"),
+      //     ),
+      //   });
+      // }
 
       // update sync time
       await tx.update(userSettingsSchema).set({ lastServerSync: new Date() });
@@ -304,10 +300,15 @@ export const syncProgressWithServer = async () => {
 };
 
 export const getProgressFromServer = async (lastSync: number) => {
-  const response = await audiobookShelfFetch<Root>("/api/me");
-  const serverMediaProgressItems = response.mediaProgress.filter(
-    (media) => media.lastUpdate > lastSync,
+  console.warn("Testing123 timing");
+  lastSync = 0;
+  console.log(
+    `fetching progress updates from server since ${new Date(lastSync)}`,
   );
+  const response = await audiobookShelfFetch<Root>("/api/me");
+  const serverMediaProgressItems =
+    response?.mediaProgress.filter((media) => media.lastUpdate > lastSync) ??
+    [];
   const results: (EBookProgressUpdate | AudioBookProgressUpdate)[] = [];
 
   for (const serverMedia of serverMediaProgressItems) {
@@ -336,6 +337,7 @@ export const getProgressFromServer = async (lastSync: number) => {
       } as EBookProgressUpdate);
     }
   }
+  console.log("Found " + results.length + " progress items from server");
   return results;
 };
 
