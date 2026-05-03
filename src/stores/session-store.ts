@@ -9,7 +9,7 @@ import { userSettingsSchema, UserSettingsSchemaType } from "@/db/schema";
 import { login } from "@/services/loginApi";
 
 const key = "session_token";
-// TODO: is there a better way? Can't use hooks inside of non-tsx files
+// Token is exposed this way, and not using the store, since you can't use hooks inside of non-tsx files
 export const getToken = () => {
   return SecureStore.getItemAsync(key);
 };

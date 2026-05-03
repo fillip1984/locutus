@@ -23,7 +23,7 @@ import {
   audiobookSchemaType,
   libraryItemWithFilesSchemaType,
 } from "@/db/schema";
-import { absolutePathUri } from "@/services/libraryItemApi";
+import { absolutePathUri } from "@/utils/file-utils";
 import { TrackPlayerExtraPayload } from "../_layout";
 
 export default function Player() {
@@ -271,7 +271,15 @@ const MediaControls = () => {
       <View className="flex w-full flex-row items-center justify-evenly p-1">
         {/* <Ionicons name="bookmark-outline" size={30} color="black" /> */}
         <Ionicons
-          onPress={() => TrackPlayer.skipToPrevious()}
+          onPress={() => {
+            async function skipToPrevious() {
+              // TODO: is this necessary? seems like a bug that we have to skip twice to go to previous track, maybe related to how we are adding tracks to the queue, need to investigate further
+              await TrackPlayer.skipToPrevious();
+              await TrackPlayer.skipToPrevious();
+              TrackPlayer.play();
+            }
+            skipToPrevious();
+          }}
           name="play-skip-back-sharp"
           size={30}
           color="white"
@@ -304,7 +312,13 @@ const MediaControls = () => {
           color="white"
         />
         <Ionicons
-          onPress={() => TrackPlayer.skipToNext()}
+          onPress={() => {
+            async function skipToNext() {
+              await TrackPlayer.skipToNext();
+              TrackPlayer.play();
+            }
+            skipToNext();
+          }}
           name="play-skip-forward"
           size={30}
           color="white"

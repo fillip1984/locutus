@@ -98,8 +98,6 @@ export default function MediaPage() {
 
   const [expandDescription, setExpandDescription] = useState(false);
 
-  // TODO: scroll to top not working
-  // TODO: keep scroll to current chapter?
   const tracksScrollViewRef = useRef<ScrollView>(null);
   const scrollToTop = () => {
     tracksScrollViewRef.current?.scrollTo({
@@ -391,10 +389,7 @@ const hideHtmlTags = (str: string) => {
   return str.replace(/<[^>]*>?/gm, "");
 };
 
-// TODO: move to central place
-export const calc = (position: number, duration: number) => {
-  // TODO: for some reason math.round returns 100%???
-  // const result = Math.round(position / duration) * 100;
+const calc = (position: number, duration: number) => {
   const result = (position / duration) * 100;
   return parseInt(result.toFixed(2), 10);
 };

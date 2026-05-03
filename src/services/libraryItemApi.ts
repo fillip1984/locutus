@@ -3,6 +3,7 @@ import { Directory, File, Paths } from "expo-file-system";
 import { db } from "@/db";
 import { userSettingsSchema } from "@/db/schema";
 import { getToken } from "@/stores/session-store";
+import { relativePathUri } from "@/utils/file-utils";
 import { audiobookShelfFetch } from "./audiobookShelfBaseClient";
 
 export const getLibraryItem = async (libraryItemId: string) => {
@@ -12,12 +13,6 @@ export const getLibraryItem = async (libraryItemId: string) => {
       `/api/items/${libraryItemId}`,
     );
     return response;
-    // if (!response.ok) {
-    //   throw new Error(
-    //     `Failed to fetch library item with id: ${libraryItemId}, status: ${response.status}`,
-    //   );
-    // }
-    // return (await response.json()) as Root;
   } catch (err) {
     console.error(
       `Exception occurred while fetching library item with id: ${libraryItemId}`,
@@ -64,24 +59,6 @@ export const downloadLibraryItem = async (
     );
     throw err;
   }
-};
-
-// TODO: move to file-utils?
-export const relativePathUri = (file: File) => {
-  const documentDir = Paths.document;
-  if (!file.uri.startsWith(documentDir.uri)) {
-    throw new Error(
-      `File path: ${file.uri} is not within document directory: ${documentDir.uri}`,
-    );
-  }
-  return file.uri.substring(documentDir.uri.length);
-};
-
-export const absolutePathUri = (relativePath: string | null) => {
-  if (!relativePath) {
-    return "";
-  }
-  return new File(`${Paths.document.uri}/${relativePath}`).uri;
 };
 
 export interface Root {

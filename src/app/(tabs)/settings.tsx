@@ -28,10 +28,15 @@ export default function SettingsPage() {
 
   const handleSyncProgress = async () => {
     toast.promise<boolean>(
-      new Promise(async (resolve) => {
-        await syncProgressWithServer();
-        refetch();
-        resolve(true);
+      new Promise(async (resolve, reject) => {
+        try {
+          await syncProgressWithServer();
+          refetch();
+          resolve(true);
+        } catch (error) {
+          console.error("Error syncing progress with server:", error);
+          reject(error);
+        }
       }),
       {
         loading: "Syncing progress with server...",
@@ -43,10 +48,15 @@ export default function SettingsPage() {
 
   const handleSync = async () => {
     toast.promise<boolean>(
-      new Promise(async (resolve) => {
-        await syncWithServer();
-        resolve(true);
-        handleSyncProgress();
+      new Promise(async (resolve, reject) => {
+        try {
+          await syncWithServer();
+          resolve(true);
+          handleSyncProgress();
+        } catch (error) {
+          console.error("Error syncing with server:", error);
+          reject(error);
+        }
       }),
       {
         loading: "Syncing with server...",

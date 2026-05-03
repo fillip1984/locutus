@@ -132,7 +132,6 @@ export const useDownloadStore = create<DownloadStore>()((set, get) => ({
   },
 }));
 
-// TODO: not sure if I like this manner of triggering downloads but it works
 export const handleDownload = async (libraryItemId: string) => {
   const downloadStore = useDownloadStore.getState();
   // Toast.show({

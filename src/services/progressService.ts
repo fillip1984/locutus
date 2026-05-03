@@ -1,6 +1,6 @@
 import { TrackItem } from "react-native-nitro-player";
 
-import { and, eq, gt, isNotNull } from "drizzle-orm";
+import { and, eq, gt, isNotNull, lt, sql } from "drizzle-orm";
 
 import { TrackPlayerExtraPayload } from "@/app/_layout";
 import { db } from "@/db";
@@ -100,77 +100,64 @@ export const syncProgressWithServer = async () => {
     const lastSync = userSettings?.lastServerSync?.getTime() ?? 0;
 
     const progressUpdatesFromServer = await getProgressFromServer(lastSync);
+    console.log({ progressUpdatesFromServer });
 
-    const ebookProgressFromPhone = await db
-      .select()
-      .from(eBookFileSchema)
-      .where(
-        and(
-          gt(eBookFileSchema.updatedAt, new Date(lastSync)),
-          isNotNull(eBookFileSchema.currentLocation),
-        ),
-      );
-    const ebookProgressUpdates: EBookProgressUpdate[] =
-      ebookProgressFromPhone.map((ebook) => {
-        return {
-          libraryItemId: ebook.libraryItemId,
-          // TODO: figure out how to get drizzle where clauses to shape data
-          ebookLocation: ebook.currentLocation
-            ? ebook.currentLocation
-            : "unknown",
-          // TODO: figure out how to get drizzle where clauses to shape data
-          ebookProgress: ebook.progress ? ebook.progress : -1,
-          updatedAt: ebook.updatedAt?.getTime() ?? 0,
-          type: "ebook",
-          source: "client",
-          // TODO: figure out how to signal that item is complete
-          // isFinished: audioBook.complete,
-        };
-      });
+    const ebookProgressFromPhone = (
+      await db
+        .select({
+          libraryItemId: eBookFileSchema.libraryItemId,
+          ebookLocation: eBookFileSchema.currentLocation,
+          ebookProgress: eBookFileSchema.progress,
+          updatedAt: sql<number>`${eBookFileSchema.updatedAt}`.mapWith((val) =>
+            new Date(val).getTime(),
+          ),
+        })
+        .from(eBookFileSchema)
+        .where(
+          and(
+            gt(eBookFileSchema.updatedAt, new Date(lastSync)),
+            isNotNull(eBookFileSchema.currentLocation),
+          ),
+        )
+    ).map((ebook) => ({
+      ...ebook,
+      type: "ebook",
+      source: "client",
+    })) as EBookProgressUpdate[];
 
-    const audioBookProgressFromPhone = await db
-      .select({
-        libraryItemId: audioFileSchema.libraryItemId,
-        start: audioFileSchema.start,
-        progress: audioFileSchema.progress,
-        complete: audioFileSchema.complete,
-        updatedAt: audioFileSchema.updatedAt,
-      })
-      .from(audioFileSchema)
-      .where(
-        and(
-          gt(audioFileSchema.updatedAt, new Date(lastSync)),
-          gt(audioFileSchema.progress, 0),
-        ),
-      );
-    const audioBookProgressUpdates: AudioBookProgressUpdate[] =
-      audioBookProgressFromPhone.map((audioBook) => {
-        console.log(
-          `found audiobook progress update for library item ${audioBook.libraryItemId}, start: ${audioBook.start}, progress: ${audioBook.progress}, complete: ${audioBook.complete}, updatedAt: ${audioBook.updatedAt}`,
-        );
-        return {
-          libraryItemId: audioBook.libraryItemId,
-          // duration: 83110.977724, //doesn't appear to be necessary
-          // TODO: figure out how to signal that item is complete
-          // isFinished: audioBook.complete,
-          // TODO: figure out how to get drizzle where clauses to shape data
-          currentTime:
-            audioBook.start + (audioBook.progress ? audioBook.progress : 0),
-          updatedAt: audioBook.updatedAt?.getTime() ?? 0,
-          type: "audioBook",
-          source: "client",
-        };
-      });
+    const audioBookProgressFromPhone = (
+      await db
+        .select({
+          libraryItemId: audioFileSchema.libraryItemId,
+          currentTime: sql<number>`${audioFileSchema.start} + ${audioFileSchema.progress}`,
+          complete: audioFileSchema.complete,
+          updatedAt: sql<number>`${audioFileSchema.updatedAt}`.mapWith((val) =>
+            new Date(val).getTime(),
+          ),
+        })
+        .from(audioFileSchema)
+        .where(
+          and(
+            gt(audioFileSchema.updatedAt, new Date(lastSync)),
+            gt(audioFileSchema.progress, 0),
+          ),
+        )
+    ).map((audioBook) => ({
+      ...audioBook,
+      type: "audioBook",
+      source: "client",
+    })) as AudioBookProgressUpdate[];
 
     const progressUpdates: (EBookProgressUpdate | AudioBookProgressUpdate)[] = [
-      ...ebookProgressUpdates,
-      ...audioBookProgressUpdates,
+      ...ebookProgressFromPhone,
+      ...audioBookProgressFromPhone,
       ...progressUpdatesFromServer,
     ].reduce(
       (
         acc: (EBookProgressUpdate | AudioBookProgressUpdate)[],
         obj: EBookProgressUpdate | AudioBookProgressUpdate,
       ) => {
+        console.log({ obj });
         const existingIndex = acc.findIndex(
           (item) => item.libraryItemId === obj.libraryItemId,
         );
@@ -180,6 +167,9 @@ export const syncProgressWithServer = async () => {
         } else {
           const existingDate = new Date(acc[existingIndex].updatedAt);
           const newDate = new Date(obj.updatedAt);
+          console.log(
+            `comparing progress update for library item ${obj.libraryItemId}, existing update time: ${existingDate}, new update time: ${newDate}`,
+          );
 
           if (newDate > existingDate) {
             acc[existingIndex] = obj;
@@ -252,7 +242,7 @@ export const syncProgressWithServer = async () => {
     for (const audioBook of progressUpdates.filter(
       (i) => i.source === "server" && i.type === "audioBook",
     ) as AudioBookProgressUpdate[]) {
-      const existingAudioFiles = await db.query.audioFileSchema.findFirst({
+      const existingAudioFile = await db.query.audioFileSchema.findFirst({
         where: {
           libraryItemId: audioBook.libraryItemId,
           start: {
@@ -265,10 +255,12 @@ export const syncProgressWithServer = async () => {
         columns: {
           id: true,
           libraryItemId: true,
+          progress: true,
+          start: true,
         },
       });
 
-      if (!existingAudioFiles) {
+      if (!existingAudioFile) {
         console.warn(
           `could not find any audio files for library item ${audioBook.libraryItemId}, skipping progress update from server`,
         );
@@ -276,25 +268,52 @@ export const syncProgressWithServer = async () => {
       }
 
       console.log(
-        `updating progress for library item ${audioBook.libraryItemId} to position ${audioBook.currentTime} based on server update`,
+        `updating progress for library item ${audioBook.libraryItemId} to position ${audioBook.currentTime} based on server update. Current progress on phone is ${existingAudioFile.start + (existingAudioFile.progress ?? 0)}  `,
       );
       void db
         .update(audioFileSchema)
         .set({
-          progress: audioBook.currentTime,
+          progress: audioBook.currentTime - existingAudioFile.start,
           updatedAt: new Date(audioBook.updatedAt),
           complete: audioBook.isFinished,
         })
-        .where(eq(audioFileSchema.id, existingAudioFiles.id))
+        .where(eq(audioFileSchema.id, existingAudioFile.id))
         .run();
-      db.update(libraryItemSchema)
+
+      // update all chapters leading up to progress as complete as well, also set duration to the end of the chapter
+      const previousChapterIdsAndDuration = await db
+        .select({
+          id: audioFileSchema.id,
+          duration: audioFileSchema.duration,
+        })
+        .from(audioFileSchema)
+        .where(
+          and(
+            eq(audioFileSchema.libraryItemId, audioBook.libraryItemId),
+            lt(audioFileSchema.end, existingAudioFile.start),
+          ),
+        );
+
+      for (const chapter of previousChapterIdsAndDuration) {
+        void db
+          .update(audioFileSchema)
+          .set({
+            complete: true,
+            updatedAt: new Date(audioBook.updatedAt),
+            progress: chapter.duration,
+          })
+          .where(eq(audioFileSchema.id, chapter.id))
+          .run();
+      }
+
+      // update lastPlayedId
+      await db
+        .update(libraryItemSchema)
         .set({
-          updatedAt: new Date(audioBook.updatedAt),
-          lastPlayedId: existingAudioFiles.id,
-          complete: audioBook.isFinished,
+          updatedAt: new Date(),
+          lastPlayedId: progressUpdates[0]?.libraryItemId ?? null,
         })
-        .where(eq(libraryItemSchema.id, audioBook.libraryItemId))
-        .run();
+        .where(eq(libraryItemSchema.id, existingAudioFile.id));
     }
 
     console.log(
@@ -344,12 +363,19 @@ export const getProgressFromServer = async (lastSync: number) => {
   );
   const response = await audiobookShelfFetch<Root>("/api/me");
   const serverMediaProgressItems =
-    response?.mediaProgress.filter((media) => media.lastUpdate > lastSync) ??
-    [];
+    response?.mediaProgress.filter((media) => {
+      // TODO: this might be a bug! when sync'ing things ping pong since either their is an async not being awaited or a precision error. First the client updates the server, then the server updates the client with the exact same progress
+      return media.lastUpdate - lastSync > 1000;
+    }) ?? [];
+  serverMediaProgressItems.forEach((media) => {
+    console.log(
+      `checking if media progress item with library item id ${media.libraryItemId} should be included, last update time: ${media.lastUpdate}, last sync time: ${lastSync}, result: ${media.lastUpdate - lastSync > 5000}`,
+    );
+  });
   const results: (EBookProgressUpdate | AudioBookProgressUpdate)[] = [];
 
   for (const serverMedia of serverMediaProgressItems) {
-    //       // TODO: figure out how to signal that item is complete
+    // TODO: figure out how to signal that item is complete
     //       isFinished: media.isFinished,
     if (serverMedia.currentTime) {
       results.push({

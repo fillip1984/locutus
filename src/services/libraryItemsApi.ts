@@ -22,40 +22,6 @@ export const getLibraryItems = async (libraryId: string) => {
   }
 };
 
-// https://dev.to/olivermengich/file-download-in-react-native-and-expo-gk8
-// export const downloadLibraryItem = async (libraryId: string) => {
-//   try {
-//     console.log(`downloading library item with id: ${libraryId}`);
-//      axios.get(url, { responseType: "blob" }).then(res => {
-//       const headerContentDisp = res.headers["content-disposition"];
-//       const filename =
-//         headerContentDisp &&
-//         headerContentDisp.split("filename=")[1].replace(/["']/g, ""); // TODO improve parcing
-//       const contentType = res.headers["content-type"];
-
-//       const blob = new Blob([res.data], { contentType });
-//       const href = window.URL.createObjectURL(blob);
-
-//       const el = document.createElement("a");
-//       el.setAttribute("href", href);
-//       el.setAttribute(
-//         "download",
-//         filename || (config && config.filename) || "someFile"
-//       );
-//       el.click();
-
-//       window.URL.revokeObjectURL(blob);
-//       return res;
-//     });
-//   }
-//   } catch (err) {
-//     console.error(
-//       `Exception occurred while downloading library item with id: ${libraryId}`,
-//       err,
-//     );
-//   }
-// };
-
 export interface Root {
   results: Result[];
   total: number;
