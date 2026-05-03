@@ -164,6 +164,7 @@ const Login = () => {
         toast.warning("Please fill in all fields");
         return;
       }
+
       setLoading(true);
       const success = await logIn(serverUrl, username, password);
       if (!success) {
@@ -230,6 +231,23 @@ const Login = () => {
                 placeholder="Server Url, i.e. http://192.168.0.10:13378"
                 className="flex-1 rounded bg-white p-2 text-xl text-black"
                 autoCapitalize="none"
+                onBlur={() => {
+                  async function testConnection() {
+                    try {
+                      const response = await fetch(serverUrl + "/ping");
+                      if (!response.ok) {
+                        throw new Error("Server responded with an error");
+                      }
+                      toast.success("Successfully connected to server");
+                    } catch (error) {
+                      console.error("Error connecting to server:", error);
+                      toast.error(
+                        "Unable to connect to server, please check the url and your network connection",
+                      );
+                    }
+                  }
+                  testConnection();
+                }}
               />
             </View>
 
