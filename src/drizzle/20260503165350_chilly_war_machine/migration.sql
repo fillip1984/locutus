@@ -12,7 +12,7 @@ CREATE TABLE `audioFile` (
 	`name` text NOT NULL,
 	`path` text,
 	`libraryItemId` text NOT NULL,
-	CONSTRAINT `fk_audioFile_libraryItemId_libraryItem_id_fk` FOREIGN KEY (`libraryItemId`) REFERENCES `libraryItem`(`id`)
+	CONSTRAINT `fk_audioFile_libraryItemId_libraryItem_id_fk` FOREIGN KEY (`libraryItemId`) REFERENCES `libraryItem`(`id`) ON DELETE CASCADE
 );
 --> statement-breakpoint
 CREATE TABLE `eBookFile` (
@@ -26,7 +26,7 @@ CREATE TABLE `eBookFile` (
 	`name` text NOT NULL,
 	`path` text,
 	`libraryItemId` text NOT NULL,
-	CONSTRAINT `fk_eBookFile_libraryItemId_libraryItem_id_fk` FOREIGN KEY (`libraryItemId`) REFERENCES `libraryItem`(`id`)
+	CONSTRAINT `fk_eBookFile_libraryItemId_libraryItem_id_fk` FOREIGN KEY (`libraryItemId`) REFERENCES `libraryItem`(`id`) ON DELETE CASCADE
 );
 --> statement-breakpoint
 CREATE TABLE `libraryItem` (
@@ -50,7 +50,7 @@ CREATE TABLE `libraryItem` (
 	`downloaded` integer DEFAULT false,
 	`complete` integer DEFAULT false,
 	`libraryId` text NOT NULL,
-	CONSTRAINT `fk_libraryItem_libraryId_library_id_fk` FOREIGN KEY (`libraryId`) REFERENCES `library`(`id`)
+	CONSTRAINT `fk_libraryItem_libraryId_library_id_fk` FOREIGN KEY (`libraryId`) REFERENCES `library`(`id`) ON DELETE CASCADE
 );
 --> statement-breakpoint
 CREATE TABLE `library` (

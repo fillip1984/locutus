@@ -1,7 +1,7 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "5e5d7259-75b4-4270-9a20-ffdfbc9e770a",
+  "id": "07ef804e-c3ee-4c18-958f-f174e55fb0ea",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -585,7 +585,7 @@
         "id"
       ],
       "onUpdate": "NO ACTION",
-      "onDelete": "NO ACTION",
+      "onDelete": "CASCADE",
       "nameExplicit": false,
       "name": "fk_audioFile_libraryItemId_libraryItem_id_fk",
       "entityType": "fks",
@@ -600,7 +600,7 @@
         "id"
       ],
       "onUpdate": "NO ACTION",
-      "onDelete": "NO ACTION",
+      "onDelete": "CASCADE",
       "nameExplicit": false,
       "name": "fk_eBookFile_libraryItemId_libraryItem_id_fk",
       "entityType": "fks",
@@ -615,7 +615,7 @@
         "id"
       ],
       "onUpdate": "NO ACTION",
-      "onDelete": "NO ACTION",
+      "onDelete": "CASCADE",
       "nameExplicit": false,
       "name": "fk_libraryItem_libraryId_library_id_fk",
       "entityType": "fks",

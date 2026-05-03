@@ -1,6 +1,6 @@
 import { TrackItem } from "react-native-nitro-player";
 
-import { and, eq, gt, isNotNull, lte } from "drizzle-orm";
+import { and, eq, gt, isNotNull } from "drizzle-orm";
 
 import { TrackPlayerExtraPayload } from "@/app/_layout";
 import { db } from "@/db";
@@ -10,6 +10,7 @@ import {
   libraryItemSchema,
   userSettingsSchema,
 } from "@/db/schema";
+import { getToken } from "@/stores/session-store";
 import { audiobookShelfFetch } from "./audiobookShelfBaseClient";
 import { pingBackend } from "./pingApi";
 
@@ -99,7 +100,6 @@ export const syncProgressWithServer = async () => {
     const lastSync = userSettings?.lastServerSync?.getTime() ?? 0;
 
     const progressUpdatesFromServer = await getProgressFromServer(lastSync);
-    // console.log({ progressUpdatesFromServer });
 
     const ebookProgressFromPhone = await db
       .select()
@@ -191,6 +191,8 @@ export const syncProgressWithServer = async () => {
       [],
     );
 
+    // TODO: doesn't appear expo sqlite supports transactions... add back later
+
     console.log({
       msg: "Updates from server",
       length: progressUpdates.filter((i) => i.source === "server").length,
@@ -203,105 +205,121 @@ export const syncProgressWithServer = async () => {
       console.log("no updates to make to sync progress with server");
     }
 
-    await db.transaction(async (tx) => {
-      // update client
-      console.log("updating ebooks");
-      for (const ebook of progressUpdates.filter(
-        (i) => i.source === "server" && i.type === "ebook",
-      ) as EBookProgressUpdate[]) {
-        await tx
-          .update(eBookFileSchema)
-          .set({
-            updatedAt: new Date(ebook.updatedAt),
-            currentLocation: ebook.ebookLocation,
-            progress: ebook.ebookProgress,
-            complete: ebook.isFinished,
-          })
-          .where(eq(eBookFileSchema.id, ebook.libraryItemId));
-        await tx
-          .update(libraryItemSchema)
-          .set({
-            updatedAt: new Date(ebook.updatedAt),
-            lastEBookId: ebook.libraryItemId,
-            complete: ebook.isFinished,
-          })
-          .where(eq(libraryItemSchema.id, ebook.libraryItemId));
+    console.log("updating ebooks");
+    for (const ebook of progressUpdates.filter(
+      (i) => i.source === "server" && i.type === "ebook",
+    ) as EBookProgressUpdate[]) {
+      const existingEBookFile = await db.query.eBookFileSchema.findFirst({
+        where: {
+          libraryItemId: ebook.libraryItemId,
+        },
+        columns: {
+          id: true,
+          libraryItemId: true,
+        },
+      });
+
+      if (!existingEBookFile) {
+        console.warn(
+          `could not find any ebook files for library item ${ebook.libraryItemId}, skipping progress update from server`,
+        );
+        continue;
       }
 
-      console.log("updating audiobooks");
-      for (const audioBook of progressUpdates.filter(
-        (i) => i.source === "server" && i.type === "audioBook",
-      ) as AudioBookProgressUpdate[]) {
-        console.log(`updating audiobook ${audioBook.libraryItemId}`);
-        const audioBookItemToUpdate = await db
-          .select()
-          .from(audioFileSchema)
-          .where(
-            and(
-              eq(audioFileSchema.libraryItemId, audioBook.libraryItemId),
-              lte(audioFileSchema.start, audioBook.currentTime),
-              gt(audioFileSchema.end, audioBook.currentTime),
-            ),
-          );
-        // TODO: there's a bug right here. If we ask the server for any updates on media we don't have downloaded then we get an error because we try to set the progress even though there are no files
-        // if (!audioBookItemToUpdate) {
-        //   throw Error(
-        //     "Unable to find audio book item to update for currentTime: " +
-        //       audioBook.currentTime,
-        //   );
-        // }
-        if (audioBookItemToUpdate) {
-          await tx
-            .update(audioFileSchema)
-            .set({
-              updatedAt: new Date(audioBook.updatedAt),
-              progress: audioBook.currentTime,
-              complete: audioBook.isFinished,
-            })
-            .where(eq(audioFileSchema.id, audioBookItemToUpdate.id));
-          await tx
-            .update(libraryItemSchema)
-            .set({
-              updatedAt: new Date(audioBook.updatedAt),
-              lastPlayedId: audioBookItemToUpdate?.id,
-              complete: audioBook.isFinished,
-            })
-            .where(eq(libraryItemSchema.id, audioBook.libraryItemId));
-        }
+      console.log(
+        `updating progress for library item ${ebook.libraryItemId} to position ${ebook.ebookLocation} based on server update`,
+      );
+      void db
+        .update(eBookFileSchema)
+        .set({
+          currentLocation: ebook.ebookLocation,
+          progress: ebook.ebookProgress,
+          updatedAt: new Date(ebook.updatedAt),
+          complete: ebook.isFinished,
+        })
+        .where(eq(eBookFileSchema.id, existingEBookFile.id))
+        .run();
+      db.update(libraryItemSchema)
+        .set({
+          updatedAt: new Date(ebook.updatedAt),
+          lastPlayedId: existingEBookFile.id,
+          complete: ebook.isFinished,
+        })
+        .where(eq(libraryItemSchema.id, ebook.libraryItemId))
+        .run();
+    }
+
+    for (const audioBook of progressUpdates.filter(
+      (i) => i.source === "server" && i.type === "audioBook",
+    ) as AudioBookProgressUpdate[]) {
+      const existingAudioFiles = await db.query.audioFileSchema.findFirst({
+        where: {
+          libraryItemId: audioBook.libraryItemId,
+          start: {
+            lte: audioBook.currentTime,
+          },
+          end: {
+            gte: audioBook.currentTime,
+          },
+        },
+        columns: {
+          id: true,
+          libraryItemId: true,
+        },
+      });
+
+      if (!existingAudioFiles) {
+        console.warn(
+          `could not find any audio files for library item ${audioBook.libraryItemId}, skipping progress update from server`,
+        );
+        continue;
       }
 
-      // update server
-      // console.log("updating server");
-      // const token = await getToken();
-      // if (progressUpdates.filter((i) => i.source === "client").length > 0) {
-      //   await fetch("/api/me/progress/batch/update", {
-      //     method: "PATCH",
-      //     headers: {
-      //       Authorization: `Bearer ${token}`,
-      //     },
-      //     body: JSON.stringify(
-      //       progressUpdates.filter((i) => i.source === "client"),
-      //     ),
-      //   });
-      // }
+      console.log(
+        `updating progress for library item ${audioBook.libraryItemId} to position ${audioBook.currentTime} based on server update`,
+      );
+      void db
+        .update(audioFileSchema)
+        .set({
+          progress: audioBook.currentTime,
+          updatedAt: new Date(audioBook.updatedAt),
+          complete: audioBook.isFinished,
+        })
+        .where(eq(audioFileSchema.id, existingAudioFiles.id))
+        .run();
+      db.update(libraryItemSchema)
+        .set({
+          updatedAt: new Date(audioBook.updatedAt),
+          lastPlayedId: existingAudioFiles.id,
+          complete: audioBook.isFinished,
+        })
+        .where(eq(libraryItemSchema.id, audioBook.libraryItemId))
+        .run();
+    }
 
-      // update sync time
-      await tx.update(userSettingsSchema).set({ lastServerSync: new Date() });
-    });
+    console.log("updating server");
+    const token = await getToken();
+    if (progressUpdates.filter((i) => i.source === "client").length > 0) {
+      await fetch("/api/me/progress/batch/update", {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(
+          progressUpdates.filter((i) => i.source === "client"),
+        ),
+      });
+    }
+
+    // update sync time
+    db.update(userSettingsSchema).set({ lastServerSync: new Date() }).run();
   } catch (err) {
     console.error("Exception occurred while fetching user sessions", err);
-    // Toast.show({
-    //   position: "bottom",
-    //   type: "error",
-    //   text1: "Error while attempting to retrieve user sessions",
-    // });
     throw err;
   }
 };
 
 export const getProgressFromServer = async (lastSync: number) => {
-  console.warn("Testing123 timing");
-  lastSync = 0;
   console.log(
     `fetching progress updates from server since ${new Date(lastSync)}`,
   );

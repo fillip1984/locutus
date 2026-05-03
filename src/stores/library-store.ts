@@ -32,6 +32,7 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
   status: "loading",
   refetch: async () => {
     set(() => ({ status: "loading" }));
+    console.log("fetching libraries from db");
     const freshLibraryItems = await db
       .select()
       .from(libraryItemSchema)

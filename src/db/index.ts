@@ -28,6 +28,11 @@ export const dropDB = async () => {
   try {
     console.log("dropping database");
     await db.delete(schema.librarySchema);
+    // TODO: cascades don't seem to be triggering
+    await db.delete(schema.libraryItemSchema);
+    await db.delete(schema.audioFileSchema);
+    await db.delete(schema.eBookFileSchema);
+
     await db.delete(schema.userSettingsSchema);
     console.log("dropped database");
   } catch (err) {

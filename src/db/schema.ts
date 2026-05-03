@@ -41,7 +41,7 @@ export const libraryItemSchema = sqliteTable("libraryItem", {
   complete: integer({ mode: "boolean" }).default(false),
   libraryId: text()
     .notNull()
-    .references(() => librarySchema.id),
+    .references(() => librarySchema.id, { onDelete: "cascade" }),
 });
 
 export type libraryItemSchemaType = typeof libraryItemSchema.$inferSelect;
@@ -64,7 +64,7 @@ export const audioFileSchema = sqliteTable("audioFile", {
   path: text(),
   libraryItemId: text()
     .notNull()
-    .references(() => libraryItemSchema.id),
+    .references(() => libraryItemSchema.id, { onDelete: "cascade" }),
 });
 
 export type audiobookSchemaType = typeof audioFileSchema.$inferSelect;
@@ -79,7 +79,7 @@ export const eBookFileSchema = sqliteTable("eBookFile", {
   path: text(),
   libraryItemId: text()
     .notNull()
-    .references(() => libraryItemSchema.id),
+    .references(() => libraryItemSchema.id, { onDelete: "cascade" }),
 });
 
 export type eBookFileSchemaType = typeof eBookFileSchema.$inferSelect;

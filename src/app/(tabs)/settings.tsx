@@ -1,4 +1,5 @@
 import { Pressable, Text, View } from "react-native";
+import { TrackPlayer } from "react-native-nitro-player";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { FontAwesome6 } from "@expo/vector-icons";
@@ -26,17 +27,33 @@ export default function SettingsPage() {
   };
 
   const handleSyncProgress = async () => {
-    console.log("Syncing progress...");
-    await syncProgressWithServer();
-    refetch();
+    toast.promise<boolean>(
+      new Promise(async (resolve) => {
+        await syncProgressWithServer();
+        refetch();
+        resolve(true);
+      }),
+      {
+        loading: "Syncing progress with server...",
+        success: (result) => "Sync progress complete",
+        error: "Sync progress failed",
+      },
+    );
   };
 
   const handleSync = async () => {
-    toast.promise<boolean>(syncWithServer(), {
-      loading: "Syncing with server...",
-      success: (result) => "Sync complete",
-      error: "Sync failed",
-    });
+    toast.promise<boolean>(
+      new Promise(async (resolve) => {
+        await syncWithServer();
+        resolve(true);
+        handleSyncProgress();
+      }),
+      {
+        loading: "Syncing with server...",
+        success: (result) => "Sync complete",
+        error: "Sync failed",
+      },
+    );
   };
 
   const handleDropData = () => {
@@ -44,7 +61,9 @@ export default function SettingsPage() {
       action: {
         label: "Confirm",
         onClick: async () => {
+          TrackPlayer.pause();
           await dropDB();
+          // TODO: delete coverart and media files
           logOut();
         },
       },
