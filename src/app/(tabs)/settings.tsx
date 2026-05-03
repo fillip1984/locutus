@@ -77,8 +77,6 @@ export default function SettingsPage() {
   return (
     <SafeAreaView style={{ backgroundColor: colors.background }}>
       <View className="flex h-screen gap-4 p-4">
-        {/* <Text className="text-3xl text-white">AudioBookShelf Settings</Text> */}
-
         <View className="flex gap-2">
           <Text className="text-3xl text-white">Server</Text>
           <Pressable

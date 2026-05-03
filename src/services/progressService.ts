@@ -297,21 +297,40 @@ export const syncProgressWithServer = async () => {
         .run();
     }
 
-    console.log("updating server");
+    console.log(
+      "updating server",
+      JSON.stringify(progressUpdates.filter((i) => i.source === "client")),
+    );
+
     const token = await getToken();
     if (progressUpdates.filter((i) => i.source === "client").length > 0) {
-      await fetch("/api/me/progress/batch/update", {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const result = await fetch(
+        `${userSettings.serverUrl}/api/me/progress/batch/update`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(
+            progressUpdates.filter((i) => i.source === "client"),
+          ),
         },
-        body: JSON.stringify(
-          progressUpdates.filter((i) => i.source === "client"),
-        ),
-      });
+      );
+
+      if (!result.ok) {
+        console.error(
+          "Failed to update progress to server, status: " + result.status,
+        );
+      } else {
+        console.log(
+          "successfully updated progress to server",
+          await result.text(),
+        );
+      }
     }
 
-    // update sync time
+    console.log("updating sync time");
     db.update(userSettingsSchema).set({ lastServerSync: new Date() }).run();
   } catch (err) {
     console.error("Exception occurred while fetching user sessions", err);
