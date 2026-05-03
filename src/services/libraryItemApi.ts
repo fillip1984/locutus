@@ -8,7 +8,7 @@ import { audiobookShelfFetch } from "./audiobookShelfBaseClient";
 
 export const getLibraryItem = async (libraryItemId: string) => {
   try {
-    console.log(`fetching library item with id: ${libraryItemId}`);
+    // console.log(`fetching library item with id: ${libraryItemId}`);
     const response = await audiobookShelfFetch<Root>(
       `/api/items/${libraryItemId}`,
     );
@@ -28,7 +28,7 @@ export const downloadLibraryItem = async (
   filename: string,
 ) => {
   try {
-    console.log(`downloading libraryItem remoteId: ${libraryItemRemoteId}`);
+    // console.log(`downloading libraryItem remoteId: ${libraryItemRemoteId}`);
     const settings = (await db.select().from(userSettingsSchema))[0];
 
     const dirInfo = new Directory(Paths.document, libraryItemRemoteId);
@@ -43,9 +43,9 @@ export const downloadLibraryItem = async (
     }
 
     const downloadUrl = `${settings.serverUrl}/api/items/${libraryItemRemoteId}/file/${fileId}/download`;
-    console.log(
-      `downloading libraryItem remoteId: ${libraryItemRemoteId}, fileId: ${fileId} from url: ${downloadUrl} to destination: ${destination.uri}`,
-    );
+    // console.log(
+    //   `downloading libraryItem remoteId: ${libraryItemRemoteId}, fileId: ${fileId} from url: ${downloadUrl} to destination: ${destination.uri}`,
+    // );
     const result = await File.downloadFileAsync(downloadUrl, destination, {
       headers: { Authorization: `Bearer ${await getToken()}` },
       idempotent: true,

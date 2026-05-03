@@ -6,7 +6,7 @@ import { getToken } from "@/stores/session-store";
 
 export const downloadCoverArt = async (libraryItemId: string) => {
   try {
-    console.log(`downloading cover art for library item: ${libraryItemId}`);
+    // console.log(`downloading cover art for library item: ${libraryItemId}`);
     const settings = (await db.select().from(userSettingsSchema))[0];
     const itemDirectory = new Directory(Paths.document, libraryItemId);
     if (!itemDirectory.exists) {

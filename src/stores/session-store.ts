@@ -43,7 +43,7 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
     set({ userSettings });
   },
   logIn: async (serverUrl: string, username: string, password: string) => {
-    console.log("Logging in...", serverUrl, username);
+    // console.log("Logging in...", serverUrl, username);
     const token = await login(serverUrl, username, password);
     if (token) {
       let existingSettings = await db.query.userSettingsSchema.findFirst();

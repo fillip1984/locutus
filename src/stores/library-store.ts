@@ -32,7 +32,7 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
   status: "loading",
   refetch: async () => {
     set(() => ({ status: "loading" }));
-    console.log("fetching libraries from db");
+    // console.log("fetching libraries from db");
     const freshLibraryItems = await db
       .select()
       .from(libraryItemSchema)
@@ -221,7 +221,7 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
         }
       }
     }
-    console.log("refreshing library after sync with server");
+    // console.log("refreshing library after sync with server");
     // expecting refetch to close out status
     get().refetch();
     return true;

@@ -56,7 +56,7 @@ export default function MediaPage() {
 
       // libraryStatus check is necessary for file download, after it completes downloading this is what triggers a reload of library item media
       if (id || libraryStatus === "loaded") {
-        console.log("Fetching library item with id:", id);
+        // console.log("Fetching library item with id:", id);
         fetchLibraryItem();
       }
     }, [id, libraryStatus]),

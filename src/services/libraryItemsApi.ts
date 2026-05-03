@@ -2,7 +2,7 @@ import { audiobookShelfFetch } from "./audiobookShelfBaseClient";
 
 export const getLibraryItems = async (libraryId: string) => {
   try {
-    console.log(`fetching library items for library with id: ${libraryId}`);
+    // console.log(`fetching library items for library with id: ${libraryId}`);
     const response = await audiobookShelfFetch<Root>(
       `/api/libraries/${libraryId}/items`,
     );
@@ -12,7 +12,7 @@ export const getLibraryItems = async (libraryId: string) => {
     //     `Failed to fetch library items for library with id: ${libraryId}, status: ${response.status}`,
     //   );
     // }
-    return response.results;
+    return response?.results;
   } catch (err) {
     console.error(
       `Exception occurred while fetching items for library with id: ${libraryId}`,

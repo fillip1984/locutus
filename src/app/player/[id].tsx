@@ -67,7 +67,7 @@ export default function Player() {
 
   useEffect(() => {
     async function setupPlaylist() {
-      console.log("Setting up playlist with audio files", audioFiles.length);
+      // console.log("Setting up playlist with audio files", audioFiles.length);
       const id = await PlayerQueue.createPlaylist(
         "Default Playlist",
         "Default queue",

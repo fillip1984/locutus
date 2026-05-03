@@ -55,7 +55,7 @@ export const markComplete = async ({
   duration: number;
 }) => {
   const audioFileId = track;
-  console.log(`mark complete audio file: ${audioFileId}`);
+  // console.log(`mark complete audio file: ${audioFileId}`);
   void db
     .update(audioFileSchema)
     .set({
@@ -93,14 +93,14 @@ export const syncProgressWithServer = async () => {
   try {
     const pingResponse = await pingBackend();
     if (!pingResponse) {
-      console.log("not connected to server");
+      // console.log("not connected to server");
       return;
     }
 
     const lastSync = userSettings?.lastServerSync?.getTime() ?? 0;
 
     const progressUpdatesFromServer = await getProgressFromServer(lastSync);
-    console.log({ progressUpdatesFromServer });
+    // console.log({ progressUpdatesFromServer });
 
     const ebookProgressFromPhone = (
       await db
@@ -157,7 +157,7 @@ export const syncProgressWithServer = async () => {
         acc: (EBookProgressUpdate | AudioBookProgressUpdate)[],
         obj: EBookProgressUpdate | AudioBookProgressUpdate,
       ) => {
-        console.log({ obj });
+        // console.log({ obj });
         const existingIndex = acc.findIndex(
           (item) => item.libraryItemId === obj.libraryItemId,
         );
@@ -167,9 +167,9 @@ export const syncProgressWithServer = async () => {
         } else {
           const existingDate = new Date(acc[existingIndex].updatedAt);
           const newDate = new Date(obj.updatedAt);
-          console.log(
-            `comparing progress update for library item ${obj.libraryItemId}, existing update time: ${existingDate}, new update time: ${newDate}`,
-          );
+          // console.log(
+          //   `comparing progress update for library item ${obj.libraryItemId}, existing update time: ${existingDate}, new update time: ${newDate}`,
+          // );
 
           if (newDate > existingDate) {
             acc[existingIndex] = obj;
@@ -183,19 +183,19 @@ export const syncProgressWithServer = async () => {
 
     // TODO: doesn't appear expo sqlite supports transactions... add back later
 
-    console.log({
-      msg: "Updates from server",
-      length: progressUpdates.filter((i) => i.source === "server").length,
-    });
-    console.log({
-      msg: "Updates from client",
-      length: progressUpdates.filter((i) => i.source === "client").length,
-    });
+    // console.log({
+    //   msg: "Updates from server",
+    //   length: progressUpdates.filter((i) => i.source === "server").length,
+    // });
+    // console.log({
+    //   msg: "Updates from client",
+    //   length: progressUpdates.filter((i) => i.source === "client").length,
+    // });
     if (progressUpdates.length === 0) {
-      console.log("no updates to make to sync progress with server");
+      // console.log("no updates to make to sync progress with server");
     }
 
-    console.log("updating ebooks");
+    // console.log("updating ebooks");
     for (const ebook of progressUpdates.filter(
       (i) => i.source === "server" && i.type === "ebook",
     ) as EBookProgressUpdate[]) {
@@ -216,9 +216,9 @@ export const syncProgressWithServer = async () => {
         continue;
       }
 
-      console.log(
-        `updating progress for library item ${ebook.libraryItemId} to position ${ebook.ebookLocation} based on server update`,
-      );
+      // console.log(
+      //   `updating progress for library item ${ebook.libraryItemId} to position ${ebook.ebookLocation} based on server update`,
+      // );
       void db
         .update(eBookFileSchema)
         .set({
@@ -267,9 +267,9 @@ export const syncProgressWithServer = async () => {
         continue;
       }
 
-      console.log(
-        `updating progress for library item ${audioBook.libraryItemId} to position ${audioBook.currentTime} based on server update. Current progress on phone is ${existingAudioFile.start + (existingAudioFile.progress ?? 0)}  `,
-      );
+      // console.log(
+      //   `updating progress for library item ${audioBook.libraryItemId} to position ${audioBook.currentTime} based on server update. Current progress on phone is ${existingAudioFile.start + (existingAudioFile.progress ?? 0)}  `,
+      // );
       void db
         .update(audioFileSchema)
         .set({
@@ -290,7 +290,7 @@ export const syncProgressWithServer = async () => {
         .where(
           and(
             eq(audioFileSchema.libraryItemId, audioBook.libraryItemId),
-            lt(audioFileSchema.end, existingAudioFile.start),
+            lt(audioFileSchema.end, audioBook.currentTime),
           ),
         );
 
@@ -316,10 +316,10 @@ export const syncProgressWithServer = async () => {
         .where(eq(libraryItemSchema.id, existingAudioFile.libraryItemId));
     }
 
-    console.log(
-      "updating server",
-      JSON.stringify(progressUpdates.filter((i) => i.source === "client")),
-    );
+    // console.log(
+    //   "updating server",
+    //   JSON.stringify(progressUpdates.filter((i) => i.source === "client")),
+    // );
 
     const token = await getToken();
     if (progressUpdates.filter((i) => i.source === "client").length > 0) {
@@ -342,14 +342,14 @@ export const syncProgressWithServer = async () => {
           "Failed to update progress to server, status: " + result.status,
         );
       } else {
-        console.log(
-          "successfully updated progress to server",
-          await result.text(),
-        );
+        // console.log(
+        //   "successfully updated progress to server",
+        //   await result.text(),
+        // );
       }
     }
 
-    console.log("updating sync time");
+    // console.log("updating sync time");
     db.update(userSettingsSchema).set({ lastServerSync: new Date() }).run();
   } catch (err) {
     console.error("Exception occurred while fetching user sessions", err);
@@ -358,20 +358,21 @@ export const syncProgressWithServer = async () => {
 };
 
 export const getProgressFromServer = async (lastSync: number) => {
-  console.log(
-    `fetching progress updates from server since ${new Date(lastSync)}`,
-  );
+  // console.log(
+  //   `fetching progress updates from server since ${new Date(lastSync)}`,
+  // );
   const response = await audiobookShelfFetch<Root>("/api/me");
   const serverMediaProgressItems =
     response?.mediaProgress.filter((media) => {
       // TODO: this might be a bug! when sync'ing things ping pong since either their is an async not being awaited or a precision error. First the client updates the server, then the server updates the client with the exact same progress
       return media.lastUpdate - lastSync > 1000;
     }) ?? [];
-  serverMediaProgressItems.forEach((media) => {
-    console.log(
-      `checking if media progress item with library item id ${media.libraryItemId} should be included, last update time: ${media.lastUpdate}, last sync time: ${lastSync}, result: ${media.lastUpdate - lastSync > 5000}`,
-    );
-  });
+  // serverMediaProgressItems.forEach((media) => {
+  // console.log(
+  //   `checking if media progress item with library item id ${media.libraryItemId} should be included, last update time: ${media.lastUpdate}, last sync time: ${lastSync}, result: ${media.lastUpdate - lastSync > 5000}`,
+  // );
+  // );
+  // });
   const results: (EBookProgressUpdate | AudioBookProgressUpdate)[] = [];
 
   for (const serverMedia of serverMediaProgressItems) {
@@ -400,7 +401,7 @@ export const getProgressFromServer = async (lastSync: number) => {
       } as EBookProgressUpdate);
     }
   }
-  console.log("Found " + results.length + " progress items from server");
+  // console.log("Found " + results.length + " progress items from server");
   return results;
 };
 

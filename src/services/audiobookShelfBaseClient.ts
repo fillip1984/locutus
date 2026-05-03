@@ -22,7 +22,7 @@ export const audiobookShelfFetch = async <T>(
     return undefined;
   }
   const effectiveUrl = `${server}${endpoint}`;
-  console.log(`Making request to ${effectiveUrl}`);
+  // console.log(`Making request to ${effectiveUrl}`);
   return typedFetch<T>(effectiveUrl, {
     ...options,
     headers: {

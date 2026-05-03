@@ -84,18 +84,26 @@ const MainLayout = () => {
       const previousTrack = (
         currentTrack.extraPayload as TrackPlayerExtraPayload
       ).previousTrack!;
-      console.log("on playing a new track, mark previous track as complete");
+      // console.log("on playing a new track, mark previous track as complete");
       markComplete({
         track: previousTrack.audioFileId,
         duration: previousTrack.duration,
       });
-    } else if (currentTrack && Math.round(currentPosition) % 15 === 0) {
-      console.log("every 15 seconds, record progress");
+    } else if (
+      currentTrack &&
+      Math.round(currentPosition) > 0 &&
+      Math.round(currentPosition) % 15 === 0
+    ) {
+      // console.log(
+      //   "every 15 seconds, record progress, current position:",
+      //   currentPosition,
+      //   currentTrack.title,
+      // );
       recordProgress(currentTrack, currentPosition);
     }
   }, [currentTrack, currentPosition]);
   useEffect(() => {
-    console.log("on change of state (play or pause), record progress");
+    // console.log("on change of state (play or pause), record progress");
     if (currentTrack) {
       recordProgress(currentTrack, currentPosition);
     }

@@ -31,7 +31,7 @@ export const useDownloadStore = create<DownloadStore>()((set, get) => ({
     const libraryItemIds = get().queue;
     for (const libraryItemId of libraryItemIds) {
       try {
-        console.log(`downloading libraryItemId: ${libraryItemId}`);
+        // console.log(`downloading libraryItemId: ${libraryItemId}`);
         const libraryItem = await db.query.libraryItemSchema.findFirst({
           where: {
             id: libraryItemId,
@@ -66,9 +66,9 @@ export const useDownloadStore = create<DownloadStore>()((set, get) => ({
         //     id: libraryItem.id,
         //   },
         // });
-        console.log({ files: libraryItem.audioFiles });
+        // console.log({ files: libraryItem.audioFiles });
         for (const audioFile of libraryItem.audioFiles) {
-          console.log(`downloading audioFile: ${audioFile.name}`);
+          // console.log(`downloading audioFile: ${audioFile.name}`);
           const file = await downloadLibraryItem(
             libraryItem.remoteId,
             audioFile.remoteId,
@@ -78,9 +78,9 @@ export const useDownloadStore = create<DownloadStore>()((set, get) => ({
             .update(audioFileSchema)
             .set({ path: file })
             .where(eq(audioFileSchema.remoteId, audioFile.remoteId));
-          console.log(
-            `downloaded audioFile: ${audioFile.name} to path: ${file}`,
-          );
+          // console.log(
+          //   `downloaded audioFile: ${audioFile.name} to path: ${file}`,
+          // );
         }
         await db
           .update(libraryItemSchema)
@@ -110,10 +110,10 @@ export const useDownloadStore = create<DownloadStore>()((set, get) => ({
           downloading: false,
         }));
         if (get().queue.length !== 0) {
-          console.log("queue still has items in it, going again for download");
+          // console.log("queue still has items in it, going again for download");
           get().download();
         } else {
-          console.log("queue is empty, sync progress with server");
+          // console.log("queue is empty, sync progress with server");
           await syncProgressWithServer();
           useLibraryStore.getState().refetch();
         }

@@ -12,9 +12,9 @@ export const db = drizzle(expo, { schema, relations });
 
 const runMigrations = async () => {
   try {
-    console.log("running migration");
+    // console.log("running migration");
     await migrate(db, migrations);
-    console.log("ran migration");
+    // console.log("ran migration");
   } catch (err) {
     console.error({ err });
     console.error(
@@ -26,7 +26,7 @@ const runMigrations = async () => {
 
 export const dropDB = async () => {
   try {
-    console.log("dropping database");
+    // console.log("dropping database");
     await db.delete(schema.librarySchema);
     // TODO: cascades don't seem to be triggering
     await db.delete(schema.libraryItemSchema);
@@ -34,7 +34,7 @@ export const dropDB = async () => {
     await db.delete(schema.eBookFileSchema);
 
     await db.delete(schema.userSettingsSchema);
-    console.log("dropped database");
+    // console.log("dropped database");
   } catch (err) {
     console.error({ err });
     console.error("Exception thrown while attempting to drop database", err);

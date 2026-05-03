@@ -7,23 +7,15 @@ import MiniPlayer from "@/components/mini-player";
 import { useSessionStore } from "@/stores/session-store";
 
 export default function TabLayout() {
-  const { authenticated } = useSessionStore();
+  const { isAuthenticated } = useSessionStore();
 
   useEffect(() => {
-    if (!authenticated) {
+    if (!isAuthenticated) {
       router.replace("/");
     }
-  }, [authenticated]);
+  }, [isAuthenticated]);
 
   const { currentPlaylist } = usePlaylist();
-  useEffect(() => {
-    console.log(
-      "Current playlist:",
-      currentPlaylist?.name,
-      "length:",
-      currentPlaylist?.tracks.length ?? 0,
-    );
-  }, [currentPlaylist]);
 
   return (
     <>
