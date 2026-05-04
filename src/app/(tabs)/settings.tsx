@@ -26,26 +26,6 @@ export default function SettingsPage() {
     }
   };
 
-  const handleSyncProgress = async () => {
-    toast.promise<boolean>(
-      new Promise(async (resolve, reject) => {
-        try {
-          await syncProgressWithServer();
-          refetch();
-          resolve(true);
-        } catch (error) {
-          console.error("Error syncing progress with server:", error);
-          reject(error);
-        }
-      }),
-      {
-        loading: "Syncing progress with server...",
-        success: (result) => "Sync progress complete",
-        error: "Sync progress failed",
-      },
-    );
-  };
-
   const handleSync = async () => {
     toast.promise<boolean>(
       new Promise(async (resolve, reject) => {
@@ -62,6 +42,26 @@ export default function SettingsPage() {
         loading: "Syncing with server...",
         success: (result) => "Sync complete",
         error: "Sync failed",
+      },
+    );
+  };
+
+  const handleSyncProgress = async () => {
+    toast.promise<boolean>(
+      new Promise(async (resolve, reject) => {
+        try {
+          await syncProgressWithServer();
+          refetch();
+          resolve(true);
+        } catch (error) {
+          console.error("Error syncing progress with server:", error);
+          reject(error);
+        }
+      }),
+      {
+        loading: "Syncing progress with server...",
+        success: (result) => "Sync progress complete",
+        error: "Sync progress failed",
       },
     );
   };
@@ -97,13 +97,6 @@ export default function SettingsPage() {
           </Pressable>
 
           <Pressable
-            onPress={handleSyncProgress}
-            className={`flex w-full flex-row items-center justify-center gap-2 rounded border border-white bg-green-300 ${status === "loading" ? "opacity-40" : ""} px-4 py-2`}
-          >
-            <Text className="text-2xl text-white">Sync Progress</Text>
-          </Pressable>
-
-          <Pressable
             onPress={handleSync}
             disabled={status === "loading"}
             className={`flex w-full flex-row items-center justify-center gap-2 rounded bg-sky-300 ${status === "loading" ? "opacity-40" : ""} px-4 py-2`}
@@ -115,6 +108,18 @@ export default function SettingsPage() {
           </Pressable>
 
           <Pressable
+            onPress={handleSyncProgress}
+            disabled={status === "loading"}
+            className={`flex w-full flex-row items-center justify-center gap-2 rounded border border-white bg-green-300 ${status === "loading" ? "opacity-40" : ""} px-4 py-2`}
+          >
+            {status === "loading" && (
+              <FontAwesome6 name="spinner" size={24} color="white" />
+            )}
+            <Text className="text-2xl text-white">Sync Progress</Text>
+          </Pressable>
+
+          <Text className="text-2xl text-red-300">Danger</Text>
+          <Pressable
             onPress={handleDropData}
             disabled={status === "loading"}
             className={`flex w-full flex-row items-center justify-center gap-2 rounded bg-red-300 ${status === "loading" ? "opacity-40" : ""} px-4 py-2`}
@@ -124,7 +129,10 @@ export default function SettingsPage() {
             )}
             <Text className="text-2xl text-white">Drop data</Text>
           </Pressable>
+        </View>
 
+        <View className="flex gap-2">
+          <Text className="text-3xl text-white">User</Text>
           <Pressable
             onPress={handleLogOut}
             disabled={status === "loading"}

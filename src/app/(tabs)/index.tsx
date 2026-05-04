@@ -18,6 +18,10 @@ export default function RecentPage() {
   const [downloadedItems, setDownloadedItems] = useState<
     libraryItemSchemaType[]
   >([]);
+  const [audiobookItems, setAudiobookItems] = useState<libraryItemSchemaType[]>(
+    [],
+  );
+  const [ebookItems, setEbookItems] = useState<libraryItemSchemaType[]>([]);
   const [revisitItems, setRevisitItems] = useState<libraryItemSchemaType[]>([]);
 
   const [isViewEmpty, setIsViewEmpty] = useState(false);
@@ -76,6 +80,44 @@ export default function RecentPage() {
             } else if (a.updatedAt && !b.updatedAt) {
               return -1;
             } else if (!a.updatedAt && b.updatedAt) {
+              return 1;
+            } else {
+              return 0;
+            }
+          })
+          .slice(0, 20) ?? [],
+      );
+      setAudiobookItems(
+        libraryStore.libraryItems
+          ?.filter((i) => i.numAudioFiles > 0)
+          ?.sort((a, b) => {
+            if (a.createdAt && b.createdAt) {
+              return (
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime()
+              );
+            } else if (a.createdAt && !b.createdAt) {
+              return -1;
+            } else if (!a.createdAt && b.createdAt) {
+              return 1;
+            } else {
+              return 0;
+            }
+          })
+          .slice(0, 20) ?? [],
+      );
+      setEbookItems(
+        libraryStore.libraryItems
+          ?.filter((i) => i.ebookFileFormat)
+          ?.sort((a, b) => {
+            if (a.createdAt && b.createdAt) {
+              return (
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime()
+              );
+            } else if (a.createdAt && !b.createdAt) {
+              return -1;
+            } else if (!a.createdAt && b.createdAt) {
               return 1;
             } else {
               return 0;
@@ -164,6 +206,14 @@ export default function RecentPage() {
 
           {downloadedItems && downloadedItems.length > 0 && (
             <LibraryShelf label="Downloaded" items={downloadedItems} />
+          )}
+
+          {audiobookItems && audiobookItems.length > 0 && (
+            <LibraryShelf label="Available Audiobooks" items={audiobookItems} />
+          )}
+
+          {ebookItems && ebookItems.length > 0 && (
+            <LibraryShelf label="Available Ebooks" items={ebookItems} />
           )}
 
           {newItems && newItems.length > 0 && (

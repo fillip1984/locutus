@@ -151,10 +151,12 @@ export default function MediaPage() {
               >
                 {hideHtmlTags(libraryItem.description ?? "")}
               </Text>
-              <MediaTracks
-                libraryItem={libraryItem}
-                scrollToTop={scrollToTop}
-              />
+              {libraryItem.audioFiles && libraryItem.audioFiles.length > 0 && (
+                <MediaTracks
+                  libraryItem={libraryItem}
+                  scrollToTop={scrollToTop}
+                />
+              )}
             </View>
           </View>
         </ScrollView>

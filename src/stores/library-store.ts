@@ -100,11 +100,7 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
           .where(eq(librarySchema.remoteId, library.id));
       }
 
-      const items = await getLibraryItems(library.id);
-      // filter down to audiobooks
-      // const audiobookItems = items.filter(
-      //   (item) => item.media.numAudioFiles > 0,
-      // );
+      const items = (await getLibraryItems(library.id)) ?? [];
       for (const item of items) {
         const remoteId = item.id;
         let libraryItemId = null;
@@ -242,17 +238,27 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
 
 const calculateChapter = (libraryItem: Root, index: number) => {
   try {
-    const start =
-      libraryItem.media && libraryItem.media.chapters.length > 0
-        ? libraryItem.media.chapters[index - 1].start
-        : 0;
-    const end =
-      libraryItem.media && libraryItem.media.chapters.length > 0
-        ? libraryItem.media.chapters[index - 1].end
-        : 0;
+    if (
+      !libraryItem.media.chapters ||
+      libraryItem.media.chapters.length === 0
+    ) {
+      console.warn("No chapters found for library item:", {
+        title: libraryItem.media.metadata.title,
+        id: libraryItem.id,
+        chapters: libraryItem.media.chapters,
+      });
+      return [0, 0];
+    }
+    const start = libraryItem.media.chapters[index - 1].start;
+    const end = libraryItem.media.chapters[index - 1].end;
     return [start, end];
   } catch (error) {
-    console.error("Error calculating chapter:", error);
+    console.error("Error calculating chapter:", error, {
+      title: libraryItem.media.metadata.title,
+      id: libraryItem.id,
+      chapters: libraryItem.media.chapters,
+      index,
+    });
     return [0, 0];
   }
 };
