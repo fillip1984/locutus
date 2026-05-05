@@ -253,9 +253,11 @@ const MediaControls = () => {
     // increments in .25, cycles back to .5x if over 3x
     const currentRate = await TrackPlayer.getPlaybackSpeed();
     const newRate = currentRate + 0.25 > 3 ? 0.5 : currentRate + 0.25;
-    TrackPlayer.setPlaybackSpeed(newRate);
     setPreferredPlaybackRate(newRate);
   };
+  useEffect(() => {
+    TrackPlayer.setPlaybackSpeed(userSettings?.preferredPlaybackRate ?? 1);
+  }, [userSettings?.preferredPlaybackRate]);
 
   const { position: playbackPosition } = useOnPlaybackProgressChange();
   const { state: playbackState } = useOnPlaybackStateChange();
