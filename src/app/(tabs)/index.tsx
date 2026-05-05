@@ -72,14 +72,14 @@ export default function RecentPage() {
         libraryStore.libraryItems
           ?.filter((i) => i.downloaded)
           ?.sort((a, b) => {
-            if (a.updatedAt && b.updatedAt) {
+            if (a.createdAt && b.createdAt) {
               return (
-                new Date(b.updatedAt).getTime() -
-                new Date(a.updatedAt).getTime()
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime()
               );
-            } else if (a.updatedAt && !b.updatedAt) {
+            } else if (a.createdAt && !b.createdAt) {
               return -1;
-            } else if (!a.updatedAt && b.updatedAt) {
+            } else if (!a.createdAt && b.createdAt) {
               return 1;
             } else {
               return 0;

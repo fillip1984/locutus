@@ -17,13 +17,20 @@ import {
   useLocalSearchParams,
 } from "expo-router";
 
-import { FontAwesome6 } from "@expo/vector-icons";
+import {
+  FontAwesome,
+  FontAwesome6,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
+import { eq } from "drizzle-orm";
 
 import { colors } from "@/components/ui/colors";
 import { generateGradientFromImageUrl } from "@/components/ui/graident-colors";
 import { db } from "@/db";
 import {
   audiobookSchemaType,
+  audioFileSchema,
+  libraryItemSchema,
   libraryItemWithFilesSchemaType,
 } from "@/db/schema";
 import { handleDownload, useDownloadStore } from "@/stores/download-store";
@@ -152,11 +159,16 @@ export default function MediaPage() {
                 {hideHtmlTags(libraryItem.description ?? "")}
               </Text>
               {libraryItem.audioFiles && libraryItem.audioFiles.length > 0 && (
-                <MediaTracks
-                  libraryItem={libraryItem}
-                  scrollToTop={scrollToTop}
-                />
+                <MediaTracks libraryItem={libraryItem} />
               )}
+              <Series />
+
+              {/* scroll to top */}
+              <View className="flex items-center justify-center pb-24">
+                <Pressable onPress={scrollToTop} className="mt-8">
+                  <FontAwesome6 name="arrow-up-long" size={48} color="white" />
+                </Pressable>
+              </View>
             </View>
           </View>
         </ScrollView>
@@ -221,8 +233,76 @@ const Controls = ({
     downloadStore.isDownloading,
   ]);
 
+  // toggle complete/unread status for the library item and audio files
+  const [readStatus, setReadStatus] = useState<"complete" | "unread">(
+    libraryItem.complete ? "complete" : "unread",
+  );
+  const handleToggleCompleteOrUnread = async () => {
+    const newReadStatus = readStatus === "complete" ? "unread" : "complete";
+    // TODO: this should be done in a transaction
+    await db
+      .update(libraryItemSchema)
+      .set({
+        updatedAt: new Date(),
+        lastPlayedId: null,
+        complete: newReadStatus === "complete" ? true : false,
+      })
+      .where(eq(libraryItemSchema.id, libraryItem.id));
+
+    const audioFiles = await db.query.audioFileSchema.findMany({
+      where: {
+        libraryItemId: libraryItem.id,
+      },
+    });
+    for (const audioFile of audioFiles) {
+      await db
+        .update(audioFileSchema)
+        .set({
+          complete: newReadStatus === "complete" ? true : false,
+          progress: newReadStatus === "complete" ? audioFile.duration : 0,
+        })
+        .where(eq(audioFileSchema.id, audioFile.id));
+    }
+    setReadStatus(newReadStatus);
+  };
+
+  const [totalDuration, setTotalDuration] = useState(0);
+  useEffect(() => {
+    if (!libraryItem) return;
+    const duration = libraryItem.audioFiles.reduce((acc, audioFile) => {
+      return acc + audioFile.duration;
+    }, 0);
+    setTotalDuration(duration);
+  }, [libraryItem]);
+
+  const [remainingDuration, setRemainingDuration] = useState(0);
+  useEffect(() => {
+    if (!libraryItem) return;
+    const remaining = libraryItem.audioFiles
+      .filter((audioFile) => !audioFile.complete)
+      .reduce((acc, audioFile) => {
+        if (libraryItem.lastPlayedId === audioFile.id) {
+          return acc + (audioFile.duration - (audioFile.progress ?? 0));
+        } else {
+          return acc + audioFile.duration;
+        }
+      }, 0);
+    setRemainingDuration(remaining);
+  }, [libraryItem]);
+
+  const [percentageRemaining, setPercentageRemaining] = useState(0);
+  useEffect(() => {
+    if (!libraryItem) return;
+
+    const percentage =
+      totalDuration && remainingDuration
+        ? (remainingDuration / totalDuration) * 100
+        : 0;
+    setPercentageRemaining(Math.round(percentage));
+  }, [remainingDuration, totalDuration, libraryItem]);
+
   return (
-    <View className="mt-2 flex-row items-center gap-4">
+    <View className="my-4 flex-row items-center gap-4">
       {isResumable ? (
         <TouchableOpacity
           onPress={() =>
@@ -251,21 +331,84 @@ const Controls = ({
           <Text className="font-semibold text-white">Downloading...</Text>
         </TouchableOpacity>
       ) : isPlayable ? (
-        <TouchableOpacity
-          onPress={() =>
-            router.push({
-              pathname: `/player/[id]`,
-              params: {
-                id: libraryItem.id,
-                audioFileId: libraryItem.lastPlayedId,
-                mode: "play",
-              },
-            })
-          }
-          className="flex w-full flex-row items-center justify-center rounded-full bg-white/10 px-4 py-4"
-        >
-          <Text className="font-semibold text-white/50">Play</Text>
-        </TouchableOpacity>
+        <View className="flex w-full gap-4">
+          <TouchableOpacity
+            onPress={() =>
+              router.push({
+                pathname: `/player/[id]`,
+                params: {
+                  id: libraryItem.id,
+                  audioFileId: libraryItem.lastPlayedId,
+                  mode: "play",
+                },
+              })
+            }
+            className="flex h-12 w-full items-center justify-center rounded-full bg-white py-2"
+          >
+            <View className="flex-row items-center justify-center gap-1">
+              <FontAwesome6 name="play" size={16} color="black" />
+              <Text className="font-semibold text-black/80">Play</Text>
+            </View>
+            {!libraryItem.complete && (
+              <>
+                <View className="flex-row items-center justify-center gap-1">
+                  <MaterialCommunityIcons
+                    name="progress-clock"
+                    size={24}
+                    color="black"
+                  />
+                  <Text className="text-sm text-black/50">
+                    {remainingDuration > 0
+                      ? `(${formatToTime(remainingDuration)} remaining)`
+                      : "done"}
+                  </Text>
+                  <Text className="text-sm text-black/50">
+                    {percentageRemaining > 0
+                      ? `(${percentageRemaining}% remaining)`
+                      : "done"}
+                  </Text>
+                </View>
+              </>
+            )}
+          </TouchableOpacity>
+          <View className="w-full flex-row items-center justify-around">
+            <TouchableOpacity className="flex w-12 items-center justify-center gap-1">
+              <View className="flex size-12 items-center justify-center rounded-full bg-white/10 p-1">
+                <FontAwesome6 name="heart" size={16} color="white" />
+              </View>
+              <Text className="text-center text-[10px] text-white">
+                Add to Favorites
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleToggleCompleteOrUnread}
+              className="flex w-12 items-center justify-center gap-1"
+            >
+              <View className="flex size-12 items-center justify-center rounded-full bg-white/10 p-1">
+                {readStatus === "complete" ? (
+                  <FontAwesome name="check-circle-o" size={20} color="white" />
+                ) : (
+                  <FontAwesome name="check-circle" size={20} color="white" />
+                )}
+              </View>
+              <Text className="text-center text-[10px] text-white">
+                {readStatus === "complete"
+                  ? "Mark as Unread"
+                  : "Mark as Complete"}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity className="flex w-12 items-center justify-center gap-1">
+              <View className="flex size-12 items-center justify-center rounded-full bg-white/10 p-1">
+                <FontAwesome6
+                  name="ellipsis-vertical"
+                  size={16}
+                  color="white"
+                />
+              </View>
+              <Text className="text-center text-[10px] text-white">More</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       ) : isReadable ? (
         <TouchableOpacity
           onPress={() =>
@@ -298,10 +441,8 @@ const Controls = ({
 
 const MediaTracks = ({
   libraryItem,
-  scrollToTop,
 }: {
   libraryItem: libraryItemWithFilesSchemaType;
-  scrollToTop: () => void;
 }) => {
   return (
     <View className="mt-4">
@@ -321,12 +462,6 @@ const MediaTracks = ({
             isLastPlayed={libraryItem.lastPlayedId === audioFile.id}
           />
         ))}
-      </View>
-
-      <View className="flex items-center justify-center pb-150">
-        <Pressable onPress={scrollToTop} className="mt-8">
-          <FontAwesome6 name="arrow-up-long" size={48} color="white" />
-        </Pressable>
       </View>
     </View>
   );
@@ -387,6 +522,32 @@ const Chapter = ({
   );
 };
 
+const Series = () => {
+  return (
+    <View>
+      <Text className="mt-6 text-xl font-bold text-white">Series</Text>
+      <View className="mt-2 flex-row items-center gap-4">
+        <View className="h-[150px] w-[100px] rounded-lg bg-black/40 p-2">
+          <Text className="font-bold text-white">Series Title</Text>
+          <Text className="text-sm text-white/80">3 Books</Text>
+        </View>
+        <View className="h-[150px] w-[100px] rounded-lg bg-black/40 p-2">
+          <Text className="font-bold text-white">Series Title</Text>
+          <Text className="text-sm text-white/80">3 Books</Text>
+        </View>
+        <View className="h-[150px] w-[100px] rounded-lg bg-black/40 p-2">
+          <Text className="font-bold text-white">Series Title</Text>
+          <Text className="text-sm text-white/80">3 Books</Text>
+        </View>
+        <View className="h-[150px] w-[100px] rounded-lg bg-black/40 p-2">
+          <Text className="font-bold text-white">Series Title</Text>
+          <Text className="text-sm text-white/80">3 Books</Text>
+        </View>
+      </View>
+    </View>
+  );
+};
+
 const hideHtmlTags = (str: string) => {
   return str.replace(/<[^>]*>?/gm, "");
 };
@@ -395,3 +556,13 @@ const calc = (position: number, duration: number) => {
   const result = (position / duration) * 100;
   return parseInt(result.toFixed(2), 10);
 };
+
+function formatToTime(remainingDuration: number) {
+  const hours = Math.floor(remainingDuration / 3600);
+  const minutes = Math.floor((remainingDuration % 3600) / 60);
+
+  const hoursDisplay = hours > 0 ? `${hours}h ` : "";
+  const minutesDisplay = minutes > 0 ? `${minutes}m ` : "";
+
+  return `${hoursDisplay}${minutesDisplay}`.trim();
+}
