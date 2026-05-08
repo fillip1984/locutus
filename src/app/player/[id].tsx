@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import {
   PlayerQueue,
   TrackItem,
@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { Link, Stack, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
@@ -23,6 +23,7 @@ import {
   audiobookSchemaType,
   libraryItemWithFilesSchemaType,
 } from "@/db/schema";
+import { formatSecondsToTime } from "@/services/progressService";
 import { useSessionStore } from "@/stores/session-store";
 import { absolutePathUri } from "@/utils/file-utils";
 import { TrackPlayerExtraPayload } from "../_layout";
@@ -153,14 +154,9 @@ export default function Player() {
       style={{ flex: 1 }}
     >
       <SafeAreaView style={{ flex: 1 }}>
-        <View className="flex h-full gap-2 p-2">
-          <Stack.Screen options={{ gestureDirection: "vertical" }} />
-          <TopActionsBar />
-
-          <View className="flex-1">
-            <MediaArt coverArtUrl={libraryItem?.coverArtPath ?? null} />
-            <MediaInfo />
-          </View>
+        <View className="flex gap-2 p-2">
+          <MediaArt coverArtUrl={libraryItem?.coverArtPath ?? null} />
+          <MediaInfo />
           <TrackProgress />
           <MediaControls />
         </View>
@@ -169,29 +165,19 @@ export default function Player() {
   );
 }
 
-const TopActionsBar = () => {
-  return (
-    <View className="mt-12 ml-2">
-      <Link href="..">
-        {/* TODO: swipe down to dismiss, should animate down like a modal, back to where we came from, swipe left and right to go back and forward through tracks */}
-        <Ionicons name="chevron-down" size={24} color="white" />
-      </Link>
-    </View>
-  );
-};
-
 const MediaArt = ({ coverArtUrl }: { coverArtUrl: string | null }) => {
   return (
-    <View className="flex w-full items-center">
-      <View className="flex items-center overflow-hidden rounded-lg">
-        <Image
-          source={coverArtUrl ? { uri: coverArtUrl } : undefined}
-          style={{ width: 350, height: 350 }}
-          contentFit="fill"
-          transition={1000}
-        />
-      </View>
-    </View>
+    <Image
+      source={coverArtUrl ? { uri: coverArtUrl } : undefined}
+      style={{
+        marginHorizontal: "auto",
+        height: 384,
+        width: 240,
+        borderRadius: 8,
+      }}
+      contentFit="cover"
+      transition={300}
+    />
   );
 };
 
@@ -199,11 +185,16 @@ const MediaInfo = () => {
   const { track: currentTrack } = useOnChangeTrack();
 
   return (
-    <View className="my-8">
-      <Text className="text-2xl text-white">{currentTrack?.album}</Text>
-      <Text className="text-xl text-white">
-        {currentTrack?.title ?? "Unknown"}
+    <View className="flex">
+      <Text className="text-2xl font-semibold text-white">
+        {currentTrack?.album}
       </Text>
+      <Text className="text-xl text-white/80">{currentTrack?.artist}</Text>
+      <View className="mt-1">
+        <Text className="text-white/80">
+          {currentTrack?.title ?? "Unknown"}
+        </Text>
+      </View>
     </View>
   );
 };
@@ -211,20 +202,9 @@ const MediaInfo = () => {
 const TrackProgress = () => {
   const { position: playbackPosition, totalDuration } =
     useOnPlaybackProgressChange();
-  // TODO: add hours, also do not exceed 00:00:00 nor total duration
-  const calculateCurrentPosition = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
-  const calculateTimeRemaining = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
 
   return (
-    <View className="mx-4 flex">
+    <View>
       <Slider
         minimumValue={0}
         maximumValue={100}
@@ -235,12 +215,12 @@ const TrackProgress = () => {
         minimumTrackTintColor="#FFFFFF"
         maximumTrackTintColor="#000000"
       />
-      <View className="flex flex-row justify-between">
-        <Text className="text-sky-300">
-          {calculateCurrentPosition(playbackPosition)}
+      <View className="flex flex-row items-center justify-between">
+        <Text className="text-slate-300">
+          {formatSecondsToTime(playbackPosition)}
         </Text>
         <Text className="text-slate-300">
-          {calculateTimeRemaining(totalDuration - playbackPosition)}
+          {formatSecondsToTime(totalDuration - playbackPosition)}
         </Text>
       </View>
     </View>
@@ -263,10 +243,9 @@ const MediaControls = () => {
   const { state: playbackState } = useOnPlaybackStateChange();
 
   return (
-    <View className="flex items-center gap-4">
-      <View className="flex w-full flex-row items-center justify-evenly p-1">
-        {/* <Ionicons name="bookmark-outline" size={30} color="black" /> */}
-        <Ionicons
+    <View className="mt-4 items-center gap-4">
+      <View className="w-full flex-row items-center justify-evenly p-1">
+        <TouchableOpacity
           onPress={() => {
             async function skipToPrevious() {
               // TODO: is this necessary? seems like a bug that we have to skip twice to go to previous track, maybe related to how we are adding tracks to the queue, need to investigate further
@@ -276,38 +255,34 @@ const MediaControls = () => {
             }
             skipToPrevious();
           }}
-          name="play-skip-back-sharp"
-          size={30}
-          color="white"
-        />
-        <FontAwesome6
+        >
+          <Ionicons name="play-skip-back" size={40} color="white" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
           onPress={() => TrackPlayer.seek(playbackPosition - 10)}
-          name="arrow-rotate-left"
-          size={30}
-          color="white"
-        />
+          className="relative flex items-center justify-center"
+        >
+          <FontAwesome6 name="arrow-rotate-left" size={40} color="white" />
+          <Text className="absolute pl-1 text-xs text-white">10</Text>
+        </TouchableOpacity>
         {playbackState === "playing" ? (
-          <Ionicons
-            onPress={() => TrackPlayer.pause()}
-            name="pause"
-            size={40}
-            color="white"
-          />
+          <TouchableOpacity onPress={() => TrackPlayer.pause()}>
+            <Ionicons name="pause" size={60} color="white" />
+          </TouchableOpacity>
         ) : (
-          <Ionicons
-            onPress={() => TrackPlayer.play()}
-            name="play-sharp"
-            size={40}
-            color="white"
-          />
+          <TouchableOpacity onPress={() => TrackPlayer.play()}>
+            <Ionicons name="play" size={55} color="white" />
+          </TouchableOpacity>
         )}
-        <FontAwesome6
+        <TouchableOpacity
           onPress={() => TrackPlayer.seek(playbackPosition + 30)}
-          name="arrow-rotate-right"
-          size={30}
-          color="white"
-        />
-        <Ionicons
+          className="relative flex items-center justify-center"
+        >
+          <FontAwesome6 name="arrow-rotate-right" size={40} color="white" />
+          <Text className="absolute pr-1 text-xs text-white">30</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
           onPress={() => {
             async function skipToNext() {
               await TrackPlayer.skipToNext();
@@ -315,17 +290,16 @@ const MediaControls = () => {
             }
             skipToNext();
           }}
-          name="play-skip-forward"
-          size={30}
-          color="white"
-        />
+        >
+          <Ionicons name="play-skip-forward" size={40} color="white" />
+        </TouchableOpacity>
       </View>
-      <View className="mb-4 flex w-full items-end">
-        <Pressable onPress={handleSetRate} className="rounded-md p-2">
-          <Text className="text-2xl text-white">
+      <View className="flex w-full items-end justify-end p-4">
+        <TouchableOpacity onPress={handleSetRate} className="rounded-md p-2">
+          <Text className="text-2xl font-bold text-white">
             {userSettings?.preferredPlaybackRate ?? 1}x
           </Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
     </View>
   );

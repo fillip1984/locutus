@@ -33,6 +33,10 @@ import {
   libraryItemSchema,
   libraryItemWithFilesSchemaType,
 } from "@/db/schema";
+import {
+  calculateDurationPercentage,
+  formatDurationToTime,
+} from "@/services/progressService";
 import { handleDownload, useDownloadStore } from "@/stores/download-store";
 import { useLibraryStore } from "@/stores/library-store";
 
@@ -137,9 +141,12 @@ export default function MediaPage() {
             <Image
               source={libraryItem.coverArtPath}
               style={{
-                height: 400,
+                marginHorizontal: "auto",
+                height: 384,
+                width: 240,
+                borderRadius: 8,
               }}
-              contentFit="contain"
+              contentFit="cover"
               transition={300}
             />
             <View className="px-2">
@@ -303,34 +310,19 @@ const Controls = ({
 
   return (
     <View className="my-4 flex-row items-center gap-4">
-      {isResumable ? (
-        <TouchableOpacity
-          onPress={() =>
-            router.push({
-              pathname: `/player/[id]`,
-              params: {
-                id: libraryItem.id,
-                audioFileId: libraryItem.lastPlayedId,
-                mode: "resume",
-              },
-            })
-          }
-          className="flex w-full flex-row items-center justify-center rounded-full bg-white/20 px-4 py-4"
-        >
-          <Text className="font-semibold text-white">Resume</Text>
-        </TouchableOpacity>
-      ) : isDownloadable ? (
+      {isDownloadable ? (
         <TouchableOpacity
           onPress={() => handleDownload(libraryItem.id)}
-          className="flex w-full flex-row items-center justify-center rounded-full bg-white/20 px-4 py-4"
+          className="flex h-16 w-full flex-row items-center justify-center gap-2 rounded-full bg-white py-2"
         >
-          <Text className="font-semibold text-white">Download</Text>
+          <FontAwesome6 name="cloud-arrow-down" size={24} color="black" />
+          <Text className="text-lg font-semibold text-black">Download</Text>
         </TouchableOpacity>
       ) : isDownloading ? (
-        <TouchableOpacity className="flex w-full flex-row items-center justify-center rounded-full bg-white/20 px-4 py-4">
+        <TouchableOpacity className="flex h-16 w-full flex-row items-center justify-center gap-2 rounded-full bg-white/20 py-4">
           <Text className="font-semibold text-white">Downloading...</Text>
         </TouchableOpacity>
-      ) : isPlayable ? (
+      ) : isPlayable || isResumable ? (
         <View className="flex w-full gap-4">
           <TouchableOpacity
             onPress={() =>
@@ -339,15 +331,17 @@ const Controls = ({
                 params: {
                   id: libraryItem.id,
                   audioFileId: libraryItem.lastPlayedId,
-                  mode: "play",
+                  mode: isResumable ? "resume" : "play",
                 },
               })
             }
-            className="flex h-12 w-full items-center justify-center rounded-full bg-white py-2"
+            className="flex h-16 w-full items-center justify-center rounded-full bg-white py-2"
           >
             <View className="flex-row items-center justify-center gap-1">
-              <FontAwesome6 name="play" size={16} color="black" />
-              <Text className="font-semibold text-black/80">Play</Text>
+              <FontAwesome6 name="play" size={24} color="black" />
+              <Text className="text-lg text-black/80">
+                {isResumable ? "Resume" : "Play"}
+              </Text>
             </View>
             {!libraryItem.complete && (
               <>
@@ -358,28 +352,22 @@ const Controls = ({
                     color="black"
                   />
                   <Text className="text-sm text-black/50">
-                    {remainingDuration > 0
-                      ? `(${formatToTime(remainingDuration)} remaining)`
-                      : "done"}
-                  </Text>
-                  <Text className="text-sm text-black/50">
-                    {percentageRemaining > 0
-                      ? `(${percentageRemaining}% remaining)`
-                      : "done"}
+                    {remainingDuration > 0 &&
+                      `(${formatDurationToTime(remainingDuration, false)} | ${percentageRemaining}% remaining)`}
                   </Text>
                 </View>
               </>
             )}
           </TouchableOpacity>
           <View className="w-full flex-row items-center justify-around">
-            <TouchableOpacity className="flex w-12 items-center justify-center gap-1">
+            {/* <TouchableOpacity className="flex w-12 items-center justify-center gap-1">
               <View className="flex size-12 items-center justify-center rounded-full bg-white/10 p-1">
                 <FontAwesome6 name="heart" size={16} color="white" />
               </View>
               <Text className="text-center text-[10px] text-white">
                 Add to Favorites
               </Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <TouchableOpacity
               onPress={handleToggleCompleteOrUnread}
               className="flex w-12 items-center justify-center gap-1"
@@ -514,7 +502,7 @@ const Chapter = ({
         <View
           className="h-1 rounded-l-full rounded-r-full bg-yellow-300"
           style={{
-            width: `${calc(audioFile.progress ?? 1, audioFile.duration)}%`,
+            width: `${calculateDurationPercentage(audioFile.progress ?? 1, audioFile.duration)}%`,
           }}
         />
       </Pressable>
@@ -527,19 +515,19 @@ const Series = () => {
     <View>
       <Text className="mt-6 text-xl font-bold text-white">Series</Text>
       <View className="mt-2 flex-row items-center gap-4">
-        <View className="h-[150px] w-[100px] rounded-lg bg-black/40 p-2">
+        <View className="h-37.5 w-25 rounded-lg bg-black/40 p-2">
           <Text className="font-bold text-white">Series Title</Text>
           <Text className="text-sm text-white/80">3 Books</Text>
         </View>
-        <View className="h-[150px] w-[100px] rounded-lg bg-black/40 p-2">
+        <View className="h-37.5 w-25 rounded-lg bg-black/40 p-2">
           <Text className="font-bold text-white">Series Title</Text>
           <Text className="text-sm text-white/80">3 Books</Text>
         </View>
-        <View className="h-[150px] w-[100px] rounded-lg bg-black/40 p-2">
+        <View className="h-37.5 w-25 rounded-lg bg-black/40 p-2">
           <Text className="font-bold text-white">Series Title</Text>
           <Text className="text-sm text-white/80">3 Books</Text>
         </View>
-        <View className="h-[150px] w-[100px] rounded-lg bg-black/40 p-2">
+        <View className="h-37.5 w-25 rounded-lg bg-black/40 p-2">
           <Text className="font-bold text-white">Series Title</Text>
           <Text className="text-sm text-white/80">3 Books</Text>
         </View>
@@ -551,18 +539,3 @@ const Series = () => {
 const hideHtmlTags = (str: string) => {
   return str.replace(/<[^>]*>?/gm, "");
 };
-
-const calc = (position: number, duration: number) => {
-  const result = (position / duration) * 100;
-  return parseInt(result.toFixed(2), 10);
-};
-
-function formatToTime(remainingDuration: number) {
-  const hours = Math.floor(remainingDuration / 3600);
-  const minutes = Math.floor((remainingDuration % 3600) / 60);
-
-  const hoursDisplay = hours > 0 ? `${hours}h ` : "";
-  const minutesDisplay = minutes > 0 ? `${minutes}m ` : "";
-
-  return `${hoursDisplay}${minutesDisplay}`.trim();
-}

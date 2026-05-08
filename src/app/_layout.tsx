@@ -122,20 +122,8 @@ const MainLayout = () => {
             headerBackButtonDisplayMode: "minimal",
           }}
         />
-        <Stack.Screen
-          name="player/[id]"
-          options={{
-            presentation: "fullScreenModal",
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="reader/[id]"
-          options={{
-            presentation: "fullScreenModal",
-            headerShown: false,
-          }}
-        />
+        <Stack.Screen name="player/[id]" options={{}} />
+        <Stack.Screen name="reader/[id]" options={{}} />
       </Stack>
       <Toaster />
     </GestureHandlerRootView>
