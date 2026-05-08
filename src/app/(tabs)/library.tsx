@@ -1,10 +1,11 @@
-import BookLink from "@/components/book-link";
-import { colors } from "@/components/ui/colors";
-import { useLibraryStore } from "@/stores/library-store";
-import { useFocusEffect } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from "expo-router";
+
+import BookLink from "@/components/book-link";
+import { colors } from "@/components/ui/colors";
+import { useLibraryStore } from "@/stores/library-store";
 
 export default function LibraryPage() {
   const { refetch, libraryItems } = useLibraryStore();
@@ -29,11 +30,11 @@ export default function LibraryPage() {
   if (isViewEmpty) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-        <View className="flex px-4 grow justify-center items-center gap-2">
+        <View className="flex grow items-center justify-center gap-2 px-4">
           <Text className="text-4xl font-bold text-white">
             Your library is empty
           </Text>
-          <Text className="font-bold text-white px-6">
+          <Text className="px-6 font-bold text-white">
             Please synchronize with your backend server to add library items
           </Text>
         </View>
@@ -43,13 +44,15 @@ export default function LibraryPage() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScrollView className="px-2">
-        <View className="flex flex-row flex-wrap gap-2">
-          {libraryItems?.map((item) => (
-            <BookLink key={item.id} item={item} />
-          ))}
-        </View>
-      </ScrollView>
+      <View className="h-screen">
+        <ScrollView className="px-2">
+          <View className="flex flex-row flex-wrap gap-2">
+            {libraryItems?.map((item) => (
+              <BookLink key={item.id} item={item} />
+            ))}
+          </View>
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }

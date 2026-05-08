@@ -197,34 +197,44 @@ export default function RecentPage() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScrollView className="px-2">
-        <View className="flex gap-4">
-          {continueItems && continueItems.length > 0 && (
-            <LibraryShelf label="Continue" items={continueItems} />
-          )}
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: colors.background,
+      }}
+    >
+      <View className="h-screen">
+        <ScrollView className="px-2">
+          <View className="flex gap-4">
+            {continueItems && continueItems.length > 0 && (
+              <LibraryShelf label="Continue" items={continueItems} />
+            )}
 
-          {downloadedItems && downloadedItems.length > 0 && (
-            <LibraryShelf label="Downloaded" items={downloadedItems} />
-          )}
+            {downloadedItems && downloadedItems.length > 0 && (
+              <LibraryShelf label="Downloaded" items={downloadedItems} />
+            )}
 
-          {audiobookItems && audiobookItems.length > 0 && (
-            <LibraryShelf label="Available Audiobooks" items={audiobookItems} />
-          )}
+            {audiobookItems && audiobookItems.length > 0 && (
+              <LibraryShelf
+                label="Available Audiobooks"
+                items={audiobookItems}
+              />
+            )}
 
-          {ebookItems && ebookItems.length > 0 && (
-            <LibraryShelf label="Available Ebooks" items={ebookItems} />
-          )}
+            {ebookItems && ebookItems.length > 0 && (
+              <LibraryShelf label="Available Ebooks" items={ebookItems} />
+            )}
 
-          {newItems && newItems.length > 0 && (
-            <LibraryShelf label="New" items={newItems} />
-          )}
+            {newItems && newItems.length > 0 && (
+              <LibraryShelf label="New" items={newItems} />
+            )}
 
-          {revisitItems && revisitItems.length > 0 && (
-            <LibraryShelf label="Revisit" items={revisitItems} />
-          )}
-        </View>
-      </ScrollView>
+            {revisitItems && revisitItems.length > 0 && (
+              <LibraryShelf label="Revisit" items={revisitItems} />
+            )}
+          </View>
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
