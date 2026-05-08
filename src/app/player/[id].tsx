@@ -155,6 +155,7 @@ export default function Player() {
     >
       <SafeAreaView style={{ flex: 1 }}>
         <View className="flex gap-2 p-2">
+          <View className="mx-auto mb-2 h-1 w-10 rounded-full bg-white"></View>
           <MediaArt coverArtUrl={libraryItem?.coverArtPath ?? null} />
           <MediaInfo />
           <TrackProgress />
@@ -175,7 +176,7 @@ const MediaArt = ({ coverArtUrl }: { coverArtUrl: string | null }) => {
         width: 240,
         borderRadius: 8,
       }}
-      contentFit="cover"
+      contentFit="contain"
       transition={300}
     />
   );

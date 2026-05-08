@@ -59,8 +59,8 @@ export default function MiniPlayer() {
               currentTrack?.artwork ? { uri: currentTrack.artwork } : undefined
             }
             style={{ width: 35, height: 35 }}
-            contentFit="fill"
-            transition={1000}
+            contentFit="contain"
+            transition={300}
           />
           {/* {placement === "regular" && ( */}
           <View className="w-66">

@@ -122,7 +122,13 @@ const MainLayout = () => {
             headerBackButtonDisplayMode: "minimal",
           }}
         />
-        <Stack.Screen name="player/[id]" options={{}} />
+        <Stack.Screen
+          name="player/[id]"
+          options={{
+            headerShown: false,
+            presentation: "modal",
+          }}
+        />
         <Stack.Screen name="reader/[id]" options={{}} />
       </Stack>
       <Toaster />

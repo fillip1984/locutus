@@ -146,7 +146,7 @@ export default function MediaPage() {
                 width: 240,
                 borderRadius: 8,
               }}
-              contentFit="cover"
+              contentFit="contain"
               transition={300}
             />
             <View className="px-2">
@@ -353,7 +353,7 @@ const Controls = ({
                   />
                   <Text className="text-sm text-black/50">
                     {remainingDuration > 0 &&
-                      `(${formatDurationToTime(remainingDuration, false)} | ${percentageRemaining}% remaining)`}
+                      `${formatDurationToTime(remainingDuration, false)} | ${percentageRemaining}% remaining`}
                   </Text>
                 </View>
               </>

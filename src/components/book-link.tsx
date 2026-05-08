@@ -19,7 +19,7 @@ export default function BookLink({ item }: { item: libraryItemSchemaType }) {
             width: 120,
             height: 192,
           }}
-          contentFit="cover"
+          contentFit="contain"
           transition={300}
         />
 
