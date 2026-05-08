@@ -22,29 +22,26 @@ export const calculateDurationPercentage = (
   return parseInt(result.toFixed(2), 10);
 };
 
-export const formatSecondsToTime = (seconds: number) => {
+export const formatSecondsToTime = (
+  seconds: number,
+  format: "timestamp" | "duration",
+) => {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = Math.round(seconds % 60);
 
-  // padStart ensures there are always two digits
-  if (h > 0) {
-    return [h, m, s].map((v) => v.toString().padStart(2, "0")).join(":");
+  if (format === "duration") {
+    const hoursDisplay = h > 0 ? `${h}h ` : "";
+    const minutesDisplay = m > 0 ? `${m}m ` : "";
+    return `${hoursDisplay}${minutesDisplay}`.trim();
+  } else {
+    // padStart ensures there are always two digits
+    if (h > 0) {
+      return [h, m, s].map((v) => v.toString().padStart(2, "0")).join(":");
+    }
+    return [m, s].map((v) => v.toString().padStart(2, "0")).join(":");
   }
-  return [m, s].map((v) => v.toString().padStart(2, "0")).join(":");
 };
-
-export function formatDurationToTime(duration: number, includeSeconds = false) {
-  const hours = Math.floor(duration / 3600);
-  const minutes = Math.floor((duration % 3600) / 60);
-  const seconds = duration % 60;
-
-  const hoursDisplay = hours > 0 ? `${hours}h ` : "";
-  const minutesDisplay = minutes > 0 ? `${minutes}m ` : "";
-  const secondsDisplay = includeSeconds ? `${seconds}s` : "";
-
-  return `${hoursDisplay}${minutesDisplay}${secondsDisplay}`.trim();
-}
 
 export const recordProgress = async (
   currentTrack: TrackItem,

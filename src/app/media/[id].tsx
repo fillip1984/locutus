@@ -35,7 +35,7 @@ import {
 } from "@/db/schema";
 import {
   calculateDurationPercentage,
-  formatDurationToTime,
+  formatSecondsToTime,
 } from "@/services/progressService";
 import { handleDownload, useDownloadStore } from "@/stores/download-store";
 import { useLibraryStore } from "@/stores/library-store";
@@ -354,7 +354,7 @@ const Controls = ({
                   />
                   <Text className="text-sm text-black/50">
                     {remainingDuration > 0 &&
-                      `${formatDurationToTime(remainingDuration, false)} | ${percentageRemaining}% remaining`}
+                      `${formatSecondsToTime(remainingDuration, "duration")} | ${percentageRemaining}% remaining`}
                   </Text>
                 </View>
               </>

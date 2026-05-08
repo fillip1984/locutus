@@ -218,10 +218,10 @@ const TrackProgress = () => {
       />
       <View className="flex flex-row items-center justify-between">
         <Text className="text-slate-300">
-          {formatSecondsToTime(playbackPosition)}
+          {formatSecondsToTime(playbackPosition, "timestamp")}
         </Text>
         <Text className="text-slate-300">
-          {formatSecondsToTime(totalDuration - playbackPosition)}
+          {formatSecondsToTime(totalDuration - playbackPosition, "timestamp")}
         </Text>
       </View>
     </View>
@@ -273,7 +273,7 @@ const MediaControls = () => {
           </TouchableOpacity>
         ) : (
           <TouchableOpacity onPress={() => TrackPlayer.play()}>
-            <Ionicons name="play" size={55} color="white" />
+            <Ionicons name="play" size={60} color="white" />
           </TouchableOpacity>
         )}
         <TouchableOpacity
