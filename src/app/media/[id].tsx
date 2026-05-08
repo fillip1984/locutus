@@ -350,6 +350,7 @@ const Controls = ({
                     name="progress-clock"
                     size={24}
                     color="black"
+                    style={{ opacity: 0.5 }}
                   />
                   <Text className="text-sm text-black/50">
                     {remainingDuration > 0 &&
@@ -513,25 +514,31 @@ const Chapter = ({
 const Series = () => {
   return (
     <View>
-      <Text className="mt-6 text-xl font-bold text-white">Series</Text>
-      <View className="mt-2 flex-row items-center gap-4">
-        <View className="h-37.5 w-25 rounded-lg bg-black/40 p-2">
-          <Text className="font-bold text-white">Series Title</Text>
-          <Text className="text-sm text-white/80">3 Books</Text>
+      <Text className="mt-6 text-3xl font-bold text-white">Series</Text>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        className="mt-4"
+      >
+        <View className="mt-2 flex-row items-center gap-4">
+          <View className="h-37.5 w-25 rounded-lg bg-black/40 p-2">
+            <Text className="font-bold text-white">Series Title</Text>
+            <Text className="text-sm text-white/80">3 Books</Text>
+          </View>
+          <View className="h-37.5 w-25 rounded-lg bg-black/40 p-2">
+            <Text className="font-bold text-white">Series Title</Text>
+            <Text className="text-sm text-white/80">3 Books</Text>
+          </View>
+          <View className="h-37.5 w-25 rounded-lg bg-black/40 p-2">
+            <Text className="font-bold text-white">Series Title</Text>
+            <Text className="text-sm text-white/80">3 Books</Text>
+          </View>
+          <View className="h-37.5 w-25 rounded-lg bg-black/40 p-2">
+            <Text className="font-bold text-white">Series Title</Text>
+            <Text className="text-sm text-white/80">3 Books</Text>
+          </View>
         </View>
-        <View className="h-37.5 w-25 rounded-lg bg-black/40 p-2">
-          <Text className="font-bold text-white">Series Title</Text>
-          <Text className="text-sm text-white/80">3 Books</Text>
-        </View>
-        <View className="h-37.5 w-25 rounded-lg bg-black/40 p-2">
-          <Text className="font-bold text-white">Series Title</Text>
-          <Text className="text-sm text-white/80">3 Books</Text>
-        </View>
-        <View className="h-37.5 w-25 rounded-lg bg-black/40 p-2">
-          <Text className="font-bold text-white">Series Title</Text>
-          <Text className="text-sm text-white/80">3 Books</Text>
-        </View>
-      </View>
+      </ScrollView>
     </View>
   );
 };
