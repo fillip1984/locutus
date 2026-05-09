@@ -192,7 +192,7 @@ const MediaInfo = () => {
         {currentTrack?.album}
       </Text>
       <Text className="text-xl text-white/80">{currentTrack?.artist}</Text>
-      <View className="mt-1">
+      <View className="mt-1 mb-3">
         <Marquee spacing={40} speed={0.6} delay={3000}>
           <Text className="text-white/80">
             {currentTrack?.title ?? "Unknown"}

@@ -6,7 +6,6 @@ import { StyleSheet, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
-  useAnimatedReaction,
   useAnimatedStyle,
   useDerivedValue,
   useFrameCallback,
@@ -95,19 +94,14 @@ export const Marquee = React.memo(
       },
       ref,
     ) => {
-      const parentMeasurement = useSharedValue<LayoutRectangle>({
-        width: 0,
-        height: 0,
-        x: 0,
-        y: 0,
-      });
       const textMeasurement = useSharedValue<LayoutRectangle>({
         width: 0,
         height: 0,
         x: 0,
         y: 0,
       });
-      const [cloneTimes, setCloneTimes] = React.useState(0);
+      const [parentSize, setParentSize] = React.useState(0);
+      const [textSize, setTextSize] = React.useState(0);
       const anim = useSharedValue(0);
       const startTimeoutRef = React.useRef<ReturnType<
         typeof setTimeout
@@ -135,37 +129,17 @@ export const Marquee = React.memo(
         }
       });
 
-      useAnimatedReaction(
-        () => {
-          if (
-            textMeasurement.value.width === 0 ||
-            parentMeasurement.value.width === 0 ||
-            textMeasurement.value.height === 0 ||
-            parentMeasurement.value.height === 0
-          ) {
-            return 0;
-          }
-          return (
-            Math.round(
-              direction === "horizontal"
-                ? parentMeasurement.value.width / textMeasurement.value.width
-                : parentMeasurement.value.height / textMeasurement.value.height,
-            ) + 1
-          );
-        },
-        (v) => {
-          if (v === 0) {
-            return;
-          }
-          // This is going to cover the case when the text/element size
-          // is greater than the actual parent size
-          // Double this to cover the entire screen twice, in this way we can
-          // reset the position of the first element when its going to move out
-          // of the screen without any noticible glitch
-          runOnJS(setCloneTimes)(v + 2);
-        },
-        [direction],
-      );
+      const isHorizontal = direction === "horizontal";
+      const isOverflowing =
+        parentSize > 0 && textSize > 0 && textSize > parentSize;
+      const cloneTimes = React.useMemo(() => {
+        if (!isOverflowing || textSize === 0) {
+          return 0;
+        }
+
+        // Render enough copies to keep seamless scrolling across viewport.
+        return Math.round(parentSize / textSize) + 3;
+      }, [isOverflowing, parentSize, textSize]);
 
       const clearStartTimeout = React.useCallback(() => {
         if (startTimeoutRef.current) {
@@ -176,9 +150,12 @@ export const Marquee = React.memo(
 
       // Pan Gestures
       const start = React.useCallback(() => {
+        if (!isOverflowing) {
+          return;
+        }
         clearStartTimeout();
         frameCallback.setActive(true);
-      }, [clearStartTimeout, frameCallback]);
+      }, [clearStartTimeout, frameCallback, isOverflowing]);
 
       const stop = React.useCallback(() => {
         clearStartTimeout();
@@ -186,6 +163,12 @@ export const Marquee = React.memo(
       }, [clearStartTimeout, frameCallback]);
 
       React.useEffect(() => {
+        if (!isOverflowing) {
+          clearStartTimeout();
+          frameCallback.setActive(false);
+          return;
+        }
+
         if (delay <= 0) {
           frameCallback.setActive(true);
           return;
@@ -199,7 +182,7 @@ export const Marquee = React.memo(
         return () => {
           clearStartTimeout();
         };
-      }, [clearStartTimeout, delay, frameCallback]);
+      }, [clearStartTimeout, delay, frameCallback, isOverflowing]);
 
       React.useImperativeHandle(ref, () => ({
         start,
@@ -208,7 +191,7 @@ export const Marquee = React.memo(
       }));
 
       const pan = Gesture.Pan()
-        .enabled(withGesture)
+        .enabled(withGesture && isOverflowing)
         .onBegin(() => {
           runOnJS(stop)();
         })
@@ -235,7 +218,15 @@ export const Marquee = React.memo(
           key={direction}
           style={style}
           onLayout={(ev) => {
-            parentMeasurement.value = ev.nativeEvent.layout;
+            const measuredParentSize = isHorizontal
+              ? ev.nativeEvent.layout.width
+              : ev.nativeEvent.layout.height;
+
+            setParentSize((prev) =>
+              Math.abs(prev - measuredParentSize) < 0.5
+                ? prev
+                : measuredParentSize,
+            );
           }}
           pointerEvents="box-none"
         >
@@ -246,19 +237,33 @@ export const Marquee = React.memo(
                 // ensure that its not going to "wrap".
               }
               <Animated.ScrollView
-                horizontal={direction === "horizontal"}
+                horizontal={isHorizontal}
                 style={styles.hidden}
                 pointerEvents="box-none"
               >
                 <View
                   onLayout={(ev) => {
                     textMeasurement.value = ev.nativeEvent.layout;
+
+                    const measuredTextSize = isHorizontal
+                      ? ev.nativeEvent.layout.width
+                      : ev.nativeEvent.layout.height;
+
+                    setTextSize((prev) =>
+                      Math.abs(prev - measuredTextSize) < 0.5
+                        ? prev
+                        : measuredTextSize,
+                    );
                   }}
                 >
                   {children}
                 </View>
               </Animated.ScrollView>
-              {cloneTimes > 0 &&
+              {!isOverflowing && (
+                <View pointerEvents="box-none">{children}</View>
+              )}
+              {isOverflowing &&
+                cloneTimes > 0 &&
                 [...Array(cloneTimes).keys()].map((index) => {
                   return (
                     <AnimatedChild
@@ -282,6 +287,6 @@ export const Marquee = React.memo(
 );
 
 const styles = StyleSheet.create({
-  hidden: { opacity: 0, zIndex: -9999 },
+  hidden: { opacity: 0, zIndex: -9999, position: "absolute" },
   row: { flexDirection: "row" },
 });

@@ -16,9 +16,8 @@ I'm currently working to rebuild the same functionality that was previously show
 ## TODO
 
 - [ ] add marquee effects on text that could expand and flow to a 2nd line
-  - [ ] mini-player
-  - [ ] player screen track name
-  - [ ] chapters on media screen?
+  - [x] mini-player
+  - [x] player screen track name
 - [ ] figure out how to show cover art in either square and book aspect ratios
 - [ ] add Expo UI drop down menu on media page
 
