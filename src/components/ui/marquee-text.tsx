@@ -5,7 +5,6 @@ import * as React from "react";
 import { StyleSheet, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
-  runOnJS,
   useAnimatedStyle,
   useDerivedValue,
   useFrameCallback,
@@ -193,7 +192,7 @@ export const Marquee = React.memo(
       const pan = Gesture.Pan()
         .enabled(withGesture && isOverflowing)
         .onBegin(() => {
-          runOnJS(stop)();
+          stop();
         })
         .onChange((e) => {
           anim.value += -(direction === "horizontal" ? e.changeX : e.changeY);
@@ -207,7 +206,7 @@ export const Marquee = React.memo(
             },
             (finished) => {
               if (finished) {
-                runOnJS(start)();
+                start();
               }
             },
           );
