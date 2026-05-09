@@ -203,7 +203,7 @@ export default function RecentPage() {
         backgroundColor: colors.background,
       }}
     >
-      <View className="h-screen">
+      <View className="h-screen pb-16">
         <ScrollView className="px-2">
           <View className="flex gap-4">
             {continueItems && continueItems.length > 0 && (

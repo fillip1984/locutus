@@ -44,7 +44,7 @@ export default function LibraryPage() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <View className="h-screen">
+      <View className="h-screen pb-16">
         <ScrollView className="px-2">
           <View className="flex flex-row flex-wrap gap-2">
             {libraryItems?.map((item) => (

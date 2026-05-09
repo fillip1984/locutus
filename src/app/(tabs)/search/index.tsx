@@ -45,7 +45,7 @@ export default function SearchIndex() {
         onChangeText={(e) => setSearchText(e.nativeEvent.text)}
       />
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-        <View className="h-screen">
+        <View className="h-screen pb-16">
           <ScrollView className="px-2">
             {filteredLibraryItems?.length === 0 ? (
               <View className="mt-24 flex grow items-center justify-center gap-2 px-4">
