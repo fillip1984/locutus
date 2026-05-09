@@ -8,7 +8,6 @@ import {
 } from "react-native";
 import { useNowPlaying } from "react-native-nitro-player";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import {
   Link,
@@ -25,6 +24,7 @@ import {
 import { eq } from "drizzle-orm";
 
 import { colors } from "@/components/ui/colors";
+import CoverArt from "@/components/ui/cover-art";
 import { generateGradientFromImageUrl } from "@/components/ui/graident-colors";
 import { db } from "@/db";
 import {
@@ -138,17 +138,7 @@ export default function MediaPage() {
       <SafeAreaView style={{ flex: 1 }}>
         <ScrollView ref={tracksScrollViewRef}>
           <View className="flex-1 gap-1">
-            <Image
-              source={libraryItem.coverArtPath}
-              style={{
-                marginHorizontal: "auto",
-                height: 384,
-                width: 240,
-                borderRadius: 8,
-              }}
-              contentFit="contain"
-              transition={300}
-            />
+            <CoverArt coverArtPath={libraryItem.coverArtPath} />
             <View className="px-2">
               <Text className="text-2xl font-bold text-white">
                 {libraryItem.title}

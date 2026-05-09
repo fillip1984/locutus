@@ -9,7 +9,6 @@ import {
   useOnPlaybackStateChange,
 } from "react-native-nitro-player";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams } from "expo-router";
 
@@ -17,6 +16,7 @@ import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 
 import { colors } from "@/components/ui/colors";
+import CoverArt from "@/components/ui/cover-art";
 import { generateGradientFromImageUrl } from "@/components/ui/graident-colors";
 import { Marquee } from "@/components/ui/marquee-text";
 import { db } from "@/db";
@@ -157,7 +157,7 @@ export default function Player() {
       <SafeAreaView style={{ flex: 1 }}>
         <View className="flex gap-2 p-2">
           <View className="mx-auto mb-2 h-1 w-10 rounded-full bg-white"></View>
-          <MediaArt coverArtUrl={libraryItem?.coverArtPath ?? null} />
+          <CoverArt coverArtPath={libraryItem?.coverArtPath ?? null} />
           <MediaInfo />
           <TrackProgress />
           <MediaControls />
@@ -166,22 +166,6 @@ export default function Player() {
     </LinearGradient>
   );
 }
-
-const MediaArt = ({ coverArtUrl }: { coverArtUrl: string | null }) => {
-  return (
-    <Image
-      source={coverArtUrl ? { uri: coverArtUrl } : undefined}
-      style={{
-        marginHorizontal: "auto",
-        height: 384,
-        width: 240,
-        borderRadius: 8,
-      }}
-      contentFit="contain"
-      transition={300}
-    />
-  );
-};
 
 const MediaInfo = () => {
   const { track: currentTrack } = useOnChangeTrack();

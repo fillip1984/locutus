@@ -15,10 +15,6 @@ I'm currently working to rebuild the same functionality that was previously show
 
 ## TODO
 
-- [ ] add marquee effects on text that could expand and flow to a 2nd line
-  - [x] mini-player
-  - [x] player screen track name
-- [ ] figure out how to show cover art in either square and book aspect ratios
 - [ ] add Expo UI drop down menu on media page
 
 ### Mid term
@@ -57,3 +53,7 @@ I'm currently working to rebuild the same functionality that was previously show
   - [x] so it works on lock screen
   - [x] so it works with Now Playing on Apple Carplay
   - [x] so it works with Now playing on Apple watch
+- [x] add marquee effects on text that could expand and flow to a 2nd line
+  - [x] mini-player
+  - [x] player screen track name
+- [x] figure out how to show cover art in either square and book aspect ratios
