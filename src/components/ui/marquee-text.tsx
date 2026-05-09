@@ -33,6 +33,7 @@ export type MarqueeRef = {
   isActive: boolean;
 };
 
+// Copied from: https://github.com/animate-react-native/marquee/blob/main/src/index.tsx
 const AnimatedChild = ({
   index,
   children,
