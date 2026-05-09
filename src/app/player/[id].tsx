@@ -18,6 +18,7 @@ import Slider from "@react-native-community/slider";
 
 import { colors } from "@/components/ui/colors";
 import { generateGradientFromImageUrl } from "@/components/ui/graident-colors";
+import { Marquee } from "@/components/ui/marquee-text";
 import { db } from "@/db";
 import {
   audiobookSchemaType,
@@ -192,9 +193,11 @@ const MediaInfo = () => {
       </Text>
       <Text className="text-xl text-white/80">{currentTrack?.artist}</Text>
       <View className="mt-1">
-        <Text className="text-white/80">
-          {currentTrack?.title ?? "Unknown"}
-        </Text>
+        <Marquee spacing={40} speed={0.6} delay={3000}>
+          <Text className="text-white/80">
+            {currentTrack?.title ?? "Unknown"}
+          </Text>
+        </Marquee>
       </View>
     </View>
   );
