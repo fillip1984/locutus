@@ -15,10 +15,6 @@ I'm currently working to rebuild the same functionality that was previously show
 
 ## TODO
 
-- [ ] add Expo UI drop down menu on media page
-
-### Mid term
-
 - [ ] add m4b chapter functionality
 - [ ] add series functionality
 - [ ] add ebook reader
@@ -37,8 +33,14 @@ I'm currently working to rebuild the same functionality that was previously show
   - [ ] swap from previous/next track to skip back 10s or forward 30s from lock and now playing screens
   - [ ] see if useOnPlaybackProgressChange() hook gets fixed for longer audio files, right now it is only triggering every 5 seconds on longer audio files
 - [ ] Once Expo NativeTabs are no longer beta, revisit todos for it
-  - [ ] there isn't much documentation on bottom accessory (mini-player), so it isn't clear how to implement. Right now it somewhat works but when it shrinks and goes inline with tabs and search it doesn't look very nice
 - [ ] Once Expo UI is no longer beta, revisit todos for it
+  - [ ] add Expo UI drop down menu on media page
+    - [ ] option to redownload content
+    - [ ] option to delete downloaded content
+    - [ ] option to mark as complete
+    - [ ] option to mark as unread
+    - [ ] option to update progress (mark all previous files/chapters as read)
+    - [ ] option to delete library item?
 
 ### Completed todos
 

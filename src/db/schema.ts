@@ -1,5 +1,10 @@
 import { createId } from "@paralleldrive/cuid2";
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+  integer,
+  sqliteTable,
+  text,
+  uniqueIndex,
+} from "drizzle-orm/sqlite-core";
 
 const baseFields = {
   id: text()
@@ -21,34 +26,56 @@ export const librarySchema = sqliteTable("library", {
 
 export type librarySchemaType = typeof librarySchema.$inferSelect;
 
-export const libraryItemSchema = sqliteTable("libraryItem", {
-  ...baseFields,
-  remoteId: text().notNull(),
-  title: text().notNull(),
-  authorName: text().notNull(),
-  authorNameLF: text(),
-  numAudioFiles: integer().notNull(),
-  ebookFileFormat: text(),
-  duration: integer().notNull(),
-  publishedYear: integer(),
-  description: text(),
-  isbn: text(),
-  asin: text(),
-  coverArtPath: text(),
-  lastPlayedId: text(),
-  lastEBookId: text(),
-  downloaded: integer({ mode: "boolean" }).default(false),
-  complete: integer({ mode: "boolean" }).default(false),
-  libraryId: text()
-    .notNull()
-    .references(() => librarySchema.id, { onDelete: "cascade" }),
-});
+export const libraryItemSchema = sqliteTable(
+  "libraryItem",
+  {
+    ...baseFields,
+    remoteId: text().notNull(),
+    title: text().notNull(),
+    authorName: text().notNull(),
+    authorNameLF: text(),
+    numAudioFiles: integer().notNull(),
+    ebookFileFormat: text(),
+    duration: integer().notNull(),
+    publishedYear: integer(),
+    description: text(),
+    isbn: text(),
+    asin: text(),
+    coverArtPath: text(),
+    lastPlayedId: text(),
+    lastEBookId: text(),
+    downloaded: integer({ mode: "boolean" }).default(false),
+    complete: integer({ mode: "boolean" }).default(false),
+    libraryId: text()
+      .notNull()
+      .references(() => librarySchema.id, { onDelete: "cascade" }),
+  },
+  (t) => [
+    uniqueIndex("library_item_remote_id_library_id_idx").on(
+      t.remoteId,
+      t.libraryId,
+    ),
+  ],
+);
 
 export type libraryItemSchemaType = typeof libraryItemSchema.$inferSelect;
 export type libraryItemWithFilesSchemaType = libraryItemSchemaType & {
   audioFiles: audiobookSchemaType[];
   eBookFiles: eBookFileSchemaType[];
 };
+
+export const chapterSchema = sqliteTable("chapter", {
+  ...baseFields,
+  remoteId: text().notNull().unique(),
+  title: text().notNull(),
+  start: integer().notNull(),
+  end: integer().notNull(),
+  libraryItemId: text()
+    .notNull()
+    .references(() => libraryItemSchema.id, { onDelete: "cascade" }),
+});
+
+export type chapterSchemaType = typeof chapterSchema.$inferSelect;
 
 export const audioFileSchema = sqliteTable("audioFile", {
   ...baseFields,
@@ -83,6 +110,36 @@ export const eBookFileSchema = sqliteTable("eBookFile", {
 });
 
 export type eBookFileSchemaType = typeof eBookFileSchema.$inferSelect;
+
+export const seriesSchema = sqliteTable("series", {
+  ...baseFields,
+  remoteId: text().notNull().unique(),
+  name: text().notNull(),
+  sequence: integer().notNull(),
+  libraryItemId: text()
+    .notNull()
+    .references(() => libraryItemSchema.id, { onDelete: "cascade" }),
+});
+export type seriesSchemaType = typeof seriesSchema.$inferSelect;
+
+export const libraryItemGenreSchema = sqliteTable("libraryItemGenre", {
+  ...baseFields,
+  libraryItemId: text()
+    .notNull()
+    .references(() => libraryItemSchema.id, { onDelete: "cascade" }),
+  genreId: text()
+    .notNull()
+    .references(() => genreSchema.id, { onDelete: "cascade" }),
+});
+export type libraryItemGenreSchemaType =
+  typeof libraryItemGenreSchema.$inferSelect;
+
+export const genreSchema = sqliteTable("genre", {
+  ...baseFields,
+  remoteId: text().notNull().unique(),
+  name: text().notNull(),
+});
+export type genreSchemaType = typeof genreSchema.$inferSelect;
 
 export const userSettingsSchema = sqliteTable("userSettings", {
   ...baseFields,

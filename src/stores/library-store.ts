@@ -67,133 +67,105 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
   },
   syncWithServer: async () => {
     set(() => ({ status: "loading" }));
-    const libraries = await getLibraries();
-    for (const library of libraries ?? []) {
+    const remoteLibraries = await getLibraries();
+    for (const remoteLibrary of remoteLibraries ?? []) {
       // insert or update library
-      // TODO: couldn't get this to work
-      // await localDb
-      //   .insert(librarySchema)
-      //   .values({ name: library.name, remoteId: library.id })
-      //   .onConflictDoUpdate({
-      //     target: librarySchema.id,
-      //     set: { name: library.name + new Date(), remoteId: library.id },
-      //   });
-      let libraryId = null;
-      const existingLibrary = await db
-        .select()
-        .from(librarySchema)
-        .where(eq(librarySchema.remoteId, library.id));
-      if (existingLibrary.length > 0) {
-        libraryId = existingLibrary[0].id;
-      }
-      if (!libraryId) {
-        // console.log("adding library");
-        await db
-          .insert(librarySchema)
-          .values({ id: library.id, name: library.name, remoteId: library.id });
-        libraryId = library.id;
-      } else {
-        // console.log("updating library");
-        await db
-          .update(librarySchema)
-          .set({ name: library.name })
-          .where(eq(librarySchema.remoteId, library.id));
-      }
+      await db
+        .insert(librarySchema)
+        .values({ name: remoteLibrary.name, remoteId: remoteLibrary.id })
+        .onConflictDoUpdate({
+          target: librarySchema.remoteId,
+          set: { name: remoteLibrary.name },
+        });
 
-      const items = (await getLibraryItems(library.id)) ?? [];
-      for (const item of items) {
-        const remoteId = item.id;
-        let libraryItemId = null;
-        const exists = await db
-          .select()
-          .from(libraryItemSchema)
-          .where(eq(libraryItemSchema.remoteId, remoteId));
-        if (exists.length > 0) {
-          libraryItemId = exists[0].id;
-        }
+      // sync library items
+      const remoteItems = (await getLibraryItems(remoteLibrary.id)) ?? [];
+      for (const remoteItem of remoteItems) {
+        console.log(
+          `syncing library item with id: ${remoteItem.id} and title: ${remoteItem.media.metadata.title}`,
+        );
+        // download cover art
+        const coverArtPath = await downloadCoverArt(remoteItem.id);
 
-        //download cover art
-        const coverArtPath = await downloadCoverArt(item.id);
-
-        if (!libraryItemId) {
-          // console.log("adding library item");
-          await db.insert(libraryItemSchema).values({
-            id: item.id,
-            title: item.media.metadata.title,
-            authorName: item.media.metadata.authorName,
-            authorNameLF: item.media.metadata.authorNameLF,
-            duration: item.media.duration,
-            numAudioFiles: item.media.numAudioFiles,
-            ebookFileFormat: item.media.ebookFormat,
-            description: item.media.metadata.description,
-            publishedYear: item.media.metadata.publishedYear
-              ? parseInt(item.media.metadata.publishedYear, 10)
+        const libraryItem = await db
+          .insert(libraryItemSchema)
+          .values({
+            id: remoteItem.id,
+            title: remoteItem.media.metadata.title,
+            authorName: remoteItem.media.metadata.authorName,
+            authorNameLF: remoteItem.media.metadata.authorNameLF,
+            duration: remoteItem.media.duration,
+            numAudioFiles: remoteItem.media.numAudioFiles,
+            ebookFileFormat: remoteItem.media.ebookFormat,
+            description: remoteItem.media.metadata.description,
+            publishedYear: remoteItem.media.metadata.publishedYear
+              ? parseInt(remoteItem.media.metadata.publishedYear, 10)
               : null,
             coverArtPath,
-            libraryId,
-            remoteId: item.id,
-          });
-          // libraryItemId = result.lastInsertRowId;
-        } else {
-          // console.log("updating library item");
-          await db
-            .update(libraryItemSchema)
-            .set({
-              title: item.media.metadata.title,
-              authorName: item.media.metadata.authorName,
-              authorNameLF: item.media.metadata.authorNameLF,
-              duration: item.media.duration,
-              numAudioFiles: item.media.numAudioFiles,
-              ebookFileFormat: item.media.ebookFormat,
+            libraryId: remoteLibrary.id,
+            remoteId: remoteItem.id,
+          })
+          .onConflictDoUpdate({
+            target: [libraryItemSchema.remoteId, libraryItemSchema.libraryId],
+            set: {
+              title: remoteItem.media.metadata.title,
+              authorName: remoteItem.media.metadata.authorName,
+              authorNameLF: remoteItem.media.metadata.authorNameLF,
+              duration: remoteItem.media.duration,
+              numAudioFiles: remoteItem.media.numAudioFiles,
+              ebookFileFormat: remoteItem.media.ebookFormat,
+              description: remoteItem.media.metadata.description,
+              publishedYear: remoteItem.media.metadata.publishedYear
+                ? parseInt(remoteItem.media.metadata.publishedYear, 10)
+                : null,
               coverArtPath,
-              libraryId,
-              remoteId: item.id,
-            })
-            .where(eq(libraryItemSchema.remoteId, item.id));
-        }
+            },
+          })
+          .returning({ id: libraryItemSchema.id });
+        const libraryItemId = libraryItem[0].id;
 
-        const libraryItem = await getLibraryItem(remoteId);
-        if (!libraryItem) {
+        const remoteLibraryItem = await getLibraryItem(remoteItem.id);
+        if (!remoteLibraryItem) {
           console.error(
-            `Failed to fetch library item with id: ${remoteId} after syncing libraries, skipping syncing related audio and ebook files for this item`,
+            `Failed to fetch library item with id: ${remoteItem.id} after syncing libraries, skipping syncing related audio and ebook files for this item`,
           );
           continue;
         }
-        if (libraryItem?.media.ebookFile) {
-          const ebook = libraryItem.media.ebookFile;
-          const exists = await db.query.eBookFileSchema.findFirst({
-            where: {
-              remoteId: ebook.ino,
-            },
-          });
 
-          if (!exists) {
-            await db.insert(eBookFileSchema).values({
+        // ebooks/audio files
+        if (remoteLibraryItem?.media.ebookFile) {
+          const ebook = remoteLibraryItem.media.ebookFile;
+          console.log(
+            `syncing ebook file with id: ${ebook.ino} and name: ${ebook.metadata.filename} for library item with id: ${remoteLibraryItem.id}`,
+          );
+          await db
+            .insert(eBookFileSchema)
+            .values({
               // TODO: this limits us to only 1 ebook at a time
-              id: libraryItem.id,
+              id: remoteLibraryItem.id,
               remoteId: ebook.ino,
               name: ebook.metadata.filename,
-              libraryItemId: libraryItem.id,
-            });
-          } else {
-            await db
-              .update(eBookFileSchema)
-              .set({
+              libraryItemId: libraryItemId,
+            })
+            .onConflictDoUpdate({
+              target: eBookFileSchema.remoteId,
+              set: {
                 name: ebook.metadata.filename,
-              })
-              .where(eq(eBookFileSchema.remoteId, ebook.ino));
-          }
+              },
+            });
         }
-        for (const audioFile of libraryItem?.media.audioFiles ?? []) {
-          const exists = await db.query.audioFileSchema.findFirst({
-            where: {
-              remoteId: audioFile.ino,
-            },
-          });
+        for (const audioFile of remoteLibraryItem?.media.audioFiles ?? []) {
+          console.log(
+            `syncing audio file with id: ${audioFile.ino} and name: ${audioFile.metadata.filename} for library item with id: ${remoteLibraryItem.id}`,
+          );
+          const [start, end] = calculateChapter(
+            remoteLibraryItem,
+            audioFile.index,
+          );
 
-          const [start, end] = calculateChapter(libraryItem, audioFile.index);
-          if (!exists) {
-            await db.insert(audioFileSchema).values({
+          await db
+            .insert(audioFileSchema)
+            .values({
               id: audioFile.ino,
               remoteId: audioFile.ino,
               index: audioFile.index,
@@ -201,19 +173,18 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
               duration: audioFile.duration,
               start,
               end,
-              libraryItemId: libraryItem.id,
-            });
-          } else {
-            await db
-              .update(audioFileSchema)
-              .set({
+              libraryItemId: libraryItemId,
+            })
+            .onConflictDoUpdate({
+              target: audioFileSchema.remoteId,
+              set: {
+                index: audioFile.index,
                 name: audioFile.metadata.filename,
                 duration: audioFile.duration,
                 start,
                 end,
-              })
-              .where(eq(audioFileSchema.remoteId, audioFile.ino));
-          }
+              },
+            });
         }
       }
     }

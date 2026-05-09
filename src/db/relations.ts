@@ -14,6 +14,10 @@ export const relations = defineRelations(schema, (r) => ({
       from: r.libraryItemSchema.libraryId,
       to: r.librarySchema.id,
     }),
+    chapters: r.many.chapterSchema({
+      from: r.libraryItemSchema.id,
+      to: r.chapterSchema.libraryItemId,
+    }),
     audioFiles: r.many.audioFileSchema({
       from: r.libraryItemSchema.id,
       to: r.audioFileSchema.libraryItemId,
@@ -21,6 +25,14 @@ export const relations = defineRelations(schema, (r) => ({
     eBookFiles: r.many.eBookFileSchema({
       from: r.libraryItemSchema.id,
       to: r.eBookFileSchema.libraryItemId,
+    }),
+    series: r.one.seriesSchema({
+      from: r.libraryItemSchema.id,
+      to: r.seriesSchema.libraryItemId,
+    }),
+    genres: r.many.libraryItemGenreSchema({
+      from: r.libraryItemSchema.id,
+      to: r.libraryItemGenreSchema.libraryItemId,
     }),
   },
   audioFile: {

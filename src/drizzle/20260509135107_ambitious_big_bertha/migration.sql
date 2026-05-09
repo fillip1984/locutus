@@ -15,6 +15,18 @@ CREATE TABLE `audioFile` (
 	CONSTRAINT `fk_audioFile_libraryItemId_libraryItem_id_fk` FOREIGN KEY (`libraryItemId`) REFERENCES `libraryItem`(`id`) ON DELETE CASCADE
 );
 --> statement-breakpoint
+CREATE TABLE `chapter` (
+	`id` text PRIMARY KEY,
+	`createdAt` integer,
+	`updatedAt` integer,
+	`remoteId` text NOT NULL UNIQUE,
+	`title` text NOT NULL,
+	`start` integer NOT NULL,
+	`end` integer NOT NULL,
+	`libraryItemId` text NOT NULL,
+	CONSTRAINT `fk_chapter_libraryItemId_libraryItem_id_fk` FOREIGN KEY (`libraryItemId`) REFERENCES `libraryItem`(`id`) ON DELETE CASCADE
+);
+--> statement-breakpoint
 CREATE TABLE `eBookFile` (
 	`id` text PRIMARY KEY,
 	`createdAt` integer,
@@ -27,6 +39,24 @@ CREATE TABLE `eBookFile` (
 	`path` text,
 	`libraryItemId` text NOT NULL,
 	CONSTRAINT `fk_eBookFile_libraryItemId_libraryItem_id_fk` FOREIGN KEY (`libraryItemId`) REFERENCES `libraryItem`(`id`) ON DELETE CASCADE
+);
+--> statement-breakpoint
+CREATE TABLE `genre` (
+	`id` text PRIMARY KEY,
+	`createdAt` integer,
+	`updatedAt` integer,
+	`remoteId` text NOT NULL UNIQUE,
+	`name` text NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE `libraryItemGenre` (
+	`id` text PRIMARY KEY,
+	`createdAt` integer,
+	`updatedAt` integer,
+	`libraryItemId` text NOT NULL,
+	`genreId` text NOT NULL,
+	CONSTRAINT `fk_libraryItemGenre_libraryItemId_libraryItem_id_fk` FOREIGN KEY (`libraryItemId`) REFERENCES `libraryItem`(`id`) ON DELETE CASCADE,
+	CONSTRAINT `fk_libraryItemGenre_genreId_genre_id_fk` FOREIGN KEY (`genreId`) REFERENCES `genre`(`id`) ON DELETE CASCADE
 );
 --> statement-breakpoint
 CREATE TABLE `libraryItem` (
@@ -61,6 +91,17 @@ CREATE TABLE `library` (
 	`name` text NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE `series` (
+	`id` text PRIMARY KEY,
+	`createdAt` integer,
+	`updatedAt` integer,
+	`remoteId` text NOT NULL UNIQUE,
+	`name` text NOT NULL,
+	`sequence` integer NOT NULL,
+	`libraryItemId` text NOT NULL,
+	CONSTRAINT `fk_series_libraryItemId_libraryItem_id_fk` FOREIGN KEY (`libraryItemId`) REFERENCES `libraryItem`(`id`) ON DELETE CASCADE
+);
+--> statement-breakpoint
 CREATE TABLE `userSettings` (
 	`id` text PRIMARY KEY,
 	`createdAt` integer,
@@ -70,3 +111,5 @@ CREATE TABLE `userSettings` (
 	`preferredPlaybackRate` integer DEFAULT 1 NOT NULL,
 	`lastServerSync` integer
 );
+--> statement-breakpoint
+CREATE UNIQUE INDEX `library_item_remote_id_library_id_idx` ON `libraryItem` (`remoteId`,`libraryId`);

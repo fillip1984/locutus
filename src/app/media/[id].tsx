@@ -473,7 +473,7 @@ const Chapter = ({
       asChild
     >
       <Pressable
-        className={`overflow-hidden rounded-lg ${audioFile.complete ? "border border-white opacity-50" : isLastPlayed ? "bg-sky-300" : "bg-slate-400/30"}`}
+        className={`overflow-hidden rounded-lg ${audioFile.complete ? "border border-white opacity-50" : isLastPlayed ? "bg-slate-600/80" : "bg-slate-400/30"}`}
       >
         <View className="flex flex-row justify-between gap-2 px-4 pt-3 pb-2">
           <Text className="w-4/5 font-bold text-white">{audioFile.name}</Text>

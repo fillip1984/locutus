@@ -1,10 +1,10 @@
 // This file is required for Expo/React Native SQLite migrations - https://orm.drizzle.team/quick-sqlite/expo
 
-import m0000 from './20260503165350_chilly_war_machine/migration.sql';
+import m0000 from './20260509135107_ambitious_big_bertha/migration.sql';
 
   export default {
     migrations: {
-      "20260503165350_chilly_war_machine": m0000
+      "20260509135107_ambitious_big_bertha": m0000
 }
   }
   

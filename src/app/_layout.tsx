@@ -281,7 +281,7 @@ const Login = () => {
             <View className="flex flex-row items-center gap-4">
               <Pressable
                 onPress={handleLogin}
-                className="flex flex-1 flex-row items-center justify-center gap-3 rounded bg-sky-300 px-4 py-2"
+                className="flex flex-1 flex-row items-center justify-center gap-3 rounded bg-slate-600 px-4 py-2"
               >
                 {loading && (
                   <View className="animate-spin">
@@ -293,7 +293,7 @@ const Login = () => {
 
               <Pressable
                 onPress={handleLoginWithBiometrics}
-                className={`rounded bg-sky-300 p-3 ${!canLogInWithBiometrics ? "opacity-50" : ""}`}
+                className={`rounded bg-slate-600 p-3 ${!canLogInWithBiometrics ? "opacity-50" : ""}`}
                 disabled={!canLogInWithBiometrics}
               >
                 <MaterialCommunityIcons
