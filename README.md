@@ -24,6 +24,8 @@ I'm currently working to rebuild the same functionality that was previously show
 
 ### Mid term
 
+- [ ] add m4b chapter functionality
+- [ ] add series functionality
 - [ ] add ebook reader
 - [ ] record gif of updated app
 - [ ] add a loading screen on login page if using biometrics to log in

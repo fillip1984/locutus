@@ -1,46 +1,30 @@
 import { Pressable, Text, View } from "react-native";
 import {
+  TrackItem,
   TrackPlayer,
-  useOnChangeTrack,
-  useOnPlaybackStateChange,
+  TrackPlayerState,
 } from "react-native-nitro-player";
 import { Image } from "expo-image";
 import { router } from "expo-router";
+import { NativeTabs } from "expo-router/unstable-native-tabs";
 
 import { Ionicons } from "@expo/vector-icons";
 
-export default function MiniPlayer() {
-  // TODO: not sure how to appropriately use placement... waiting for more documentation to be made available
-  // const placement = NativeTabs.BottomAccessory.usePlacement();
-  const { state: playbackState } = useOnPlaybackStateChange();
-  const { track: currentTrack } = useOnChangeTrack();
+import { colors } from "./ui/colors";
 
-  // if (placement === "inline") {
-  //   // Compact UI for inline placement
-  //   return (
-  //     <View>
-  //       {playbackState === "playing" ? (
-  //         <Ionicons
-  //           onPress={() => TrackPlayer.pause()}
-  //           name="pause"
-  //           size={40}
-  //           color="white"
-  //         />
-  //       ) : (
-  //         <Ionicons
-  //           onPress={() => TrackPlayer.play()}
-  //           name="play-sharp"
-  //           size={40}
-  //           color="white"
-  //         />
-  //       )}
-  //     </View>
-  //   );
-  // }
+export default function MiniPlayer({
+  currentTrack,
+  playbackState,
+}: {
+  currentTrack: TrackItem | null;
+  playbackState: TrackPlayerState;
+}) {
+  // TODO: not sure how to appropriately use placement... waiting for more documentation to be made available
+  const placement = NativeTabs.BottomAccessory.usePlacement();
 
   // Full UI for regular placement
   return (
-    <View className="flex-row gap-1">
+    <View className="flex-row gap-1 px-4 py-2">
       <Pressable
         onPress={() =>
           router.push({
@@ -53,41 +37,45 @@ export default function MiniPlayer() {
         }
         className="flex flex-row items-center gap-2"
       >
-        <View className="grow flex-row gap-1">
+        <View className="grow flex-row items-center gap-1">
           <Image
             source={
               currentTrack?.artwork ? { uri: currentTrack.artwork } : undefined
             }
-            style={{ width: 35, height: 35 }}
+            style={{
+              width: 35,
+              height: 35,
+              borderRadius: 8,
+              backgroundColor: colors.foreground,
+            }}
             contentFit="contain"
             transition={300}
           />
-          {/* {placement === "regular" && ( */}
-          <View className="w-66">
-            <Text className="line-clamp-1 text-nowrap text-white">
+          {/* TODO: check if there's a better way to size this */}
+          <View className={`${placement === "regular" ? "w-64" : "w-32"}`}>
+            <Text className="line-clamp-1 font-bold text-nowrap text-white">
               {currentTrack?.album}
             </Text>
-            <Text className="line-clamp-1 text-nowrap text-white">
+            <Text className="line-clamp-1 text-xs text-nowrap text-white/80">
               {currentTrack?.title}
             </Text>
           </View>
-          {/* )} */}
         </View>
       </Pressable>
-      <Pressable>
+      <Pressable className="shrink-0">
         <View>
           {playbackState === "playing" ? (
             <Ionicons
               onPress={() => TrackPlayer.pause()}
               name="pause"
-              size={40}
+              size={30}
               color="white"
             />
           ) : (
             <Ionicons
               onPress={() => TrackPlayer.play()}
               name="play-sharp"
-              size={40}
+              size={30}
               color="white"
             />
           )}

@@ -1,5 +1,9 @@
 import { useEffect } from "react";
-import { usePlaylist } from "react-native-nitro-player";
+import {
+  useOnChangeTrack,
+  useOnPlaybackStateChange,
+  usePlaylist,
+} from "react-native-nitro-player";
 import { router } from "expo-router";
 import { NativeTabs } from "expo-router/build/native-tabs";
 
@@ -8,6 +12,8 @@ import { useSessionStore } from "@/stores/session-store";
 
 export default function TabLayout() {
   const { isAuthenticated } = useSessionStore();
+  const { state: playbackState } = useOnPlaybackStateChange();
+  const { track: currentTrack } = useOnChangeTrack();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -37,7 +43,10 @@ export default function TabLayout() {
         </NativeTabs.Trigger>
         {currentPlaylist && currentPlaylist.tracks.length > 0 && (
           <NativeTabs.BottomAccessory>
-            <MiniPlayer />
+            <MiniPlayer
+              currentTrack={currentTrack}
+              playbackState={playbackState}
+            />
           </NativeTabs.BottomAccessory>
         )}
       </NativeTabs>
