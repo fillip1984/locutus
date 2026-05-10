@@ -53,11 +53,13 @@ export const recordProgress = async (
     .set({
       audiobookLocation: currentPosition + extraPayload.start,
       audiobookProgress:
-        Math.round(
+        (Math.round(
           ((currentPosition + extraPayload.start) /
             extraPayload.totalDuration) *
             1000,
-        ) / 1000,
+        ) /
+          1000) *
+        100,
       complete: false,
       updatedAt: new Date(),
     })
@@ -196,9 +198,12 @@ export const syncProgressWithServer = async () => {
       } else if (update.type === "audioBook") {
         db.update(libraryItemSchema)
           .set({
-
-            audiobookLocation: parseFloat(((update as AudioBookProgressUpdate).currentTime).toFixed(3)),
-            audiobookProgress: parseFloat(((update as AudioBookProgressUpdate).progress).toFixed(3)),
+            audiobookLocation: parseFloat(
+              (update as AudioBookProgressUpdate).currentTime.toFixed(3),
+            ),
+            audiobookProgress: parseFloat(
+              (update as AudioBookProgressUpdate).progress.toFixed(3),
+            ),
             complete: update.isFinished,
             updatedAt: new Date(update.updatedAt),
           })
