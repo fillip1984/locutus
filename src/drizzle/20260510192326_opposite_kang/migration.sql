@@ -13,17 +13,6 @@ CREATE TABLE `audioChapter` (
 	CONSTRAINT `fk_audioChapter_libraryItemId_libraryItem_id_fk` FOREIGN KEY (`libraryItemId`) REFERENCES `libraryItem`(`id`) ON DELETE CASCADE
 );
 --> statement-breakpoint
-CREATE TABLE `audioFile` (
-	`id` text PRIMARY KEY,
-	`createdAt` integer,
-	`updatedAt` integer,
-	`remoteId` text NOT NULL UNIQUE,
-	`mediaFormat` text NOT NULL,
-	`filePath` text NOT NULL,
-	`libraryItemId` text NOT NULL,
-	CONSTRAINT `fk_audioFile_libraryItemId_libraryItem_id_fk` FOREIGN KEY (`libraryItemId`) REFERENCES `libraryItem`(`id`) ON DELETE CASCADE
-);
---> statement-breakpoint
 CREATE TABLE `ebook` (
 	`id` text PRIMARY KEY,
 	`createdAt` integer,

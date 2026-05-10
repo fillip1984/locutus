@@ -103,16 +103,7 @@ export const audioChapterSchema = sqliteTable(
 );
 
 export type audioChapterSchemaType = typeof audioChapterSchema.$inferSelect;
-
-export const audioFileSchema = sqliteTable("audioFile", {
-  ...baseFields,
-  remoteId: text().notNull().unique(),
-  mediaFormat: text().notNull(),
-  filePath: text().notNull(),
-  libraryItemId: text()
-    .notNull()
-    .references(() => libraryItemSchema.id, { onDelete: "cascade" }),
-});
+export type newAudioChapterType = typeof audioChapterSchema.$inferInsert;
 
 export const seriesSchema = sqliteTable("series", {
   ...baseFields,

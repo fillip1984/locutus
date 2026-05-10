@@ -9,6 +9,7 @@ import {
   libraryItemSchemaType,
   librarySchema,
   librarySchemaType,
+  newAudioChapterType,
 } from "@/db/schema";
 import { downloadCoverArt } from "@/services/coverArtApi";
 import { getLibraries } from "@/services/libraryApi";
@@ -134,6 +135,9 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
             set: ebookValues,
           });
         }
+
+        // build then save chapters
+        const chapterList: newAudioChapterType[] = [];
         let chapterCounter = 0;
         for (const audioFile of remoteLibraryItem.media.audioFiles ?? []) {
           const chapters: Chapter[] =
@@ -143,8 +147,8 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
 
           for (const chapter of chapters) {
             try {
-              const audioChapterValues = {
-                index: chapter.id,
+              chapterList.push({
+                index: chapterList.length,
                 title: chapter.title,
                 start: Math.round(chapter.start * 1000) / 1000,
                 end: Math.round(chapter.end * 1000) / 1000,
@@ -153,18 +157,7 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
                 duration:
                   Math.round((chapter.end - chapter.start) * 1000) / 1000,
                 libraryItemId: localLibraryItemId,
-              };
-
-              await db
-                .insert(audioChapterSchema)
-                .values(audioChapterValues)
-                .onConflictDoUpdate({
-                  target: [
-                    audioChapterSchema.libraryItemId,
-                    audioChapterSchema.index,
-                  ],
-                  set: audioChapterValues,
-                });
+              });
             } catch (error) {
               console.error(
                 `Failed to sync chapter for library item ${remoteLibraryItem.media.metadata.title}`,
@@ -174,6 +167,24 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
           }
           chapterCounter++;
         }
+
+        chapterList.forEach((chapter, index) => {
+          chapter.index = index;
+        });
+
+        for (const chapter of chapterList) {
+          await db
+            .insert(audioChapterSchema)
+            .values(chapter)
+            .onConflictDoUpdate({
+              target: [
+                audioChapterSchema.index,
+                audioChapterSchema.libraryItemId,
+              ],
+              set: chapter,
+            });
+        }
+
         // update total duration
         if (remoteLibraryItem.media.chapters?.length > 0) {
           await db

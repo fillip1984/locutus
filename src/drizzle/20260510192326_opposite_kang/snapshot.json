@@ -1,17 +1,13 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "7d947bf8-79ef-4abb-8eef-45983576beda",
+  "id": "48a3c171-eb36-4825-8587-a0905c96ccf6",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
   "ddl": [
     {
       "name": "audioChapter",
-      "entityType": "tables"
-    },
-    {
-      "name": "audioFile",
       "entityType": "tables"
     },
     {
@@ -151,76 +147,6 @@
       "name": "libraryItemId",
       "entityType": "columns",
       "table": "audioChapter"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "id",
-      "entityType": "columns",
-      "table": "audioFile"
-    },
-    {
-      "type": "integer",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "createdAt",
-      "entityType": "columns",
-      "table": "audioFile"
-    },
-    {
-      "type": "integer",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "updatedAt",
-      "entityType": "columns",
-      "table": "audioFile"
-    },
-    {
-      "type": "text",
-      "notNull": true,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "remoteId",
-      "entityType": "columns",
-      "table": "audioFile"
-    },
-    {
-      "type": "text",
-      "notNull": true,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "mediaFormat",
-      "entityType": "columns",
-      "table": "audioFile"
-    },
-    {
-      "type": "text",
-      "notNull": true,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "filePath",
-      "entityType": "columns",
-      "table": "audioFile"
-    },
-    {
-      "type": "text",
-      "notNull": true,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "libraryItemId",
-      "entityType": "columns",
-      "table": "audioFile"
     },
     {
       "type": "text",
@@ -828,21 +754,6 @@
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "nameExplicit": false,
-      "name": "fk_audioFile_libraryItemId_libraryItem_id_fk",
-      "entityType": "fks",
-      "table": "audioFile"
-    },
-    {
-      "columns": [
-        "libraryItemId"
-      ],
-      "tableTo": "libraryItem",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "nameExplicit": false,
       "name": "fk_ebook_libraryItemId_libraryItem_id_fk",
       "entityType": "fks",
       "table": "ebook"
@@ -914,15 +825,6 @@
       "nameExplicit": false,
       "name": "audioChapter_pk",
       "table": "audioChapter",
-      "entityType": "pks"
-    },
-    {
-      "columns": [
-        "id"
-      ],
-      "nameExplicit": false,
-      "name": "audioFile_pk",
-      "table": "audioFile",
       "entityType": "pks"
     },
     {
@@ -1023,15 +925,6 @@
       "name": "library_item_remote_id_library_id_idx",
       "entityType": "indexes",
       "table": "libraryItem"
-    },
-    {
-      "columns": [
-        "remoteId"
-      ],
-      "nameExplicit": false,
-      "name": "audioFile_remoteId_unique",
-      "entityType": "uniques",
-      "table": "audioFile"
     },
     {
       "columns": [
