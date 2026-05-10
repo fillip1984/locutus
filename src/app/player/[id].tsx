@@ -10,9 +10,9 @@ import {
 } from "react-native-nitro-player";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 
-import { FontAwesome6, Ionicons } from "@expo/vector-icons";
+import { Feather, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 
 import { colors } from "@/components/ui/colors";
@@ -221,7 +221,7 @@ export default function Player() {
     >
       <SafeAreaView style={{ flex: 1 }}>
         <View className="flex gap-2 p-2">
-          <View className="mx-auto mb-2 h-1 w-10 rounded-full bg-white"></View>
+          <View className="mx-auto my-2 h-1 w-10 rounded-full bg-white"></View>
           <CoverArt coverArtPath={libraryItem?.coverArtPath ?? null} />
           <MediaInfo />
           <TrackProgress />
@@ -426,7 +426,21 @@ const MediaControls = () => {
           <Ionicons name="play-skip-forward" size={40} color="white" />
         </TouchableOpacity>
       </View>
-      <View className="flex w-full items-end justify-end p-4">
+      <View className="w-full flex-row items-center justify-between p-4">
+        <TouchableOpacity
+          onPress={() => {
+            router.dismiss();
+            router.push({
+              pathname: `/media/[id]`,
+              params: {
+                id: (currentTrack?.extraPayload as TrackPlayerExtraPayload)
+                  .libraryItemId,
+              },
+            });
+          }}
+        >
+          <Feather name="list" size={24} color="white" />
+        </TouchableOpacity>
         <TouchableOpacity onPress={handleSetRate} className="rounded-md p-2">
           <Text className="text-2xl font-bold text-white">
             {userSettings?.preferredPlaybackRate ?? 1}x

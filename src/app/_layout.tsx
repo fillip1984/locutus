@@ -105,9 +105,8 @@ const MainLayout = () => {
         <Stack.Screen
           name="media/[id]"
           options={{
-            headerTransparent: true,
-            title: "",
-            headerBackButtonDisplayMode: "minimal",
+            headerShown: false,
+            presentation: "modal",
           }}
         />
         <Stack.Screen

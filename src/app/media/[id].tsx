@@ -121,6 +121,7 @@ export default function MediaPage() {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
         <View className="flex-1 items-center justify-center">
+          <View className="mx-auto my-2 h-1 w-10 rounded-full bg-white"></View>
           <Text className="text-4xl font-bold text-white">Media not found</Text>
         </View>
       </SafeAreaView>
@@ -137,6 +138,7 @@ export default function MediaPage() {
       <SafeAreaView style={{ flex: 1 }}>
         <ScrollView ref={tracksScrollViewRef}>
           <View className="flex-1 gap-1">
+            <View className="mx-auto my-2 h-1 w-10 rounded-full bg-white"></View>
             <CoverArt coverArtPath={libraryItem.coverArtPath} />
             <View className="px-2">
               <Text className="text-2xl font-bold text-white">
@@ -188,29 +190,21 @@ const Controls = ({
   const [isDownloading, setIsDownloading] = useState(false);
   const [isDownloadable, setIsDownloadable] = useState(false);
 
-  const hasAudioChapters = useCallback(
-    () => libraryItem.audioChapters.length > 0,
-    [libraryItem.audioChapters],
-  );
-
-  const hasEBook = useCallback(
-    () => libraryItem.ebook !== null,
-    [libraryItem.ebook],
-  );
-
   useEffect(() => {
     if (!libraryItem) return;
     setIsResumable(
       libraryItem.id === currentTrack?.extraPayload?.libraryItemId &&
         currentState === "playing",
     );
-    setIsPlayable(!isResumable && hasAudioChapters() && libraryItem.downloaded);
-    setIsReadable(hasEBook() && libraryItem.downloaded);
+    setIsPlayable(
+      !isResumable && libraryItem.isAudiobook && libraryItem.downloaded,
+    );
+    setIsReadable(libraryItem.isEbook && libraryItem.downloaded);
     setIsDownloading(downloadStore.isDownloading(libraryItem.id ?? ""));
     setIsDownloadable(
       !downloadStore.isDownloading(libraryItem.id) &&
         !libraryItem.downloaded &&
-        (hasAudioChapters() || hasEBook()),
+        (libraryItem.isAudiobook || libraryItem.isEbook),
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
