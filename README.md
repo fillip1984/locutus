@@ -7,6 +7,7 @@ As I'm waiting on [react-native-track-player](https://rntp.dev) to be compatible
 ## UI
 
 Previous version
+
 ![Sample project gif](demo.gif)
 
 ## Current state
@@ -15,25 +16,31 @@ I'm currently working to rebuild the same functionality that was previously show
 
 ## TODO
 
+- [ ] should we default to opening player when selecting an item from continue?
+  - [ ] would need to also add a button on player to allow user to go back to the media page
 - [ ] add series functionality
 - [ ] add ebook reader
+- [ ] add genre and tags
 - [ ] record gif of updated app
 - [ ] add a loading screen on login page if using biometrics to log in
 
 ### Long term
 
+Need to wait a month or 2 to see if things I'm using that are beta or early development move to general availability - May 2026
+
 - [ ] Resolve remaining UI issues, they're marked in files with TODO tags
   - [ ] Create book card when cover is not available (example: The Private Life of Genghis Khan)
 - [ ] Once Drizzle ORM v1 is released, revisit todos for it
-- [ ] Once react-native-nitro-player becomes more stable, revisit todos for it
+- [ ] Once react-native-nitro-player becomes more stable (just launched v1 in April 2026), revisit todos for it
   - [ ] Once react-native-track-player v5 becomes more stable, revisit it to see if it fixes issues of react-native-nitro-player...
   - [?] Figure out how to get it to play in the background
     - [?] I have included expo-audio and set app.json expo-audio -> enableBackgroundPlayback to true, which shouldn't be necessary but seems to work
   - [?] add m4b chapter functionality
-    - [?] had to hack things together to get this to work and title updates and previous/next tracks may not work right
+    - [?] had to hack things together to get this to work and title updates and previous/next tracks may not work right (wasn't able to update title on the fly, previous and next functionality has to be custom since there's only 1 file with chapters)
   - [ ] swap from previous/next track to skip back 10s or forward 30s from lock and now playing screens
   - [ ] see if useOnPlaybackProgressChange() hook gets fixed for longer audio files, right now it is only triggering every 5 seconds on longer audio files
 - [ ] Once Expo NativeTabs are no longer beta, revisit todos for it
+  - [ ] marquee text doesn't work properly so we might have to rewrite it, find another library, or maybe it isn't working because bottom accessory is still unstable?
 - [ ] Once Expo UI is no longer beta, revisit todos for it
   - [ ] add Expo UI drop down menu on media page
     - [ ] option to redownload content
