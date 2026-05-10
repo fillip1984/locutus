@@ -15,15 +15,14 @@ import { Marquee } from "./ui/marquee-text";
 
 export default function MiniPlayer({
   currentTrack,
+  effectiveTitle,
   playbackState,
 }: {
   currentTrack: TrackItem | null;
+  effectiveTitle: string;
   playbackState: TrackPlayerState;
 }) {
-  // TODO: not sure how to appropriately use placement... waiting for more documentation to be made available
   const placement = NativeTabs.BottomAccessory.usePlacement();
-
-  // Full UI for regular placement
   return (
     <View className="grow flex-row items-center justify-between px-4 py-2">
       <Pressable
@@ -54,13 +53,13 @@ export default function MiniPlayer({
         />
         {/* TODO: check if there's a better way to size this */}
         <View
-          className={`-mt-4 grow ${placement === "regular" ? "max-w-4/5" : "max-w-2/3"}`}
+          className={`-mt-3 grow ${placement === "regular" ? "max-w-4/5" : "max-w-2/3"}`}
         >
           <Text className="line-clamp-1 font-bold text-nowrap text-white">
             {currentTrack?.album}
           </Text>
           <Marquee spacing={40} speed={0.6} delay={3000}>
-            <Text className="text-xs text-white/80">{currentTrack?.title}</Text>
+            <Text className="text-xs text-white/80">{effectiveTitle}</Text>
           </Marquee>
         </View>
       </Pressable>

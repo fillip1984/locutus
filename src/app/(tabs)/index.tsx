@@ -35,36 +35,24 @@ export default function RecentPage() {
 
   useEffect(() => {
     async function initView() {
-      // if (
-      //   libraryStore.status === "loaded" &&
-      //   (libraryStore.libraries === undefined ||
-      //     libraryStore.libraries?.length === 0)
-      // ) {
-      //   const result = await db.select().from(userSettingsSchema);
-      //   console.log("syncing libraries");
-      //   await libraryStore.syncWithServer();
-      //   if (result[0] && result[0].lastServerSync) {
-      //     const serverProgressUpdates = await getProgressFromServer(
-      //       result[0].lastServerSync,
-      //     );
-      //     for (const media of serverProgressUpdates) {
-      //       downloadStore.add(media.libraryItemId);
-      //     }
-      //     downloadStore.download();
-      //   }
-      // }
-
       setContinueItems(
         libraryStore.libraryItems
-          ?.filter((i) => !i.complete && (i.lastPlayedId || i.lastEBookId))
+          ?.filter(
+            (i) => !i.complete && (i.audiobookProgress || i.ebookProgress),
+          )
           ?.sort((a, b) => {
-            const aLastPlayed = a.lastPlayedId
-              ? (a.updatedAt?.getTime() ?? 0)
-              : 0;
-            const bLastPlayed = b.lastPlayedId
-              ? (b.updatedAt?.getTime() ?? 0)
-              : 0;
-            return bLastPlayed - aLastPlayed;
+            if (a.updatedAt && b.updatedAt) {
+              return (
+                new Date(b.updatedAt).getTime() -
+                new Date(a.updatedAt).getTime()
+              );
+            } else if (a.updatedAt && !b.updatedAt) {
+              return -1;
+            } else if (!a.updatedAt && b.updatedAt) {
+              return 1;
+            } else {
+              return 0;
+            }
           })
           .slice(0, 20) ?? [],
       );
@@ -89,7 +77,7 @@ export default function RecentPage() {
       );
       setAudiobookItems(
         libraryStore.libraryItems
-          ?.filter((i) => i.numAudioFiles > 0)
+          ?.filter((i) => i.isAudiobook)
           ?.sort((a, b) => {
             if (a.createdAt && b.createdAt) {
               return (
@@ -108,7 +96,7 @@ export default function RecentPage() {
       );
       setEbookItems(
         libraryStore.libraryItems
-          ?.filter((i) => i.ebookFileFormat)
+          ?.filter((i) => i.isEbook)
           ?.sort((a, b) => {
             if (a.createdAt && b.createdAt) {
               return (
@@ -148,7 +136,10 @@ export default function RecentPage() {
         libraryStore.libraryItems
           ?.filter(
             (i) =>
-              !i.complete && !i.downloaded && !i.lastPlayedId && !i.lastEBookId,
+              !i.complete &&
+              !i.downloaded &&
+              !i.audiobookProgress &&
+              !i.ebookProgress,
           )
           ?.sort((a, b) => {
             if (a.createdAt && b.createdAt) {

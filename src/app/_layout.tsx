@@ -26,19 +26,22 @@ import { useFileExplorerDevTools } from "file-explorer-expo-dev-plugin";
 import { colors } from "@/components/ui/colors";
 import { db } from "@/db";
 import {
-  markComplete,
   recordProgress,
   syncProgressWithServer,
 } from "@/services/progressService";
 import { useSessionStore } from "@/stores/session-store";
 
 export type TrackPlayerExtraPayload = {
+  playlistType: "file-per-chapter" | "file-for-all-chapters";
+  chapters?: {
+    index: number;
+    title: string;
+    start: number;
+    end: number;
+  }[];
   libraryItemId: string;
-  audioFileId: string;
-  previousTrack: {
-    audioFileId: string;
-    duration: number;
-  } | null;
+  start: number;
+  totalDuration: number;
 };
 
 export default function RootLayout() {
@@ -76,29 +79,14 @@ const MainLayout = () => {
   useEffect(() => {
     if (
       currentTrack &&
-      (currentTrack.extraPayload as TrackPlayerExtraPayload).previousTrack !==
-        null &&
-      Math.round(currentPosition) === 0
-    ) {
-      // TODO: couldn't get either useOnPlaybackStateChange.reason nor useOnChangeTrack.reason to tell me when the file ended
-      const previousTrack = (
-        currentTrack.extraPayload as TrackPlayerExtraPayload
-      ).previousTrack!;
-      // console.log("on playing a new track, mark previous track as complete");
-      markComplete({
-        track: previousTrack.audioFileId,
-        duration: previousTrack.duration,
-      });
-    } else if (
-      currentTrack &&
       Math.round(currentPosition) > 0 &&
       Math.round(currentPosition) % 15 === 0
     ) {
-      // console.log(
-      //   "every 15 seconds, record progress, current position:",
-      //   currentPosition,
-      //   currentTrack.title,
-      // );
+      console.log(
+        "every 15 seconds, record progress, current position:",
+        currentPosition.toFixed(3),
+        currentTrack.title,
+      );
       recordProgress(currentTrack, currentPosition);
     }
   }, [currentTrack, currentPosition]);

@@ -28,8 +28,7 @@ import CoverArt from "@/components/ui/cover-art";
 import { generateGradientFromImageUrl } from "@/components/ui/graident-colors";
 import { db } from "@/db";
 import {
-  audiobookSchemaType,
-  audioFileSchema,
+  audioChapterSchemaType,
   libraryItemSchema,
   libraryItemWithFilesSchemaType,
 } from "@/db/schema";
@@ -54,8 +53,8 @@ export default function MediaPage() {
             id,
           },
           with: {
-            audioFiles: true,
-            eBookFiles: true,
+            audioChapters: true,
+            ebook: true,
           },
         });
         if (result) {
@@ -155,9 +154,10 @@ export default function MediaPage() {
               >
                 {hideHtmlTags(libraryItem.description ?? "")}
               </Text>
-              {libraryItem.audioFiles && libraryItem.audioFiles.length > 0 && (
-                <MediaTracks libraryItem={libraryItem} />
-              )}
+              {libraryItem.audioChapters &&
+                libraryItem.audioChapters.length > 0 && (
+                  <MediaTracks libraryItem={libraryItem} />
+                )}
               <Series />
 
               {/* scroll to top */}
@@ -188,23 +188,15 @@ const Controls = ({
   const [isDownloading, setIsDownloading] = useState(false);
   const [isDownloadable, setIsDownloadable] = useState(false);
 
-  const hasAudioFiles = useCallback(
-    () => libraryItem.audioFiles.length > 0,
-    [libraryItem.audioFiles],
+  const hasAudioChapters = useCallback(
+    () => libraryItem.audioChapters.length > 0,
+    [libraryItem.audioChapters],
   );
 
-  const hasDownloadableAudioFiles = useCallback(() => {
-    return hasAudioFiles() && libraryItem.audioFiles.some((a) => !a.path);
-  }, [libraryItem.audioFiles, hasAudioFiles]);
-
-  const hasEBookFiles = useCallback(
-    () => libraryItem.eBookFiles.length > 0,
-    [libraryItem.eBookFiles],
+  const hasEBook = useCallback(
+    () => libraryItem.ebook !== null,
+    [libraryItem.ebook],
   );
-
-  const hasDownloadableEBookFiles = useCallback(() => {
-    return hasEBookFiles() && libraryItem.eBookFiles.some((a) => !a.path);
-  }, [libraryItem.eBookFiles, hasEBookFiles]);
 
   useEffect(() => {
     if (!libraryItem) return;
@@ -212,14 +204,13 @@ const Controls = ({
       libraryItem.id === currentTrack?.extraPayload?.libraryItemId &&
         currentState === "playing",
     );
-    setIsPlayable(
-      !isResumable && hasAudioFiles() && !hasDownloadableAudioFiles(),
-    );
-    setIsReadable(hasEBookFiles() && !hasDownloadableEBookFiles());
+    setIsPlayable(!isResumable && hasAudioChapters() && libraryItem.downloaded);
+    setIsReadable(hasEBook() && libraryItem.downloaded);
     setIsDownloading(downloadStore.isDownloading(libraryItem.id ?? ""));
     setIsDownloadable(
       !downloadStore.isDownloading(libraryItem.id) &&
-        (hasDownloadableAudioFiles() || hasDownloadableEBookFiles()),
+        !libraryItem.downloaded &&
+        (hasAudioChapters() || hasEBook()),
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -241,62 +232,29 @@ const Controls = ({
       .update(libraryItemSchema)
       .set({
         updatedAt: new Date(),
-        lastPlayedId: null,
+        audiobookLocation:
+          newReadStatus === "complete" ? libraryItem.audiobookDuration : 0,
+        audiobookProgress: newReadStatus === "complete" ? 100 : 0,
         complete: newReadStatus === "complete" ? true : false,
       })
       .where(eq(libraryItemSchema.id, libraryItem.id));
 
-    const audioFiles = await db.query.audioFileSchema.findMany({
-      where: {
-        libraryItemId: libraryItem.id,
-      },
-    });
-    for (const audioFile of audioFiles) {
-      await db
-        .update(audioFileSchema)
-        .set({
-          complete: newReadStatus === "complete" ? true : false,
-          progress: newReadStatus === "complete" ? audioFile.duration : 0,
-        })
-        .where(eq(audioFileSchema.id, audioFile.id));
-    }
+    // const audioFiles = await db.query.audioChapterSchema.findMany({
+    //   where: {
+    //     libraryItemId: libraryItem.id,
+    //   },
+    // });
+    // for (const audioFile of audioFiles) {
+    //   await db
+    //     .update(audioChapterSchema)
+    //     .set({
+    //       complete: newReadStatus === "complete" ? true : false,
+    //       progress: newReadStatus === "complete" ? audioFile.duration : 0,
+    //     })
+    //     .where(eq(audioChapterSchema.id, audioFile.id));
+    // }
     setReadStatus(newReadStatus);
   };
-
-  const [totalDuration, setTotalDuration] = useState(0);
-  useEffect(() => {
-    if (!libraryItem) return;
-    const duration = libraryItem.audioFiles.reduce((acc, audioFile) => {
-      return acc + audioFile.duration;
-    }, 0);
-    setTotalDuration(duration);
-  }, [libraryItem]);
-
-  const [remainingDuration, setRemainingDuration] = useState(0);
-  useEffect(() => {
-    if (!libraryItem) return;
-    const remaining = libraryItem.audioFiles
-      .filter((audioFile) => !audioFile.complete)
-      .reduce((acc, audioFile) => {
-        if (libraryItem.lastPlayedId === audioFile.id) {
-          return acc + (audioFile.duration - (audioFile.progress ?? 0));
-        } else {
-          return acc + audioFile.duration;
-        }
-      }, 0);
-    setRemainingDuration(remaining);
-  }, [libraryItem]);
-
-  const [percentageRemaining, setPercentageRemaining] = useState(0);
-  useEffect(() => {
-    if (!libraryItem) return;
-
-    const percentage =
-      totalDuration && remainingDuration
-        ? (remainingDuration / totalDuration) * 100
-        : 0;
-    setPercentageRemaining(Math.round(percentage));
-  }, [remainingDuration, totalDuration, libraryItem]);
 
   return (
     <View className="my-4 flex-row items-center gap-4">
@@ -320,7 +278,7 @@ const Controls = ({
                 pathname: `/player/[id]`,
                 params: {
                   id: libraryItem.id,
-                  audioFileId: libraryItem.lastPlayedId,
+                  audiobookLocation: libraryItem.audiobookLocation,
                   mode: isResumable ? "resume" : "play",
                 },
               })
@@ -343,8 +301,7 @@ const Controls = ({
                     style={{ opacity: 0.5 }}
                   />
                   <Text className="text-sm text-black/50">
-                    {remainingDuration > 0 &&
-                      `${formatSecondsToTime(remainingDuration, "duration")} | ${percentageRemaining}% remaining`}
+                    {`${formatSecondsToTime((libraryItem.audiobookDuration ?? 0) - (libraryItem.audiobookLocation ?? 0), "duration")} | ${Math.trunc(100 - (libraryItem.audiobookProgress ?? 0))}% remaining`}
                   </Text>
                 </View>
               </>
@@ -395,7 +352,7 @@ const Controls = ({
               pathname: `/reader/[id]`,
               params: {
                 id: libraryItem.id,
-                eBookFileId: libraryItem.lastEBookId,
+                eBookFileId: libraryItem.ebook?.remoteId,
                 mode: "read",
               },
             })
@@ -428,17 +385,23 @@ const MediaTracks = ({
       <View className="flex flex-row justify-between">
         <Text className="text-white uppercase">Chapters</Text>
         <Text className="text-stone-300">
-          {libraryItem.audioFiles?.filter((a) => !a.complete).length}/
-          {libraryItem.audioFiles?.length} remaining
+          {
+            libraryItem.audioChapters?.filter((a) =>
+              libraryItem.audiobookLocation
+                ? a.end > libraryItem.audiobookLocation
+                : true,
+            ).length
+          }
+          /{libraryItem.audioChapters?.length} remaining
         </Text>
       </View>
 
       <View className="my-2 flex gap-2">
-        {libraryItem.audioFiles?.map((audioFile, i) => (
+        {libraryItem.audioChapters?.map((audioChapter, i) => (
           <Chapter
-            key={audioFile.id}
-            audioFile={audioFile}
-            isLastPlayed={libraryItem.lastPlayedId === audioFile.id}
+            key={audioChapter.id}
+            libraryItem={libraryItem}
+            audioChapter={audioChapter}
           />
         ))}
       </View>
@@ -447,44 +410,47 @@ const MediaTracks = ({
 };
 
 const Chapter = ({
-  audioFile,
-  isLastPlayed,
+  audioChapter,
+  libraryItem,
 }: {
-  audioFile: audiobookSchemaType;
-  isLastPlayed: boolean;
+  audioChapter: audioChapterSchemaType;
+  libraryItem: libraryItemWithFilesSchemaType;
 }) => {
-  // console.log(
-  //   "Rendering chapter",
-  //   audioFile.name,
-  //   "isLastPlayed:",
-  //   isLastPlayed,
-  // );
+  const isLastPlayed = libraryItem.audiobookLocation
+    ? audioChapter.end > libraryItem.audiobookLocation &&
+      audioChapter.start < libraryItem.audiobookLocation
+    : false;
+  const complete = libraryItem.audiobookLocation
+    ? audioChapter.end < libraryItem.audiobookLocation
+    : false;
+
   return (
     <Link
-      disabled={!audioFile.path}
+      disabled={!libraryItem.downloaded}
       href={{
         pathname: "/player/[id]",
         params: {
-          id: audioFile.libraryItemId,
-          audioFileId: audioFile.id,
+          id: audioChapter.libraryItemId,
+          audiobookLocation: audioChapter.start,
           mode: isLastPlayed ? "resume" : "play",
         },
       }}
       asChild
     >
       <Pressable
-        className={`overflow-hidden rounded-lg ${audioFile.complete ? "border border-white opacity-50" : isLastPlayed ? "bg-slate-600/80" : "bg-slate-400/30"}`}
+        className={`overflow-hidden rounded-lg ${complete ? "border border-white opacity-50" : isLastPlayed ? "bg-slate-600" : "bg-slate-600/50"}`}
       >
         <View className="flex flex-row justify-between gap-2 px-4 pt-3 pb-2">
-          <Text className="w-4/5 font-bold text-white">{audioFile.name}</Text>
+          <Text className="w-4/5 font-bold text-white">
+            {audioChapter.title}
+          </Text>
 
-          {audioFile.path && audioFile.complete && (
+          {complete && (
             <View>
               <FontAwesome6 name="circle-check" size={24} color="white" />
             </View>
           )}
-          {/* TODO: replace play symbol with either a pause or a sound sampler logo */}
-          {audioFile.path && !audioFile.complete && (
+          {!complete && (
             <View>
               <FontAwesome6 name="circle-play" size={24} color="white" />
             </View>
@@ -493,7 +459,7 @@ const Chapter = ({
         <View
           className="h-1 rounded-l-full rounded-r-full bg-yellow-300"
           style={{
-            width: `${calculateDurationPercentage(audioFile.progress ?? 1, audioFile.duration)}%`,
+            width: `${calculateDurationPercentage((libraryItem.audiobookLocation ?? 0) - audioChapter.start <= 0 ? 0 : (libraryItem.audiobookLocation ?? 0) - audioChapter.start, audioChapter.duration)}%`,
           }}
         />
       </Pressable>

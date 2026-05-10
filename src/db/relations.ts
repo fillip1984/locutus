@@ -14,17 +14,13 @@ export const relations = defineRelations(schema, (r) => ({
       from: r.libraryItemSchema.libraryId,
       to: r.librarySchema.id,
     }),
-    chapters: r.many.chapterSchema({
+    audioChapters: r.many.audioChapterSchema({
       from: r.libraryItemSchema.id,
-      to: r.chapterSchema.libraryItemId,
+      to: r.audioChapterSchema.libraryItemId,
     }),
-    audioFiles: r.many.audioFileSchema({
+    ebook: r.one.ebookSchema({
       from: r.libraryItemSchema.id,
-      to: r.audioFileSchema.libraryItemId,
-    }),
-    eBookFiles: r.many.eBookFileSchema({
-      from: r.libraryItemSchema.id,
-      to: r.eBookFileSchema.libraryItemId,
+      to: r.ebookSchema.libraryItemId,
     }),
     series: r.one.seriesSchema({
       from: r.libraryItemSchema.id,
@@ -33,18 +29,6 @@ export const relations = defineRelations(schema, (r) => ({
     genres: r.many.libraryItemGenreSchema({
       from: r.libraryItemSchema.id,
       to: r.libraryItemGenreSchema.libraryItemId,
-    }),
-  },
-  audioFile: {
-    libraryItem: r.one.libraryItemSchema({
-      from: r.audioFileSchema.libraryItemId,
-      to: r.libraryItemSchema.id,
-    }),
-  },
-  eBookFile: {
-    libraryItem: r.one.libraryItemSchema({
-      from: r.eBookFileSchema.libraryItemId,
-      to: r.libraryItemSchema.id,
     }),
   },
 }));

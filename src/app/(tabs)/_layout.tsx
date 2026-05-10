@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   useOnChangeTrack,
+  useOnPlaybackProgressChange,
   useOnPlaybackStateChange,
   usePlaylist,
 } from "react-native-nitro-player";
@@ -9,11 +10,13 @@ import { NativeTabs } from "expo-router/build/native-tabs";
 
 import MiniPlayer from "@/components/mini-player";
 import { useSessionStore } from "@/stores/session-store";
+import { TrackPlayerExtraPayload } from "../_layout";
 
 export default function TabLayout() {
   const { isAuthenticated } = useSessionStore();
   const { state: playbackState } = useOnPlaybackStateChange();
   const { track: currentTrack } = useOnChangeTrack();
+  const { position: playbackPosition } = useOnPlaybackProgressChange();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -22,6 +25,29 @@ export default function TabLayout() {
   }, [isAuthenticated]);
 
   const { currentPlaylist } = usePlaylist();
+
+  // TODO: couldn't figure out how to update the title so having to resolve it myself
+  const [effectiveTitle, setEffectiveTitle] = useState("Loading...");
+  useEffect(() => {
+    if (!currentTrack?.extraPayload) {
+      return;
+    }
+    const chapters = (currentTrack?.extraPayload as TrackPlayerExtraPayload)
+      .chapters;
+    if (!chapters) {
+      setEffectiveTitle(currentTrack?.title ?? "Unknown Title");
+      return;
+    }
+    const currentChapterIndex = chapters.findIndex(
+      (chapter) =>
+        chapter.start <= playbackPosition && chapter.end > playbackPosition,
+    );
+    if (currentChapterIndex === -1) {
+      console.error("Current chapter not found");
+      return;
+    }
+    setEffectiveTitle(chapters[currentChapterIndex].title);
+  }, [currentTrack?.title, playbackPosition]);
 
   return (
     <>
@@ -45,6 +71,7 @@ export default function TabLayout() {
           <NativeTabs.BottomAccessory>
             <MiniPlayer
               currentTrack={currentTrack}
+              effectiveTitle={effectiveTitle}
               playbackState={playbackState}
             />
           </NativeTabs.BottomAccessory>

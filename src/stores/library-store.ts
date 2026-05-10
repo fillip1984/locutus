@@ -3,8 +3,8 @@ import { create } from "zustand";
 
 import { db } from "@/db";
 import {
-  audioFileSchema,
-  eBookFileSchema,
+  audioChapterSchema,
+  ebookSchema,
   libraryItemSchema,
   libraryItemSchemaType,
   librarySchema,
@@ -12,7 +12,7 @@ import {
 } from "@/db/schema";
 import { downloadCoverArt } from "@/services/coverArtApi";
 import { getLibraries } from "@/services/libraryApi";
-import { getLibraryItem, Root } from "@/services/libraryItemApi";
+import { Chapter, getLibraryItem } from "@/services/libraryItemApi";
 import { getLibraryItems } from "@/services/libraryItemsApi";
 
 export interface LibraryStore {
@@ -81,48 +81,36 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
       // sync library items
       const remoteItems = (await getLibraryItems(remoteLibrary.id)) ?? [];
       for (const remoteItem of remoteItems) {
-        console.log(
-          `syncing library item with id: ${remoteItem.id} and title: ${remoteItem.media.metadata.title}`,
-        );
         // download cover art
         const coverArtPath = await downloadCoverArt(remoteItem.id);
+        const libraryItemValues = {
+          remoteId: remoteItem.id,
+          title: remoteItem.media.metadata.title,
+          subtitle: remoteItem.media.metadata.subtitle,
+          authorName: remoteItem.media.metadata.authorName,
+          authorNameLF: remoteItem.media.metadata.authorNameLF,
+          publishedYear: remoteItem.media.metadata.publishedYear
+            ? parseInt(remoteItem.media.metadata.publishedYear)
+            : null,
+          description: remoteItem.media.metadata.description,
+          isbn: remoteItem.media.metadata.isbn,
+          asin: remoteItem.media.metadata.asin,
+          coverArtPath,
+          isAudiobook: remoteItem.media.numAudioFiles > 0,
+          // TODO: check that this works!!!
+          isEbook: !!remoteItem.media.ebookFormat,
+          libraryId: remoteLibrary.id,
+        };
 
         const libraryItem = await db
           .insert(libraryItemSchema)
-          .values({
-            id: remoteItem.id,
-            title: remoteItem.media.metadata.title,
-            authorName: remoteItem.media.metadata.authorName,
-            authorNameLF: remoteItem.media.metadata.authorNameLF,
-            duration: remoteItem.media.duration,
-            numAudioFiles: remoteItem.media.numAudioFiles,
-            ebookFileFormat: remoteItem.media.ebookFormat,
-            description: remoteItem.media.metadata.description,
-            publishedYear: remoteItem.media.metadata.publishedYear
-              ? parseInt(remoteItem.media.metadata.publishedYear, 10)
-              : null,
-            coverArtPath,
-            libraryId: remoteLibrary.id,
-            remoteId: remoteItem.id,
-          })
+          .values(libraryItemValues)
           .onConflictDoUpdate({
             target: [libraryItemSchema.remoteId, libraryItemSchema.libraryId],
-            set: {
-              title: remoteItem.media.metadata.title,
-              authorName: remoteItem.media.metadata.authorName,
-              authorNameLF: remoteItem.media.metadata.authorNameLF,
-              duration: remoteItem.media.duration,
-              numAudioFiles: remoteItem.media.numAudioFiles,
-              ebookFileFormat: remoteItem.media.ebookFormat,
-              description: remoteItem.media.metadata.description,
-              publishedYear: remoteItem.media.metadata.publishedYear
-                ? parseInt(remoteItem.media.metadata.publishedYear, 10)
-                : null,
-              coverArtPath,
-            },
+            set: libraryItemValues,
           })
           .returning({ id: libraryItemSchema.id });
-        const libraryItemId = libraryItem[0].id;
+        const localLibraryItemId = libraryItem[0].id;
 
         const remoteLibraryItem = await getLibraryItem(remoteItem.id);
         if (!remoteLibraryItem) {
@@ -132,59 +120,73 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
           continue;
         }
 
-        // ebooks/audio files
+        // ebook/audio synchronization
         if (remoteLibraryItem?.media.ebookFile) {
           const ebook = remoteLibraryItem.media.ebookFile;
-          console.log(
-            `syncing ebook file with id: ${ebook.ino} and name: ${ebook.metadata.filename} for library item with id: ${remoteLibraryItem.id}`,
-          );
-          await db
-            .insert(eBookFileSchema)
-            .values({
-              // TODO: this limits us to only 1 ebook at a time
-              id: remoteLibraryItem.id,
-              remoteId: ebook.ino,
-              name: ebook.metadata.filename,
-              libraryItemId: libraryItemId,
-            })
-            .onConflictDoUpdate({
-              target: eBookFileSchema.remoteId,
-              set: {
-                name: ebook.metadata.filename,
-              },
-            });
+          const ebookValues = {
+            remoteId: ebook.ino,
+            name: ebook.metadata.filename,
+            ebookFormat: ebook.metadata.ext,
+            libraryItemId: localLibraryItemId,
+          };
+          await db.insert(ebookSchema).values(ebookValues).onConflictDoUpdate({
+            target: ebookSchema.remoteId,
+            set: ebookValues,
+          });
         }
-        for (const audioFile of remoteLibraryItem?.media.audioFiles ?? []) {
-          console.log(
-            `syncing audio file with id: ${audioFile.ino} and name: ${audioFile.metadata.filename} for library item with id: ${remoteLibraryItem.id}`,
-          );
-          const [start, end] = calculateChapter(
-            remoteLibraryItem,
-            audioFile.index,
-          );
+        let chapterCounter = 0;
+        for (const audioFile of remoteLibraryItem.media.audioFiles ?? []) {
+          const chapters: Chapter[] =
+            audioFile.chapters.length > 0
+              ? audioFile.chapters
+              : [remoteLibraryItem.media.chapters[chapterCounter]];
 
+          for (const chapter of chapters) {
+            try {
+              const audioChapterValues = {
+                index: chapter.id,
+                title: chapter.title,
+                start: Math.round(chapter.start * 1000) / 1000,
+                end: Math.round(chapter.end * 1000) / 1000,
+                mediaRemoteId: audioFile.ino,
+                mediaFormat: audioFile.metadata.ext,
+                duration:
+                  Math.round((chapter.end - chapter.start) * 1000) / 1000,
+                libraryItemId: localLibraryItemId,
+              };
+
+              await db
+                .insert(audioChapterSchema)
+                .values(audioChapterValues)
+                .onConflictDoUpdate({
+                  target: [
+                    audioChapterSchema.libraryItemId,
+                    audioChapterSchema.index,
+                  ],
+                  set: audioChapterValues,
+                });
+            } catch (error) {
+              console.error(
+                `Failed to sync chapter for library item ${remoteLibraryItem.media.metadata.title}`,
+                error,
+              );
+            }
+          }
+          chapterCounter++;
+        }
+        // update total duration
+        if (remoteLibraryItem.media.chapters?.length > 0) {
           await db
-            .insert(audioFileSchema)
-            .values({
-              id: audioFile.ino,
-              remoteId: audioFile.ino,
-              index: audioFile.index,
-              name: audioFile.metadata.filename,
-              duration: audioFile.duration,
-              start,
-              end,
-              libraryItemId: libraryItemId,
+            .update(libraryItemSchema)
+            .set({
+              audiobookDuration:
+                Math.round(
+                  remoteLibraryItem.media.chapters[
+                    remoteLibraryItem.media.chapters.length - 1
+                  ].end * 1000,
+                ) / 1000,
             })
-            .onConflictDoUpdate({
-              target: audioFileSchema.remoteId,
-              set: {
-                index: audioFile.index,
-                name: audioFile.metadata.filename,
-                duration: audioFile.duration,
-                start,
-                end,
-              },
-            });
+            .where(eq(libraryItemSchema.id, localLibraryItemId));
         }
       }
     }
@@ -206,30 +208,3 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
     get().refetch();
   },
 }));
-
-const calculateChapter = (libraryItem: Root, index: number) => {
-  try {
-    if (
-      !libraryItem.media.chapters ||
-      libraryItem.media.chapters.length === 0
-    ) {
-      console.warn("No chapters found for library item:", {
-        title: libraryItem.media.metadata.title,
-        id: libraryItem.id,
-        chapters: libraryItem.media.chapters,
-      });
-      return [0, 0];
-    }
-    const start = libraryItem.media.chapters[index - 1].start;
-    const end = libraryItem.media.chapters[index - 1].end;
-    return [start, end];
-  } catch (error) {
-    console.error("Error calculating chapter:", error, {
-      title: libraryItem.media.metadata.title,
-      id: libraryItem.id,
-      chapters: libraryItem.media.chapters,
-      index,
-    });
-    return [0, 0];
-  }
-};

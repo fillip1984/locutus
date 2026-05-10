@@ -2,11 +2,7 @@ import { eq } from "drizzle-orm";
 import { create } from "zustand";
 
 import { db } from "@/db";
-import {
-  audioFileSchema,
-  eBookFileSchema,
-  libraryItemSchema,
-} from "@/db/schema";
+import { audioChapterSchemaType, libraryItemSchema } from "@/db/schema";
 import { downloadLibraryItem } from "@/services/libraryItemApi";
 import { syncProgressWithServer } from "@/services/progressService";
 import { useLibraryStore } from "./library-store";
@@ -37,8 +33,8 @@ export const useDownloadStore = create<DownloadStore>()((set, get) => ({
             id: libraryItemId,
           },
           with: {
-            audioFiles: true,
-            eBookFiles: true,
+            audioChapters: true,
+            ebook: true,
           },
         });
 
@@ -47,56 +43,39 @@ export const useDownloadStore = create<DownloadStore>()((set, get) => ({
             `Unable to download audio files for library item id: ${libraryItemId}`,
           );
         }
-        if (libraryItem.eBookFiles.length > 0) {
-          const ebookFile = await downloadLibraryItem(
+        if (libraryItem.ebook) {
+          await downloadLibraryItem(
             libraryItem.remoteId,
-            libraryItem.eBookFiles[0].remoteId,
-            libraryItem.eBookFiles[0].name,
+            libraryItem.ebook.remoteId,
+            libraryItem.ebook.ebookFormat,
           );
-
-          await db
-            .update(eBookFileSchema)
-            .set({ path: ebookFile })
-            .where(
-              eq(eBookFileSchema.remoteId, libraryItem.eBookFiles[0].remoteId),
-            );
         }
-        // const audioFilesToDownload = await db.query.audioFileSchema.findMany({
-        //   where: {
-        //     id: libraryItem.id,
-        //   },
-        // });
-        // console.log({ files: libraryItem.audioFiles });
-        for (const audioFile of libraryItem.audioFiles) {
+
+        // for (const audioChapter of libraryItem.audioChapters) {
+        for (const audioChapter of libraryItem.audioChapters.reduce(
+          (acc: audioChapterSchemaType[], chapter) => {
+            const duplicateDownloadDueToM4b = acc.findIndex(
+              (c) => c.mediaRemoteId === chapter.mediaRemoteId,
+            );
+            if (duplicateDownloadDueToM4b === -1) {
+              acc.push(chapter);
+            }
+            return acc;
+          },
+          [],
+        )) {
           // console.log(`downloading audioFile: ${audioFile.name}`);
-          const file = await downloadLibraryItem(
+          await downloadLibraryItem(
             libraryItem.remoteId,
-            audioFile.remoteId,
-            audioFile.name,
+            audioChapter.mediaRemoteId,
+            audioChapter.mediaFormat,
           );
-          await db
-            .update(audioFileSchema)
-            .set({ path: file })
-            .where(eq(audioFileSchema.remoteId, audioFile.remoteId));
-          // console.log(
-          //   `downloaded audioFile: ${audioFile.name} to path: ${file}`,
-          // );
         }
         await db
           .update(libraryItemSchema)
           .set({ downloaded: true })
           .where(eq(libraryItemSchema.id, libraryItemId));
-        // //reload if we're still on the same page
-        // if (useMediaStore.getState().libraryItem?.id === libraryItem.id) {
-        //   useMediaStore.getState().refetch(libraryItemId);
-        // }
         useLibraryStore.getState().refetch();
-        // console.log(`downloaded libraryItemId: ${libraryItemId}`);
-        // Toast.show({
-        //   type: "success",
-        //   text1: `Downloaded audio files for ${libraryItem.title}`,
-        //   position: "bottom",
-        // });
         return true;
       } catch (err) {
         console.error(

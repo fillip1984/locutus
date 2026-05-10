@@ -1,4 +1,3 @@
-// import { Feather } from "@expo/vector-icons";
 import React from "react";
 import { Text, View } from "react-native";
 import { Image } from "expo-image";
@@ -30,12 +29,6 @@ export default function BookLink({ item }: { item: libraryItemSchemaType }) {
             <Text className="mr-auto text-white">
               {item.publishedYear ?? "Unknown"}
             </Text>
-            {/* {item.numAudioFiles > 0 && (
-              <Feather name="volume-2" size={20} color="white" />
-            )}
-            {item.ebookFileFormat && (
-              <Feather name="book" size={20} color="white" />
-            )} */}
           </View>
         </View>
       </View>

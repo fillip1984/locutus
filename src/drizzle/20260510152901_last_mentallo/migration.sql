@@ -1,44 +1,37 @@
+CREATE TABLE `audioChapter` (
+	`id` text PRIMARY KEY,
+	`createdAt` integer,
+	`updatedAt` integer,
+	`index` integer NOT NULL,
+	`title` text NOT NULL,
+	`start` integer NOT NULL,
+	`end` integer NOT NULL,
+	`mediaRemoteId` text NOT NULL,
+	`mediaFormat` text NOT NULL,
+	`duration` integer NOT NULL,
+	`libraryItemId` text NOT NULL,
+	CONSTRAINT `fk_audioChapter_libraryItemId_libraryItem_id_fk` FOREIGN KEY (`libraryItemId`) REFERENCES `libraryItem`(`id`) ON DELETE CASCADE
+);
+--> statement-breakpoint
 CREATE TABLE `audioFile` (
 	`id` text PRIMARY KEY,
 	`createdAt` integer,
 	`updatedAt` integer,
 	`remoteId` text NOT NULL UNIQUE,
-	`index` integer NOT NULL,
-	`duration` integer NOT NULL,
-	`start` integer NOT NULL,
-	`end` integer NOT NULL,
-	`progress` integer,
-	`complete` integer DEFAULT false,
-	`name` text NOT NULL,
-	`path` text,
+	`mediaFormat` text NOT NULL,
+	`filePath` text NOT NULL,
 	`libraryItemId` text NOT NULL,
 	CONSTRAINT `fk_audioFile_libraryItemId_libraryItem_id_fk` FOREIGN KEY (`libraryItemId`) REFERENCES `libraryItem`(`id`) ON DELETE CASCADE
 );
 --> statement-breakpoint
-CREATE TABLE `chapter` (
+CREATE TABLE `ebook` (
 	`id` text PRIMARY KEY,
 	`createdAt` integer,
 	`updatedAt` integer,
 	`remoteId` text NOT NULL UNIQUE,
-	`title` text NOT NULL,
-	`start` integer NOT NULL,
-	`end` integer NOT NULL,
+	`ebookFormat` text NOT NULL,
 	`libraryItemId` text NOT NULL,
-	CONSTRAINT `fk_chapter_libraryItemId_libraryItem_id_fk` FOREIGN KEY (`libraryItemId`) REFERENCES `libraryItem`(`id`) ON DELETE CASCADE
-);
---> statement-breakpoint
-CREATE TABLE `eBookFile` (
-	`id` text PRIMARY KEY,
-	`createdAt` integer,
-	`updatedAt` integer,
-	`remoteId` text NOT NULL UNIQUE,
-	`currentLocation` text,
-	`progress` integer,
-	`complete` integer DEFAULT false,
-	`name` text NOT NULL,
-	`path` text,
-	`libraryItemId` text NOT NULL,
-	CONSTRAINT `fk_eBookFile_libraryItemId_libraryItem_id_fk` FOREIGN KEY (`libraryItemId`) REFERENCES `libraryItem`(`id`) ON DELETE CASCADE
+	CONSTRAINT `fk_ebook_libraryItemId_libraryItem_id_fk` FOREIGN KEY (`libraryItemId`) REFERENCES `libraryItem`(`id`) ON DELETE CASCADE
 );
 --> statement-breakpoint
 CREATE TABLE `genre` (
@@ -65,20 +58,23 @@ CREATE TABLE `libraryItem` (
 	`updatedAt` integer,
 	`remoteId` text NOT NULL,
 	`title` text NOT NULL,
+	`subtitle` text,
 	`authorName` text NOT NULL,
 	`authorNameLF` text,
-	`numAudioFiles` integer NOT NULL,
-	`ebookFileFormat` text,
-	`duration` integer NOT NULL,
 	`publishedYear` integer,
 	`description` text,
 	`isbn` text,
 	`asin` text,
 	`coverArtPath` text,
-	`lastPlayedId` text,
-	`lastEBookId` text,
-	`downloaded` integer DEFAULT false,
-	`complete` integer DEFAULT false,
+	`audiobookLocation` integer,
+	`audiobookDuration` integer,
+	`audiobookProgress` integer,
+	`ebookLocation` text,
+	`ebookProgress` integer,
+	`isAudiobook` integer DEFAULT false NOT NULL,
+	`isEbook` integer DEFAULT false NOT NULL,
+	`downloaded` integer DEFAULT false NOT NULL,
+	`complete` integer DEFAULT false NOT NULL,
 	`libraryId` text NOT NULL,
 	CONSTRAINT `fk_libraryItem_libraryId_library_id_fk` FOREIGN KEY (`libraryId`) REFERENCES `library`(`id`) ON DELETE CASCADE
 );
@@ -112,4 +108,5 @@ CREATE TABLE `userSettings` (
 	`lastServerSync` integer
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `audio_chapter_index_library_item_id_idx` ON `audioChapter` (`index`,`libraryItemId`);--> statement-breakpoint
 CREATE UNIQUE INDEX `library_item_remote_id_library_id_idx` ON `libraryItem` (`remoteId`,`libraryId`);

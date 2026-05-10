@@ -30,8 +30,11 @@ export const dropDB = async () => {
     await db.delete(schema.librarySchema);
     // TODO: cascades don't seem to be triggering
     await db.delete(schema.libraryItemSchema);
-    await db.delete(schema.audioFileSchema);
-    await db.delete(schema.eBookFileSchema);
+    await db.delete(schema.audioChapterSchema);
+    await db.delete(schema.ebookSchema);
+    await db.delete(schema.seriesSchema);
+    await db.delete(schema.libraryItemGenreSchema);
+    await db.delete(schema.genreSchema);
 
     await db.delete(schema.userSettingsSchema);
     // console.log("dropped database");

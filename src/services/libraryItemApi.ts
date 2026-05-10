@@ -25,7 +25,7 @@ export const getLibraryItem = async (libraryItemId: string) => {
 export const downloadLibraryItem = async (
   libraryItemRemoteId: string,
   fileId: string,
-  filename: string,
+  fileExtension: string,
 ) => {
   try {
     // console.log(`downloading libraryItem remoteId: ${libraryItemRemoteId}`);
@@ -37,7 +37,7 @@ export const downloadLibraryItem = async (
     }
 
     // delete previous version of the file
-    const destination = new File(dirInfo, filename);
+    const destination = new File(dirInfo, `${fileId}${fileExtension}`);
     if (destination.exists) {
       destination.delete();
     }
@@ -54,7 +54,7 @@ export const downloadLibraryItem = async (
     return relativePathUri(result);
   } catch (err) {
     console.error(
-      `Exception occurred while downloading library item remote id: ${libraryItemRemoteId}, fileId: ${fileId}, filename: ${filename}`,
+      `Exception occurred while downloading library item remote id: ${libraryItemRemoteId}, fileId: ${fileId}, fileExtension: ${fileExtension}`,
       err,
     );
     throw err;
@@ -141,7 +141,7 @@ export interface AudioFile {
   timeBase: string;
   channels: number;
   channelLayout: string;
-  chapters: any[];
+  chapters: Chapter[];
   embeddedCoverArt: any;
   metaTags: MetaTags;
   mimeType: string;

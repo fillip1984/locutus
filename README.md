@@ -15,7 +15,6 @@ I'm currently working to rebuild the same functionality that was previously show
 
 ## TODO
 
-- [ ] add m4b chapter functionality
 - [ ] add series functionality
 - [ ] add ebook reader
 - [ ] record gif of updated app
@@ -30,6 +29,8 @@ I'm currently working to rebuild the same functionality that was previously show
   - [ ] Once react-native-track-player v5 becomes more stable, revisit it to see if it fixes issues of react-native-nitro-player...
   - [?] Figure out how to get it to play in the background
     - [?] I have included expo-audio and set app.json expo-audio -> enableBackgroundPlayback to true, which shouldn't be necessary but seems to work
+  - [?] add m4b chapter functionality
+    - [?] had to hack things together to get this to work and title updates and previous/next tracks may not work right
   - [ ] swap from previous/next track to skip back 10s or forward 30s from lock and now playing screens
   - [ ] see if useOnPlaybackProgressChange() hook gets fixed for longer audio files, right now it is only triggering every 5 seconds on longer audio files
 - [ ] Once Expo NativeTabs are no longer beta, revisit todos for it

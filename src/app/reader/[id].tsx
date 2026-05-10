@@ -1,12 +1,13 @@
-import { colors } from "@/components/ui/colors";
-import { db } from "@/db";
-import { libraryItemWithFilesSchemaType } from "@/db/schema";
-import { Ionicons } from "@expo/vector-icons";
-
-import { Link, Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Link, Stack, useLocalSearchParams } from "expo-router";
+
+import { Ionicons } from "@expo/vector-icons";
+
+import { colors } from "@/components/ui/colors";
+import { db } from "@/db";
+import { libraryItemWithFilesSchemaType } from "@/db/schema";
 
 export default function Player() {
   const {
@@ -27,8 +28,8 @@ export default function Player() {
           id: libraryItemId,
         },
         with: {
-          audioFiles: true,
-          eBookFiles: true,
+          audioChapters: true,
+          ebook: true,
         },
       });
       if (!libraryItem) {

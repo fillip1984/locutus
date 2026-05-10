@@ -6,12 +6,6 @@ export const getLibraryItems = async (libraryId: string) => {
     const response = await audiobookShelfFetch<Root>(
       `/api/libraries/${libraryId}/items`,
     );
-
-    // if (!response.ok) {
-    //   throw new Error(
-    //     `Failed to fetch library items for library with id: ${libraryId}, status: ${response.status}`,
-    //   );
-    // }
     return response?.results;
   } catch (err) {
     console.error(

@@ -32,20 +32,23 @@ export const libraryItemSchema = sqliteTable(
     ...baseFields,
     remoteId: text().notNull(),
     title: text().notNull(),
+    subtitle: text(),
     authorName: text().notNull(),
     authorNameLF: text(),
-    numAudioFiles: integer().notNull(),
-    ebookFileFormat: text(),
-    duration: integer().notNull(),
     publishedYear: integer(),
     description: text(),
     isbn: text(),
     asin: text(),
     coverArtPath: text(),
-    lastPlayedId: text(),
-    lastEBookId: text(),
-    downloaded: integer({ mode: "boolean" }).default(false),
-    complete: integer({ mode: "boolean" }).default(false),
+    audiobookLocation: integer(),
+    audiobookDuration: integer(),
+    audiobookProgress: integer(),
+    ebookLocation: text(),
+    ebookProgress: integer(),
+    isAudiobook: integer({ mode: "boolean" }).notNull().default(false),
+    isEbook: integer({ mode: "boolean" }).notNull().default(false),
+    downloaded: integer({ mode: "boolean" }).notNull().default(false),
+    complete: integer({ mode: "boolean" }).notNull().default(false),
     libraryId: text()
       .notNull()
       .references(() => librarySchema.id, { onDelete: "cascade" }),
@@ -60,56 +63,56 @@ export const libraryItemSchema = sqliteTable(
 
 export type libraryItemSchemaType = typeof libraryItemSchema.$inferSelect;
 export type libraryItemWithFilesSchemaType = libraryItemSchemaType & {
-  audioFiles: audiobookSchemaType[];
-  eBookFiles: eBookFileSchemaType[];
+  audioChapters: audioChapterSchemaType[];
+  ebook: ebookSchemaType | null;
 };
 
-export const chapterSchema = sqliteTable("chapter", {
+export const ebookSchema = sqliteTable("ebook", {
   ...baseFields,
   remoteId: text().notNull().unique(),
-  title: text().notNull(),
-  start: integer().notNull(),
-  end: integer().notNull(),
+  ebookFormat: text().notNull(),
   libraryItemId: text()
     .notNull()
     .references(() => libraryItemSchema.id, { onDelete: "cascade" }),
 });
 
-export type chapterSchemaType = typeof chapterSchema.$inferSelect;
+export type ebookSchemaType = typeof ebookSchema.$inferSelect;
+
+export const audioChapterSchema = sqliteTable(
+  "audioChapter",
+  {
+    ...baseFields,
+    index: integer().notNull(),
+    title: text().notNull(),
+    start: integer().notNull(),
+    end: integer().notNull(),
+    // media file info
+    mediaRemoteId: text().notNull(),
+    mediaFormat: text().notNull(),
+    duration: integer().notNull(),
+    libraryItemId: text()
+      .notNull()
+      .references(() => libraryItemSchema.id, { onDelete: "cascade" }),
+  },
+  (t) => [
+    uniqueIndex("audio_chapter_index_library_item_id_idx").on(
+      t.index,
+      t.libraryItemId,
+    ),
+  ],
+);
+
+export type audioChapterSchemaType = typeof audioChapterSchema.$inferSelect;
 
 export const audioFileSchema = sqliteTable("audioFile", {
   ...baseFields,
   remoteId: text().notNull().unique(),
-  index: integer().notNull(),
-  duration: integer().notNull(),
-  start: integer().notNull(),
-  end: integer().notNull(),
-  progress: integer(),
-  complete: integer({ mode: "boolean" }).default(false),
-  name: text().notNull(),
-  // path is relative uri actually, a little tricky to reconsitute the path but it works like this: new File(Paths.document, audioFile.path)
-  path: text(),
+  mediaFormat: text().notNull(),
+  filePath: text().notNull(),
   libraryItemId: text()
     .notNull()
     .references(() => libraryItemSchema.id, { onDelete: "cascade" }),
 });
-
-export type audiobookSchemaType = typeof audioFileSchema.$inferSelect;
-
-export const eBookFileSchema = sqliteTable("eBookFile", {
-  ...baseFields,
-  remoteId: text().notNull().unique(),
-  currentLocation: text(),
-  progress: integer(),
-  complete: integer({ mode: "boolean" }).default(false),
-  name: text().notNull(),
-  path: text(),
-  libraryItemId: text()
-    .notNull()
-    .references(() => libraryItemSchema.id, { onDelete: "cascade" }),
-});
-
-export type eBookFileSchemaType = typeof eBookFileSchema.$inferSelect;
 
 export const seriesSchema = sqliteTable("series", {
   ...baseFields,
@@ -140,6 +143,8 @@ export const genreSchema = sqliteTable("genre", {
   name: text().notNull(),
 });
 export type genreSchemaType = typeof genreSchema.$inferSelect;
+
+// TODO: add tags? Looks like they compliment genres so it may be possible to shove both of them in there
 
 export const userSettingsSchema = sqliteTable("userSettings", {
   ...baseFields,
