@@ -16,8 +16,6 @@ I'm currently working to rebuild the same functionality that was previously show
 
 ## TODO
 
-- [ ] should we default to opening player when selecting an item from continue?
-  - [ ] would need to also add a button on player to allow user to go back to the media page
 - [ ] add series functionality
 - [ ] add ebook reader
 - [ ] add genre and tags
@@ -67,3 +65,5 @@ Need to wait a month or 2 to see if things I'm using that are beta or early deve
   - [x] mini-player
   - [x] player screen track name
 - [x] figure out how to show cover art in either square and book aspect ratios
+- [x] should we default to opening player when selecting an item from continue?
+  - [x] would need to also add a button on player to allow user to go back to the media page
