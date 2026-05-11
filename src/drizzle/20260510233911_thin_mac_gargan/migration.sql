@@ -68,6 +68,17 @@ CREATE TABLE `libraryItem` (
 	CONSTRAINT `fk_libraryItem_libraryId_library_id_fk` FOREIGN KEY (`libraryId`) REFERENCES `library`(`id`) ON DELETE CASCADE
 );
 --> statement-breakpoint
+CREATE TABLE `libraryItemSeries` (
+	`id` text PRIMARY KEY,
+	`createdAt` integer,
+	`updatedAt` integer,
+	`libraryItemId` text NOT NULL,
+	`seriesId` text NOT NULL,
+	`sequence` integer,
+	CONSTRAINT `fk_libraryItemSeries_libraryItemId_libraryItem_id_fk` FOREIGN KEY (`libraryItemId`) REFERENCES `libraryItem`(`id`) ON DELETE CASCADE,
+	CONSTRAINT `fk_libraryItemSeries_seriesId_series_id_fk` FOREIGN KEY (`seriesId`) REFERENCES `series`(`id`) ON DELETE CASCADE
+);
+--> statement-breakpoint
 CREATE TABLE `library` (
 	`id` text PRIMARY KEY,
 	`createdAt` integer,
@@ -81,10 +92,7 @@ CREATE TABLE `series` (
 	`createdAt` integer,
 	`updatedAt` integer,
 	`remoteId` text NOT NULL UNIQUE,
-	`name` text NOT NULL,
-	`sequence` integer NOT NULL,
-	`libraryItemId` text NOT NULL,
-	CONSTRAINT `fk_series_libraryItemId_libraryItem_id_fk` FOREIGN KEY (`libraryItemId`) REFERENCES `libraryItem`(`id`) ON DELETE CASCADE
+	`name` text NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `userSettings` (

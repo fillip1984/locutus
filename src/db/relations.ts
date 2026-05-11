@@ -22,13 +22,19 @@ export const relations = defineRelations(schema, (r) => ({
       from: r.libraryItemSchema.id,
       to: r.ebookSchema.libraryItemId,
     }),
-    series: r.one.seriesSchema({
+    series: r.many.libraryItemSeriesSchema({
       from: r.libraryItemSchema.id,
-      to: r.seriesSchema.libraryItemId,
+      to: r.libraryItemSeriesSchema.libraryItemId,
     }),
     genres: r.many.libraryItemGenreSchema({
       from: r.libraryItemSchema.id,
       to: r.libraryItemGenreSchema.libraryItemId,
+    }),
+  },
+  seriesSchema: {
+    libraryItems: r.many.libraryItemSeriesSchema({
+      from: r.seriesSchema.id,
+      to: r.libraryItemSeriesSchema.seriesId,
     }),
   },
 }));

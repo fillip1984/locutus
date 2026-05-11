@@ -7,9 +7,11 @@ import {
   ebookSchema,
   libraryItemSchema,
   libraryItemSchemaType,
+  libraryItemSeriesSchema,
   librarySchema,
   librarySchemaType,
   newAudioChapterType,
+  seriesSchema,
 } from "@/db/schema";
 import { downloadCoverArt } from "@/services/coverArtApi";
 import { getLibraries } from "@/services/libraryApi";
@@ -199,8 +201,51 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
             })
             .where(eq(libraryItemSchema.id, localLibraryItemId));
         }
+
+        // build then save series
+        if (remoteLibraryItem.media.metadata.series.length > 0) {
+          const series = remoteLibraryItem.media.metadata.series
+            .filter((s) => s.sequence)
+            .map((s) => {
+              return {
+                remoteId: s.id,
+                sequence: s.sequence ? parseInt(s.sequence) : null,
+                name: s.name,
+              };
+            });
+
+          for (const seriesEntry of series) {
+            const seriesId = (
+              await db
+                .insert(seriesSchema)
+                .values(seriesEntry)
+                .onConflictDoUpdate({
+                  target: [seriesSchema.remoteId],
+                  set: seriesEntry,
+                })
+                .returning({ id: seriesSchema.id })
+            )[0].id;
+
+            const libraryItemSeriesValues = {
+              libraryItemId: localLibraryItemId,
+              seriesId,
+              sequence: seriesEntry.sequence,
+            };
+            await db
+              .insert(libraryItemSeriesSchema)
+              .values(libraryItemSeriesValues)
+              .onConflictDoUpdate({
+                target: [
+                  libraryItemSeriesSchema.libraryItemId,
+                  libraryItemSeriesSchema.seriesId,
+                ],
+                set: libraryItemSeriesSchema,
+              });
+          }
+        }
       }
     }
+
     // console.log("refreshing library after sync with server");
     // expecting refetch to close out status
     get().refetch();

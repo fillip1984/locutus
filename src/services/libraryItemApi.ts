@@ -98,18 +98,18 @@ export interface Media {
 
 export interface Metadata {
   title: string;
-  subtitle: any;
+  subtitle: string | null;
   authors: Author[];
-  narrators: any[];
-  series: any[];
+  narrators: string[];
+  series: Series[];
   genres: string[];
   publishedYear: string;
-  publishedDate: any;
-  publisher: any;
+  publishedDate: string;
+  publisher: string;
   description: string;
-  isbn: any;
-  asin: any;
-  language: any;
+  isbn: string;
+  asin: string;
+  language: string;
   explicit: boolean;
   abridged: boolean;
 }
@@ -117,6 +117,12 @@ export interface Metadata {
 export interface Author {
   id: string;
   name: string;
+}
+
+export interface Series {
+  id: string;
+  name: string;
+  sequence: string;
 }
 
 export interface AudioFile {

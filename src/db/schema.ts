@@ -105,14 +105,32 @@ export const audioChapterSchema = sqliteTable(
 export type audioChapterSchemaType = typeof audioChapterSchema.$inferSelect;
 export type newAudioChapterType = typeof audioChapterSchema.$inferInsert;
 
+export const libraryItemSeriesSchema = sqliteTable(
+  "libraryItemSeries",
+  {
+    ...baseFields,
+    libraryItemId: text()
+      .notNull()
+      .references(() => libraryItemSchema.id, { onDelete: "cascade" }),
+    seriesId: text()
+      .notNull()
+      .references(() => seriesSchema.id, { onDelete: "cascade" }),
+    sequence: integer(),
+  },
+  (t) => [
+    uniqueIndex("library_item_series_library_item_id_series_id_idx").on(
+      t.libraryItemId,
+      t.seriesId,
+    ),
+  ],
+);
+export type libraryItemSeriesSchemaType =
+  typeof libraryItemSeriesSchema.$inferSelect;
+
 export const seriesSchema = sqliteTable("series", {
   ...baseFields,
   remoteId: text().notNull().unique(),
   name: text().notNull(),
-  sequence: integer().notNull(),
-  libraryItemId: text()
-    .notNull()
-    .references(() => libraryItemSchema.id, { onDelete: "cascade" }),
 });
 export type seriesSchemaType = typeof seriesSchema.$inferSelect;
 

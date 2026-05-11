@@ -30,7 +30,10 @@ import { db } from "@/db";
 import {
   audioChapterSchemaType,
   libraryItemSchema,
+  libraryItemSchemaType,
+  libraryItemSeriesSchema,
   libraryItemWithFilesSchemaType,
+  seriesSchema,
 } from "@/db/schema";
 import {
   calculateDurationPercentage,
@@ -160,7 +163,7 @@ export default function MediaPage() {
                 libraryItem.audioChapters.length > 0 && (
                   <MediaTracks libraryItem={libraryItem} />
                 )}
-              <Series />
+              <Series libraryItemId={libraryItem.id} />
 
               {/* scroll to top */}
               <View className="flex items-center justify-center pb-24">
@@ -267,7 +270,8 @@ const Controls = ({
       ) : isPlayable || isResumable ? (
         <View className="flex w-full gap-4">
           <TouchableOpacity
-            onPress={() =>
+            onPress={() => {
+              router.dismiss();
               router.push({
                 pathname: `/player/[id]`,
                 params: {
@@ -275,8 +279,8 @@ const Controls = ({
                   audiobookLocation: libraryItem.audiobookLocation,
                   mode: isResumable ? "resume" : "play",
                 },
-              })
-            }
+              });
+            }}
             className="flex h-16 w-full items-center justify-center rounded-full bg-white py-2"
           >
             <View className="flex-row items-center justify-center gap-1">
@@ -461,7 +465,57 @@ const Chapter = ({
   );
 };
 
-const Series = () => {
+const Series = ({ libraryItemId }: { libraryItemId: string }) => {
+  const [series, setSeries] = useState<
+    { libraryItems: libraryItemSchemaType }[]
+  >([]);
+
+  useEffect(() => {
+    const fetchSeries = async () => {
+      const seriesFromDB = await db
+        .select()
+        .from(libraryItemSeriesSchema)
+        .where(eq(libraryItemSeriesSchema.libraryItemId, libraryItemId))
+        .innerJoin(
+          seriesSchema,
+          eq(libraryItemSeriesSchema.seriesId, seriesSchema.id),
+        )
+        .innerJoin(
+          libraryItemSchema,
+          eq(libraryItemSeriesSchema.libraryItemId, libraryItemSchema.id),
+        )
+        .get({ libraryItemSchema });
+
+      // console.log({ series: seriesFromDB.map((s) => s.series.name) });
+      // setSeries(seriesFromDB);
+      // const seriesIds = await db.query.libraryItemSeriesSchema.findMany({
+      //   where: {
+      //     libraryItemId: libraryItemId,
+      //   },
+      //   columns: {
+      //     seriesId: true,
+      //   },
+      // });
+      // console.log({ seriesIds });
+      // const series = await db.query.seriesSchema.findMany({
+      //   with: {
+      //     libraryItems: {
+      //       columns: {
+
+      //       }
+      //     },
+      //   },
+      //   where: {
+      //     id: {
+      //       in: seriesIds.map((s) => s.seriesId),
+      //     },
+      //   },
+      // });
+      // console.log({ items: series[0].libraryItems });
+    };
+    fetchSeries();
+  }, [libraryItemId]);
+
   return (
     <View>
       <Text className="mt-6 text-3xl font-bold text-white">Series</Text>
@@ -470,24 +524,9 @@ const Series = () => {
         showsHorizontalScrollIndicator={false}
         className="mt-4"
       >
-        <View className="mt-2 flex-row items-center gap-4">
-          <View className="h-37.5 w-25 rounded-lg bg-black/40 p-2">
-            <Text className="font-bold text-white">Series Title</Text>
-            <Text className="text-sm text-white/80">3 Books</Text>
-          </View>
-          <View className="h-37.5 w-25 rounded-lg bg-black/40 p-2">
-            <Text className="font-bold text-white">Series Title</Text>
-            <Text className="text-sm text-white/80">3 Books</Text>
-          </View>
-          <View className="h-37.5 w-25 rounded-lg bg-black/40 p-2">
-            <Text className="font-bold text-white">Series Title</Text>
-            <Text className="text-sm text-white/80">3 Books</Text>
-          </View>
-          <View className="h-37.5 w-25 rounded-lg bg-black/40 p-2">
-            <Text className="font-bold text-white">Series Title</Text>
-            <Text className="text-sm text-white/80">3 Books</Text>
-          </View>
-        </View>
+        {/* {series.map((s) => (
+          <BookLink key={s.series.id} item={s.} />
+        ))} */}
       </ScrollView>
     </View>
   );

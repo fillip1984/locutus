@@ -30,11 +30,11 @@ Need to wait a month or 2 to see if things I'm using that are beta or early deve
   - [ ] Create book card when cover is not available (example: The Private Life of Genghis Khan)
 - [ ] Once Drizzle ORM v1 is released, revisit todos for it
 - [ ] Once react-native-nitro-player becomes more stable (just launched v1 in April 2026), revisit todos for it
-  - [ ] Once react-native-track-player v5 becomes more stable, revisit it to see if it fixes issues of react-native-nitro-player...
+  - [ ] Once react-native-track-player v5 becomes available, revisit it to see if it fixes issues of react-native-nitro-player...
   - [?] Figure out how to get it to play in the background
     - [?] I have included expo-audio and set app.json expo-audio -> enableBackgroundPlayback to true, which shouldn't be necessary but seems to work
   - [?] add m4b chapter functionality
-    - [?] had to hack things together to get this to work and title updates and previous/next tracks may not work right (wasn't able to update title on the fly, previous and next functionality has to be custom since there's only 1 file with chapters)
+    - [?] had to hack things together to get this to work -- title updates and previous/next tracks may not work right (wasn't able to update title on the fly, previous and next functionality has to be custom since there's only 1 file with chapters)
   - [ ] swap from previous/next track to skip back 10s or forward 30s from lock and now playing screens
   - [ ] see if useOnPlaybackProgressChange() hook gets fixed for longer audio files, right now it is only triggering every 5 seconds on longer audio files
 - [ ] Once Expo NativeTabs are no longer beta, revisit todos for it
