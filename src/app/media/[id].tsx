@@ -35,10 +35,7 @@ import {
   libraryItemWithFilesSchemaType,
   seriesSchema,
 } from "@/db/schema";
-import {
-  calculateDurationPercentage,
-  formatSecondsToTime,
-} from "@/services/progressService";
+import { formatSecondsToTime } from "@/services/progressService";
 import { handleDownload, useDownloadStore } from "@/stores/download-store";
 import { useLibraryStore } from "@/stores/library-store";
 
@@ -457,7 +454,7 @@ const Chapter = ({
         <View
           className="h-1 rounded-l-full rounded-r-full bg-yellow-300"
           style={{
-            width: `${calculateDurationPercentage((libraryItem.audiobookLocation ?? 0) - audioChapter.start <= 0 ? 0 : (libraryItem.audiobookLocation ?? 0) - audioChapter.start, audioChapter.duration)}%`,
+            width: `${calculateChapterProgress(libraryItem, audioChapter)}%`,
           }}
         />
       </Pressable>
@@ -534,4 +531,41 @@ const Series = ({ libraryItemId }: { libraryItemId: string }) => {
 
 const hideHtmlTags = (str: string) => {
   return str.replace(/<[^>]*>?/gm, "");
+};
+
+const calculateChapterProgress = (
+  libraryItem: libraryItemWithFilesSchemaType,
+  audioChapter: audioChapterSchemaType,
+) => {
+  console.log(
+    "Calculating chapter progress for",
+    audioChapter.title,
+    "with library item location",
+    libraryItem.audiobookLocation,
+    "chapter start",
+    audioChapter.start,
+    "chapter end",
+    audioChapter.end,
+  );
+  if (!libraryItem.audiobookLocation) {
+    console.log("audiobookLocation is undefined or null");
+    return 0;
+  }
+  if (libraryItem.audiobookLocation >= audioChapter.end) {
+    console.log("Chapter is complete");
+    return 100;
+  }
+  if (libraryItem.audiobookLocation <= audioChapter.start) {
+    console.log("Chapter has not started");
+    return 0;
+  }
+
+  const position = libraryItem.audiobookLocation - audioChapter.start;
+  const duration = audioChapter.duration;
+  if (duration === 0) {
+    return 0;
+  }
+  const result = (position / duration) * 100;
+  console.log("Chapter progress:", result);
+  return parseInt(result.toFixed(2), 10);
 };

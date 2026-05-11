@@ -15,7 +15,7 @@ import {
 } from "@/db/schema";
 import { downloadCoverArt } from "@/services/coverArtApi";
 import { getLibraries } from "@/services/libraryApi";
-import { Chapter, getLibraryItem } from "@/services/libraryItemApi";
+import { getLibraryItem } from "@/services/libraryItemApi";
 import { getLibraryItems } from "@/services/libraryItemsApi";
 
 export interface LibraryStore {
@@ -139,67 +139,67 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
         }
 
         // build then save chapters
-        const chapterList: newAudioChapterType[] = [];
-        let chapterCounter = 0;
-        for (const audioFile of remoteLibraryItem.media.audioFiles ?? []) {
-          const chapters: Chapter[] =
-            audioFile.chapters.length > 0
-              ? audioFile.chapters
-              : [remoteLibraryItem.media.chapters[chapterCounter]];
+        try {
+          // ran into an issue where chapters nested under audioFiles had start set to 0 for every track, so using libraryItem.media.chapters and filling in the rest from libraryItem.media.audioFiles
+          const chapterList: newAudioChapterType[] = [];
+          let chapterIndex = 0;
+          console.log(
+            "Building chapters for library item:",
+            remoteLibraryItem.media.metadata.title,
+          );
+          for (const chapter of remoteLibraryItem.media.chapters) {
+            chapterList.push({
+              index: chapter.id,
+              title: chapter.title,
+              start: Math.round(chapter.start * 1000) / 1000,
+              end: Math.round(chapter.end * 1000) / 1000,
+              mediaRemoteId:
+                remoteLibraryItem.media.audioFiles[chapterIndex].ino,
+              mediaFormat:
+                remoteLibraryItem.media.audioFiles[chapterIndex].metadata.ext,
+              duration:
+                remoteLibraryItem.media.audioFiles[chapterIndex].duration,
+              libraryItemId: localLibraryItemId,
+            });
 
-          for (const chapter of chapters) {
-            try {
-              chapterList.push({
-                index: chapterList.length,
-                title: chapter.title,
-                start: Math.round(chapter.start * 1000) / 1000,
-                end: Math.round(chapter.end * 1000) / 1000,
-                mediaRemoteId: audioFile.ino,
-                mediaFormat: audioFile.metadata.ext,
-                duration:
-                  Math.round((chapter.end - chapter.start) * 1000) / 1000,
-                libraryItemId: localLibraryItemId,
-              });
-            } catch (error) {
-              console.error(
-                `Failed to sync chapter for library item ${remoteLibraryItem.media.metadata.title}`,
-                error,
-              );
+            // some audiobooks use a single audiofile for the entire book, so check if this is a single audiobook before incrementing chapterIndex to avoid an out of bounds error
+            if (remoteLibraryItem.media.audioFiles.length > 1) {
+              chapterIndex++;
             }
           }
-          chapterCounter++;
-        }
 
-        chapterList.forEach((chapter, index) => {
-          chapter.index = index;
-        });
+          for (const chapter of chapterList) {
+            await db
+              .insert(audioChapterSchema)
+              .values(chapter)
+              .onConflictDoUpdate({
+                target: [
+                  audioChapterSchema.index,
+                  audioChapterSchema.libraryItemId,
+                ],
+                set: chapter,
+              });
+          }
 
-        for (const chapter of chapterList) {
-          await db
-            .insert(audioChapterSchema)
-            .values(chapter)
-            .onConflictDoUpdate({
-              target: [
-                audioChapterSchema.index,
-                audioChapterSchema.libraryItemId,
-              ],
-              set: chapter,
-            });
-        }
-
-        // update total duration
-        if (remoteLibraryItem.media.chapters?.length > 0) {
-          await db
-            .update(libraryItemSchema)
-            .set({
-              audiobookDuration:
-                Math.round(
-                  remoteLibraryItem.media.chapters[
-                    remoteLibraryItem.media.chapters.length - 1
-                  ].end * 1000,
-                ) / 1000,
-            })
-            .where(eq(libraryItemSchema.id, localLibraryItemId));
+          // update total duration
+          if (remoteLibraryItem.media.chapters?.length > 0) {
+            await db
+              .update(libraryItemSchema)
+              .set({
+                audiobookDuration:
+                  Math.round(
+                    remoteLibraryItem.media.chapters[
+                      remoteLibraryItem.media.chapters.length - 1
+                    ].end * 1000,
+                  ) / 1000,
+              })
+              .where(eq(libraryItemSchema.id, localLibraryItemId));
+          }
+        } catch (error) {
+          console.error(
+            `Failed to sync chapters for library item with id: ${remoteItem.id}, title: '${remoteItem.media.metadata.title}', skipping chapters for this item`,
+            error,
+          );
         }
 
         // build then save series

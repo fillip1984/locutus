@@ -30,17 +30,6 @@ export const formatSecondsToTime = (
   }
 };
 
-export const calculateDurationPercentage = (
-  position: number,
-  duration: number,
-) => {
-  if (duration === 0) {
-    return 0;
-  }
-  const result = (position / duration) * 100;
-  return parseInt(result.toFixed(2), 10);
-};
-
 export const recordProgress = async (
   currentTrack: TrackItem,
   currentPosition: number,
