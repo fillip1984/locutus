@@ -4,12 +4,12 @@
   "version": "1.0.0",
   "scripts": {
     "build": "pnpm lint && pnpm tsc --noEmit && pnpm build:production",
-    "build:interactive": "eas build -p ios -e production --local",
-    "build:production": "eas build -p ios -e production --local --non-interactive",
+    "build:interactive": "NODE_ENV=production eas build -p ios -e production --local",
+    "build:production": "NODE_ENV=production eas build -p ios -e production --local --non-interactive",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "dev": "expo run:ios",
-    "lint": "expo lint",
+    "dev": "NODE_ENV=development expo run:ios",
+    "lint": "NODE_ENV=development expo lint",
     "format": "prettier --write ."
   },
   "dependencies": {
