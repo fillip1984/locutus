@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `library_item_series_library_item_id_series_id_idx` ON `libraryItemSeries` (`libraryItemId`,`seriesId`);

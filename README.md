@@ -1,35 +1,69 @@
 # locutus
 
-My mad dash to creating an Audiobook player built with react native. This is an expo project written in Typescript, using drizzle for persistence, zustand for state, and NativeWind for UI. I've built an audiobook player that uses AudioBookShelf as it's backend to fetch metadata and also the audiobooks themselves.
+Locutus is an audiobook player/ebook reader built with react native. This is an expo project written in Typescript, using drizzle for persistence, zustand for state, and Uniwind for UI. I've built an audiobook player that uses AudioBookShelf as it's backend to fetch metadata and also the audiobooks themselves.
 
-[React-native-track-player](https://rntp.dev) is used for audio playback. I started with expo-av but switched to react-native-track-player to gain lock screen, carplay, now playing, and apple watch integration.
+As I'm waiting on [react-native-track-player](https://rntp.dev) to be compatible with react native's new architecture, I've switched over to [react-native-nitro-player](https://github.com/riteshshukla04/react-native-nitro-player).
 
 ## UI
+
+Previous version
 
 ![Sample project gif](demo.gif)
 
 ## Current state
 
-Other than UI imperfections (marked with TODO: tags), playback works and progress is being tracked and resumed on audiobook files. Audiobooks play in the background and also appear (can be controlled) from lock screen, carplay, and applewatch.
+I'm currently working to rebuild the same functionality that was previously shown. I'm making updates to drizzle using the beta version, removing axios, trying to adopt expo UI...
 
 ## TODO
 
-* [ ] Enhance drizzle to simplify data queries (right now app doesn't pull in relationships)
-* [ ] REALLY learn how to use Zustand!
-* [ ] Resolve remaining UI issues, they're marked in some files
-  * [ ] Try to ping the server (and get local network permission access) just after entering server url
-  * [ ] Create book card when cover is not available (example: The Private Life of Genghis Khan)
-* [x] Figure out security (face id)
-* [X] Switch over audio player: <https://medium.com/@gionata.brunel/implementing-react-native-track-player-with-expo-including-lock-screen-part-1-ios-9552fea5178c>
-* [X] Enhance UI for download experience
-* [X] Finish out pushing the mini-player to the bottom when switching between player and library
-* [X] Finish out flow from playlist to player (expo-router)
-* [X] Figure out tabs (expo-router)
-* [X] Figure out how to store files locally (expo-filesystem)
-* [X] Figure out how to import files from elsewhere (AudioBookShelf Apis to the rescue)
-* [X] Figure out how to distribute without app store (--local and internal/ad hoc distribution, apple developer subscription required)
-* [X] Figure out how to get it to play in the background (plist permission)
-* [X] Figure out how to integrate into Apple now playing experiences (react-native-track-player solved this)
-* [X] Figure out how to integrate into Apple lock screen (react-native-track-player solved this)
-* [X] Figure out how to integrate with Apple Carplay (react-native-track-player solved this)
-* [X] Figure out how to integrate with Apple watch (react-native-track-player solved this)
+- [ ] add series functionality
+- [ ] add ebook reader
+- [ ] add genre and tags
+- [ ] record gif of updated app
+- [ ] add a loading screen on login page if using biometrics to log in
+
+### Long term
+
+Need to wait a month or 2 to see if things I'm using that are beta or early development move to general availability - May 2026
+
+- [ ] Resolve remaining UI issues, they're marked in files with TODO tags
+  - [ ] Create book card when cover is not available (example: The Private Life of Genghis Khan)
+- [ ] Once Drizzle ORM v1 is released, revisit todos for it
+- [ ] Once react-native-nitro-player becomes more stable (just launched v1 in April 2026), revisit todos for it
+  - [ ] Once react-native-track-player v5 becomes available, revisit it to see if it fixes issues of react-native-nitro-player...
+  - [?] Figure out how to get it to play in the background
+    - [?] I have included expo-audio and set app.json expo-audio -> enableBackgroundPlayback to true, which shouldn't be necessary but seems to work
+  - [?] add m4b chapter functionality
+    - [?] had to hack things together to get this to work -- title updates and previous/next tracks may not work right (wasn't able to update title on the fly, previous and next functionality has to be custom since there's only 1 file with chapters)
+  - [ ] swap from previous/next track to skip back 10s or forward 30s from lock and now playing screens
+  - [ ] see if useOnPlaybackProgressChange() hook gets fixed for longer audio files, right now it is only triggering every 5 seconds on longer audio files
+- [ ] Once Expo NativeTabs are no longer beta, revisit todos for it
+  - [ ] marquee text doesn't work properly so we might have to rewrite it, find another library, or maybe it isn't working because bottom accessory is still unstable?
+- [ ] Once Expo UI is no longer beta, revisit todos for it
+  - [ ] add Expo UI drop down menu on media page
+    - [ ] option to redownload content
+    - [ ] option to delete downloaded content
+    - [ ] option to mark as complete
+    - [ ] option to mark as unread
+    - [ ] option to update progress (mark all previous files/chapters as read)
+    - [ ] option to delete library item?
+
+### Completed todos
+
+- [x] Implement security (face id)
+- [x] create mini-player near bottom when switching between player and library
+- [x] Finish flow from playlist to player (expo-router)
+- [x] Figure tabs (expo-router native tabs are still in beta)
+- [x] Figure out how to store files locally (expo-filesystem)
+- [x] Figure out how to import files from elsewhere (AudioBookShelf Apis to the rescue)
+- [x] Figure out how to distribute without app store (--local and internal/ad hoc distribution, apple developer subscription required)
+- [x] Figure out how to integrate into Apple now playing experiences
+  - [x] so it works on lock screen
+  - [x] so it works with Now Playing on Apple Carplay
+  - [x] so it works with Now playing on Apple watch
+- [x] add marquee effects on text that could expand and flow to a 2nd line
+  - [x] mini-player
+  - [x] player screen track name
+- [x] figure out how to show cover art in either square and book aspect ratios
+- [x] should we default to opening player when selecting an item from continue?
+  - [x] would need to also add a button on player to allow user to go back to the media page
