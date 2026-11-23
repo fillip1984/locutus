@@ -51,7 +51,7 @@ export default function MediaPage() {
             id,
           },
           with: {
-            audioChapters: true,
+            audioChapters: { orderBy: { index: "asc" } },
             ebook: true,
           },
         });
@@ -405,7 +405,9 @@ const Chapter = ({
         pathname: "/player/[id]",
         params: {
           id: audioChapter.libraryItemId,
-          audiobookLocation: audioChapter.start,
+          audiobookLocation: isLastPlayed
+            ? libraryItem.audiobookLocation
+            : audioChapter.start,
           mode: isLastPlayed ? "resume" : "play",
         },
       }}

@@ -36,17 +36,17 @@ export const recordProgress = async (
 ) => {
   const extraPayload = currentTrack.extraPayload as TrackPlayerExtraPayload;
   const libraryItemId = extraPayload.libraryItemId;
+  const audiobookPosition =
+    extraPayload.playlistType === "file-for-all-chapters"
+      ? currentPosition
+      : currentPosition + extraPayload.start;
 
   void db
     .update(libraryItemSchema)
     .set({
-      audiobookLocation: currentPosition + extraPayload.start,
+      audiobookLocation: audiobookPosition,
       audiobookProgress:
-        (Math.round(
-          ((currentPosition + extraPayload.start) /
-            extraPayload.totalDuration) *
-            1000,
-        ) /
+        (Math.round((audiobookPosition / extraPayload.totalDuration) * 1000) /
           1000) *
         100,
       complete: false,
