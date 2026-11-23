@@ -173,7 +173,11 @@ export default function Player() {
 
         await PlayerQueue.addTracksToPlaylist(id, playableAudioChapters);
         await PlayerQueue.loadPlaylist(id);
-        await TrackPlayer.seek(activeAudioChapter?.start ?? 0);
+        const resumePosition =
+          audiobookLocation && Number.isFinite(parseFloat(audiobookLocation))
+            ? parseFloat(audiobookLocation)
+            : (activeAudioChapter?.start ?? 0);
+        await TrackPlayer.seek(resumePosition);
         await TrackPlayer.play();
       }
     }

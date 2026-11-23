@@ -10,19 +10,13 @@ import migrations from "@/drizzle/migrations";
 const expo = openDatabaseSync("locutus.db");
 export const db = drizzle(expo, { relations });
 
-const runMigrations = async () => {
-  try {
-    // console.log("running migration");
-    await migrate(db, migrations);
-    // console.log("ran migration");
-  } catch (err) {
-    console.error({ err });
-    console.error(
-      "Exception thrown while attempting to run database migration scripts",
-      err,
-    );
-  }
-};
+export const dbReady = migrate(db, migrations).catch((err) => {
+  console.error(
+    "Exception thrown while attempting to run database migration scripts",
+    err,
+  );
+  throw err;
+});
 
 export const dropDB = async () => {
   try {
@@ -43,5 +37,3 @@ export const dropDB = async () => {
     console.error("Exception thrown while attempting to drop database", err);
   }
 };
-
-runMigrations();

@@ -24,7 +24,7 @@ import {
 import { useFileExplorerDevTools } from "file-explorer-expo-dev-plugin";
 
 import { colors } from "@/components/ui/colors";
-import { db } from "@/db";
+import { db, dbReady } from "@/db";
 import {
   recordProgress,
   syncProgressWithServer,
@@ -46,7 +46,31 @@ export type TrackPlayerExtraPayload = {
 
 export default function RootLayout() {
   useFileExplorerDevTools();
+  const [databaseReady, setDatabaseReady] = useState(false);
   const { isAuthenticated } = useSessionStore();
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    dbReady
+      .then(() => {
+        if (!isCancelled) {
+          setDatabaseReady(true);
+        }
+      })
+      .catch(() => {
+        // Keep the app locked when migrations fail instead of querying an
+        // incompletely initialized database.
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  if (!databaseReady) {
+    return null;
+  }
 
   if (isAuthenticated) {
     return <MainLayout />;
