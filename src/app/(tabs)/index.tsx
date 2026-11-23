@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useFocusEffect } from "expo-router";
 
 import LibraryShelf from "@/components/book-shelf";
 import { colors } from "@/components/ui/colors";

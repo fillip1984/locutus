@@ -1,12 +1,12 @@
+import { Image } from "expo-image";
+import { router } from "expo-router";
+import { NativeTabs } from "expo-router/unstable-native-tabs";
 import { Pressable, Text, View } from "react-native";
 import {
   TrackItem,
   TrackPlayer,
   TrackPlayerState,
 } from "react-native-nitro-player";
-import { Image } from "expo-image";
-import { router } from "expo-router";
-import { NativeTabs } from "expo-router/unstable-native-tabs";
 
 import { Ionicons } from "@expo/vector-icons";
 

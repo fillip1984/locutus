@@ -1,9 +1,9 @@
+import * as LocalAuthentication from "expo-local-authentication";
+import { Stack, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
-import * as LocalAuthentication from "expo-local-authentication";
-import { Stack, useFocusEffect } from "expo-router";
 
 import { toast, Toaster } from "sonner-native";
 

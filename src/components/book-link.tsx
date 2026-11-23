@@ -1,8 +1,7 @@
-import React from "react";
-import { Pressable, Text, View } from "react-native";
-import { useNowPlaying } from "react-native-nitro-player";
 import { Image } from "expo-image";
 import { router } from "expo-router";
+import { Pressable, Text, View } from "react-native";
+import { useNowPlaying } from "react-native-nitro-player";
 
 import { libraryItemSchemaType } from "@/db/schema";
 import { colors } from "./ui/colors";

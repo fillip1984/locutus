@@ -1,5 +1,5 @@
-import React, { useState } from "react";
 import { Image } from "expo-image";
+import { useState } from "react";
 
 export default function CoverArt({
   coverArtPath,

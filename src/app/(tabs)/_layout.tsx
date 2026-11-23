@@ -1,3 +1,5 @@
+import { router } from "expo-router";
+import { NativeTabs } from "expo-router/build/native-tabs";
 import { useEffect, useState } from "react";
 import {
   useOnChangeTrack,
@@ -5,8 +7,6 @@ import {
   useOnPlaybackStateChange,
   usePlaylist,
 } from "react-native-nitro-player";
-import { router } from "expo-router";
-import { NativeTabs } from "expo-router/build/native-tabs";
 
 import MiniPlayer from "@/components/mini-player";
 import { useSessionStore } from "@/stores/session-store";

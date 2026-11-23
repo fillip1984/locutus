@@ -1,7 +1,7 @@
+import { Stack, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Stack, useFocusEffect } from "expo-router";
 
 import BookLink from "@/components/book-link";
 import { colors } from "@/components/ui/colors";

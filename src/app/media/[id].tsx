@@ -1,4 +1,11 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { LinearGradient } from "expo-linear-gradient";
+import {
+  Link,
+  router,
+  useFocusEffect,
+  useLocalSearchParams,
+} from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -8,13 +15,6 @@ import {
 } from "react-native";
 import { useNowPlaying } from "react-native-nitro-player";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
-import {
-  Link,
-  router,
-  useFocusEffect,
-  useLocalSearchParams,
-} from "expo-router";
 
 import {
   FontAwesome,
