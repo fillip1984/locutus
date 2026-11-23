@@ -92,6 +92,7 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
   },
   logOut: async () => {
     TrackPlayer.pause();
+    await SecureStore.deleteItemAsync(key);
     set({
       isAuthenticated: false,
       userSettings: null,

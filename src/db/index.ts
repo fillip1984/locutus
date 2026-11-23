@@ -1,3 +1,4 @@
+import { Directory, Paths } from "expo-file-system";
 import { openDatabaseSync } from "expo-sqlite";
 
 import { drizzle } from "drizzle-orm/expo-sqlite";
@@ -20,6 +21,16 @@ export const dbReady = migrate(db, migrations).catch((err) => {
 
 export const dropDB = async () => {
   try {
+    const libraryItems = await db
+      .select({ remoteId: schema.libraryItemSchema.remoteId })
+      .from(schema.libraryItemSchema);
+    for (const libraryItem of libraryItems) {
+      const itemDirectory = new Directory(Paths.document, libraryItem.remoteId);
+      if (itemDirectory.exists) {
+        itemDirectory.delete();
+      }
+    }
+
     // console.log("dropping database");
     await db.delete(schema.librarySchema);
     // TODO: cascades don't seem to be triggering

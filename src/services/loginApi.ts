@@ -5,24 +5,18 @@ export const login = async (
   username: string,
   password: string,
 ) => {
-  try {
-    // console.log("logging in");
-    const response = await typedFetch<Root>(`${url}/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username,
-        password,
-      }),
-    });
+  const response = await typedFetch<Root>(`${url}/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      username,
+      password,
+    }),
+  });
 
-    return response.user.token;
-  } catch (err) {
-    console.error("Exception occurred while fetching libraries", err);
-    return null;
-  }
+  return response.user.token;
 };
 
 export interface Root {

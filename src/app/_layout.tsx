@@ -30,6 +30,7 @@ import {
   syncProgressWithServer,
 } from "@/services/progressService";
 import { useSessionStore } from "@/stores/session-store";
+import { HttpResponseError } from "@/services/typedFetch";
 
 export type TrackPlayerExtraPayload = {
   playlistType: "file-per-chapter" | "file-for-all-chapters";
@@ -187,8 +188,15 @@ const Login = () => {
       // if (bioAuthResult) {
       //   await logInWithBiometrics(bioAuthResult);
       // }
-    } catch {
-      toast.error("Unknown error");
+    } catch (error) {
+      if (
+        error instanceof HttpResponseError &&
+        (error.status === 401 || error.status === 403)
+      ) {
+        toast.error("Invalid username or password");
+      } else {
+        toast.error("Unable to connect to server");
+      }
     } finally {
       setLoading(false);
     }

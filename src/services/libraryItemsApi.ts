@@ -2,11 +2,27 @@ import { audiobookShelfFetch } from "./audiobookShelfBaseClient";
 
 export const getLibraryItems = async (libraryId: string) => {
   try {
-    // console.log(`fetching library items for library with id: ${libraryId}`);
-    const response = await audiobookShelfFetch<Root>(
-      `/api/libraries/${libraryId}/items`,
-    );
-    return response?.results;
+    const limit = 100;
+    const results: Result[] = [];
+    let page = 0;
+
+    while (true) {
+      const response = await audiobookShelfFetch<Root>(
+        `/api/libraries/${libraryId}/items?limit=${limit}&page=${page}`,
+      );
+      if (!response) {
+        return results;
+      }
+
+      results.push(...response.results);
+      if (
+        response.results.length === 0 ||
+        response.offset + response.results.length >= response.total
+      ) {
+        return results;
+      }
+      page++;
+    }
   } catch (err) {
     console.error(
       `Exception occurred while fetching items for library with id: ${libraryId}`,
