@@ -10,7 +10,8 @@
     "db:migrate": "drizzle-kit migrate",
     "dev": "NODE_ENV=development expo run:ios",
     "lint": "NODE_ENV=development expo lint",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test": "node --test tests/"
   },
   "dependencies": {
     "@expo/ui": "~58.0.29",

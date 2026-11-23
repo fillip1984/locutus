@@ -233,7 +233,8 @@ const MediaControls = ({ libraryItemId, isReady }: PlayerComponentProps) => {
     TrackPlayer.setPlaybackSpeed(userSettings?.preferredPlaybackRate ?? 1);
   }, [userSettings?.preferredPlaybackRate]);
 
-  const { position: playbackPosition } = useOnPlaybackProgressChange();
+  const { position: playbackPosition, totalDuration } =
+    useOnPlaybackProgressChange();
   const { state: playbackState } = useOnPlaybackStateChange();
   const { track: currentTrack } = useOnChangeTrack();
   const enabled =
@@ -287,7 +288,7 @@ const MediaControls = ({ libraryItemId, isReady }: PlayerComponentProps) => {
 
         <TouchableOpacity
           disabled={!enabled}
-          onPress={() => TrackPlayer.seek(playbackPosition - 10)}
+          onPress={() => TrackPlayer.seek(Math.max(0, playbackPosition - 10))}
           className="relative flex items-center justify-center"
         >
           <FontAwesome6 name="arrow-rotate-left" size={40} color="white" />
@@ -310,7 +311,13 @@ const MediaControls = ({ libraryItemId, isReady }: PlayerComponentProps) => {
         )}
         <TouchableOpacity
           disabled={!enabled}
-          onPress={() => TrackPlayer.seek(playbackPosition + 30)}
+          onPress={() =>
+            TrackPlayer.seek(
+              totalDuration > 0
+                ? Math.min(totalDuration, playbackPosition + 30)
+                : playbackPosition + 30,
+            )
+          }
           className="relative flex items-center justify-center"
         >
           <FontAwesome6 name="arrow-rotate-right" size={40} color="white" />

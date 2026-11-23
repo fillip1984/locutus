@@ -1,6 +1,6 @@
 import * as LocalAuthentication from "expo-local-authentication";
 import { Stack, useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -29,8 +29,8 @@ import {
   recordProgress,
   syncProgressWithServer,
 } from "@/services/progressService";
-import { useSessionStore } from "@/stores/session-store";
 import { HttpResponseError } from "@/services/typedFetch";
+import { useSessionStore } from "@/stores/session-store";
 
 export type TrackPlayerExtraPayload = {
   playlistType: "file-per-chapter" | "file-for-all-chapters";
@@ -101,17 +101,25 @@ const MainLayout = () => {
 
   // setup progres and complete hooks
   const { currentTrack, currentPosition, currentState } = useNowPlaying();
+  // position-based rather than clock-based so faster playback speeds can't skip a save
+  const lastRecorded = useRef<{ key: string; position: number } | null>(null);
   useEffect(() => {
-    if (
-      currentTrack &&
-      Math.round(currentPosition) > 0 &&
-      Math.round(currentPosition) % 15 === 0
-    ) {
+    if (!currentTrack) {
+      return;
+    }
+    const key = `${currentTrack.extraPayload?.libraryItemId}:${currentTrack.id}`;
+    const last = lastRecorded.current;
+    if (!last || last.key !== key) {
+      lastRecorded.current = { key, position: currentPosition };
+      return;
+    }
+    if (Math.abs(currentPosition - last.position) >= 15) {
       console.log(
         "every 15 seconds, record progress, current position:",
         currentPosition.toFixed(3),
         currentTrack.title,
       );
+      lastRecorded.current = { key, position: currentPosition };
       recordProgress(currentTrack, currentPosition);
     }
   }, [currentTrack, currentPosition]);
@@ -227,7 +235,9 @@ const Login = () => {
           const bioAuthResult = await requestAndAuthenticateViaBiometrics();
           if (bioAuthResult) {
             logInWithBiometrics(bioAuthResult);
-            await syncProgressWithServer();
+            await syncProgressWithServer().catch(() => {
+              // already logged, a failed sync shouldn't break login
+            });
           }
         }
       };

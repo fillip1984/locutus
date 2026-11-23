@@ -131,6 +131,14 @@ test("multi-file playback orders chapters and seeks within the selected file", a
   assert.ok(calls.some((call) => call[0] === "seek" && call[1] === 50));
 });
 
+test("a finished single-file book restarts from the beginning", async () => {
+  const { queue, player, calls } = createHarness();
+  const setup = createPlaylistSetup(queue, player, (path) => path);
+  await setup(item("book", true), "200", "play", () => false);
+  assert.ok(calls.some((call) => call[0] === "seek" && call[1] === 0));
+  assert.ok(!calls.some((call) => call[0] === "seek" && call[1] === 200));
+});
+
 test("previous chapter selects exactly one previous index", async () => {
   const indices = [];
   let currentIndex = 3;

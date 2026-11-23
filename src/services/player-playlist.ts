@@ -144,7 +144,10 @@ export function createPlaylistSetup(
         if (isCancelled()) return false;
 
         if (playlistType === "file-for-all-chapters") {
-          await player.seek(position);
+          // a finished book is saved at its end, so start it over instead
+          const bookEnd =
+            libraryItem.audiobookDuration ?? chapters[chapters.length - 1].end;
+          await player.seek(position >= bookEnd ? 0 : position);
         } else if (activeChapterIndex !== -1) {
           await player.seek(position - chapters[activeChapterIndex].start);
         }
