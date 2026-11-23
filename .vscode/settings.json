@@ -35,9 +35,7 @@
     "ListFooterComponentClassName",
     "ListHeaderComponentClassName"
   ],
-  "tailwindCSS.classFunctions": [
-    "useResolveClassNames"
-  ],
+  "tailwindCSS.classFunctions": ["useResolveClassNames"],
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode"
 }

@@ -4,6 +4,12 @@ Locutus is an audiobook player/ebook reader built with react native. This is an 
 
 As I'm waiting on [react-native-track-player](https://rntp.dev) to be compatible with react native's new architecture, I've switched over to [react-native-nitro-player](https://github.com/riteshshukla04/react-native-nitro-player).
 
+## Linting and formatting
+
+Run `pnpm lint` to check the code with Expo's ESLint configuration. Run
+`pnpm format:check` to check formatting or `pnpm format` to apply Prettier.
+Generated Drizzle migrations and Uniwind types are excluded from both tools.
+
 ## UI
 
 Previous version

@@ -1,0 +1,8 @@
+.expo/
+dist/
+web-build/
+ios/
+android/
+pnpm-lock.yaml
+src/drizzle/
+src/uniwind-types.d.ts
