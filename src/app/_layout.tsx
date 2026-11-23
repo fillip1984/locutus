@@ -1,7 +1,7 @@
 import * as LocalAuthentication from "expo-local-authentication";
 import { Stack, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { Pressable, StatusBar, Text, TextInput, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -99,7 +99,7 @@ const MainLayout = () => {
     setupPlayer();
   }, []);
 
-  // setup progres and complete hooks
+  // setup progress and complete hooks
   const { currentTrack, currentPosition, currentState } = useNowPlaying();
   // position-based rather than clock-based so faster playback speeds can't skip a save
   const lastRecorded = useRef<{ key: string; position: number } | null>(null);
@@ -152,6 +152,7 @@ const MainLayout = () => {
         <Stack.Screen name="reader/[id]" options={{}} />
       </Stack>
       <Toaster />
+      <StatusBar barStyle="dark-content" />
     </GestureHandlerRootView>
   );
 };
