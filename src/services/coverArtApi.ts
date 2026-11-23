@@ -14,6 +14,9 @@ export const downloadCoverArt = async (libraryItemId: string) => {
     }
 
     const destinationFile = new File(itemDirectory, "cover.webp");
+    if (destinationFile.exists) {
+      return destinationFile.uri;
+    }
     const result = await File.downloadFileAsync(
       `${settings.serverUrl}/api/items/${libraryItemId}/cover`,
       destinationFile,
@@ -28,6 +31,6 @@ export const downloadCoverArt = async (libraryItemId: string) => {
       `Exception occurred while downloading cover art for library item: ${libraryItemId}`,
       err,
     );
-    throw err;
+    return null;
   }
 };

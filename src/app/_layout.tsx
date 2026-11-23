@@ -1,7 +1,7 @@
 import * as LocalAuthentication from "expo-local-authentication";
 import { Stack, useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Pressable, StatusBar, Text, TextInput, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -24,12 +24,13 @@ import {
 import { useFileExplorerDevTools } from "file-explorer-expo-dev-plugin";
 
 import { colors } from "@/components/ui/colors";
-import { db } from "@/db";
+import { db, dbReady } from "@/db";
 import {
   recordProgress,
   syncProgressWithServer,
 } from "@/services/progressService";
-import { useSessionStore } from "@/stores/session-store";
+import { HttpResponseError } from "@/services/typedFetch";
+import { getToken, useSessionStore } from "@/stores/session-store";
 
 export type TrackPlayerExtraPayload = {
   playlistType: "file-per-chapter" | "file-for-all-chapters";
@@ -46,7 +47,31 @@ export type TrackPlayerExtraPayload = {
 
 export default function RootLayout() {
   useFileExplorerDevTools();
+  const [databaseReady, setDatabaseReady] = useState(false);
   const { isAuthenticated } = useSessionStore();
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    dbReady
+      .then(() => {
+        if (!isCancelled) {
+          setDatabaseReady(true);
+        }
+      })
+      .catch(() => {
+        // Keep the app locked when migrations fail instead of querying an
+        // incompletely initialized database.
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  if (!databaseReady) {
+    return null;
+  }
 
   if (isAuthenticated) {
     return <MainLayout />;
@@ -74,19 +99,27 @@ const MainLayout = () => {
     setupPlayer();
   }, []);
 
-  // setup progres and complete hooks
+  // setup progress and complete hooks
   const { currentTrack, currentPosition, currentState } = useNowPlaying();
+  // position-based rather than clock-based so faster playback speeds can't skip a save
+  const lastRecorded = useRef<{ key: string; position: number } | null>(null);
   useEffect(() => {
-    if (
-      currentTrack &&
-      Math.round(currentPosition) > 0 &&
-      Math.round(currentPosition) % 15 === 0
-    ) {
+    if (!currentTrack) {
+      return;
+    }
+    const key = `${currentTrack.extraPayload?.libraryItemId}:${currentTrack.id}`;
+    const last = lastRecorded.current;
+    if (!last || last.key !== key) {
+      lastRecorded.current = { key, position: currentPosition };
+      return;
+    }
+    if (Math.abs(currentPosition - last.position) >= 15) {
       console.log(
         "every 15 seconds, record progress, current position:",
         currentPosition.toFixed(3),
         currentTrack.title,
       );
+      lastRecorded.current = { key, position: currentPosition };
       recordProgress(currentTrack, currentPosition);
     }
   }, [currentTrack, currentPosition]);
@@ -119,6 +152,7 @@ const MainLayout = () => {
         <Stack.Screen name="reader/[id]" options={{}} />
       </Stack>
       <Toaster />
+      <StatusBar barStyle="dark-content" />
     </GestureHandlerRootView>
   );
 };
@@ -163,8 +197,15 @@ const Login = () => {
       // if (bioAuthResult) {
       //   await logInWithBiometrics(bioAuthResult);
       // }
-    } catch {
-      toast.error("Unknown error");
+    } catch (error) {
+      if (
+        error instanceof HttpResponseError &&
+        (error.status === 401 || error.status === 403)
+      ) {
+        toast.error("Invalid username or password");
+      } else {
+        toast.error("Unable to connect to server");
+      }
     } finally {
       setLoading(false);
     }
@@ -172,35 +213,58 @@ const Login = () => {
 
   const handleLoginWithBiometrics = async () => {
     try {
-      if (!serverUrl) {
-        toast.warning("Please set server url first");
-        return;
-      }
-
       const bioAuthResult = await requestAndAuthenticateViaBiometrics();
       if (bioAuthResult) {
-        await logInWithBiometrics(bioAuthResult);
+        const loggedIn = await logInWithBiometrics(bioAuthResult);
+        if (!loggedIn) {
+          setCanLogInWithBiometrics(false);
+          toast.error("Please log in with your server credentials first");
+        }
       }
-    } catch {
-      toast.error("Unknown error");
+    } catch (error) {
+      console.error("Unable to log in with biometrics", error);
+      toast.error("Unable to log in with Face ID");
     }
   };
 
   useFocusEffect(
     useCallback(() => {
+      let isCancelled = false;
       const fetchData = async () => {
         const result = await db.query.userSettingsSchema.findFirst();
-        if (result && result.signInWithBiometrics) {
+        const token = result?.signInWithBiometrics ? await getToken() : null;
+        if (isCancelled) return;
+        if (result?.signInWithBiometrics && token) {
           setCanLogInWithBiometrics(true);
           const bioAuthResult = await requestAndAuthenticateViaBiometrics();
-          if (bioAuthResult) {
-            logInWithBiometrics(bioAuthResult);
-            await syncProgressWithServer();
+          if (bioAuthResult && !isCancelled) {
+            const loggedIn = await logInWithBiometrics(bioAuthResult);
+            if (!loggedIn && !isCancelled) {
+              setCanLogInWithBiometrics(false);
+              toast.error("Please log in with your server credentials first");
+            } else if (loggedIn) {
+              void syncProgressWithServer().catch((error) => {
+                console.error(
+                  "Unable to sync progress after Face ID login",
+                  error,
+                );
+              });
+            }
           }
+        } else {
+          setCanLogInWithBiometrics(false);
         }
       };
 
-      fetchData();
+      void fetchData().catch((error) => {
+        console.error("Unable to initialize Face ID login", error);
+        if (!isCancelled) {
+          toast.error("Unable to initialize Face ID login");
+        }
+      });
+      return () => {
+        isCancelled = true;
+      };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []),
   );

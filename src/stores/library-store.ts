@@ -73,13 +73,15 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
     const remoteLibraries = await getLibraries();
     for (const remoteLibrary of remoteLibraries ?? []) {
       // insert or update library
-      await db
+      const localLibrary = await db
         .insert(librarySchema)
         .values({ name: remoteLibrary.name, remoteId: remoteLibrary.id })
         .onConflictDoUpdate({
           target: librarySchema.remoteId,
           set: { name: remoteLibrary.name },
-        });
+        })
+        .returning({ id: librarySchema.id });
+      const localLibraryId = localLibrary[0].id;
 
       // sync library items
       const remoteItems = (await getLibraryItems(remoteLibrary.id)) ?? [];
@@ -102,7 +104,7 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
           isAudiobook: remoteItem.media.numAudioFiles > 0,
           // TODO: check that this works!!!
           isEbook: !!remoteItem.media.ebookFormat,
-          libraryId: remoteLibrary.id,
+          libraryId: localLibraryId,
         };
 
         const libraryItem = await db
@@ -239,7 +241,7 @@ export const useLibraryStore = create<LibraryStore>()((set, get) => ({
                   libraryItemSeriesSchema.libraryItemId,
                   libraryItemSeriesSchema.seriesId,
                 ],
-                set: libraryItemSeriesSchema,
+                set: libraryItemSeriesValues,
               });
           }
         }

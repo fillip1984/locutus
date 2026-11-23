@@ -79,19 +79,23 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
     }
   },
   logInWithBiometrics: async (biometricsResult: boolean) => {
-    if (biometricsResult) {
-      const result = await db.query.userSettingsSchema.findFirst();
-      set({
-        isAuthenticated: true,
-        userSettings: result,
-      });
-      return true;
-    } else {
+    if (!biometricsResult) {
       return false;
     }
+    const result = await db.query.userSettingsSchema.findFirst();
+    const token = await getToken();
+    if (!result?.signInWithBiometrics || !token) {
+      return false;
+    }
+    set({
+      isAuthenticated: true,
+      userSettings: result,
+    });
+    return true;
   },
   logOut: async () => {
     TrackPlayer.pause();
+    await SecureStore.deleteItemAsync(key);
     set({
       isAuthenticated: false,
       userSettings: null,

@@ -93,7 +93,9 @@ export const useDownloadStore = create<DownloadStore>()((set, get) => ({
           get().download();
         } else {
           // console.log("queue is empty, sync progress with server");
-          await syncProgressWithServer();
+          await syncProgressWithServer().catch(() => {
+            // already logged, a failed sync shouldn't stop the library refresh
+          });
           useLibraryStore.getState().refetch();
         }
       }

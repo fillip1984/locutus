@@ -1,3 +1,4 @@
+import { Directory, Paths } from "expo-file-system";
 import { openDatabaseSync } from "expo-sqlite";
 
 import { drizzle } from "drizzle-orm/expo-sqlite";
@@ -10,22 +11,26 @@ import migrations from "@/drizzle/migrations";
 const expo = openDatabaseSync("locutus.db");
 export const db = drizzle(expo, { relations });
 
-const runMigrations = async () => {
-  try {
-    // console.log("running migration");
-    await migrate(db, migrations);
-    // console.log("ran migration");
-  } catch (err) {
-    console.error({ err });
-    console.error(
-      "Exception thrown while attempting to run database migration scripts",
-      err,
-    );
-  }
-};
+export const dbReady = migrate(db, migrations).catch((err) => {
+  console.error(
+    "Exception thrown while attempting to run database migration scripts",
+    err,
+  );
+  throw err;
+});
 
 export const dropDB = async () => {
   try {
+    const libraryItems = await db
+      .select({ remoteId: schema.libraryItemSchema.remoteId })
+      .from(schema.libraryItemSchema);
+    for (const libraryItem of libraryItems) {
+      const itemDirectory = new Directory(Paths.document, libraryItem.remoteId);
+      if (itemDirectory.exists) {
+        itemDirectory.delete();
+      }
+    }
+
     // console.log("dropping database");
     await db.delete(schema.librarySchema);
     // TODO: cascades don't seem to be triggering
@@ -43,5 +48,3 @@ export const dropDB = async () => {
     console.error("Exception thrown while attempting to drop database", err);
   }
 };
-
-runMigrations();
