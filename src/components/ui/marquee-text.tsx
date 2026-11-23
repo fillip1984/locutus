@@ -124,6 +124,7 @@ export const Marquee = React.memo(
 
       useDerivedValue(() => {
         if (position) {
+          // eslint-disable-next-line react-hooks/immutability -- Reanimated shared values are intentionally mutable.
           position.value = anim.value;
         }
       });
@@ -191,13 +192,17 @@ export const Marquee = React.memo(
 
       const pan = Gesture.Pan()
         .enabled(withGesture && isOverflowing)
+        // eslint-disable-next-line react-hooks/refs -- Gesture callbacks run outside React render.
         .onBegin(() => {
           stop();
         })
         .onChange((e) => {
+          // eslint-disable-next-line react-hooks/immutability -- Reanimated shared values are intentionally mutable.
           anim.value += -(direction === "horizontal" ? e.changeX : e.changeY);
         })
+        // eslint-disable-next-line react-hooks/refs -- Gesture callbacks run outside React render.
         .onFinalize((e) => {
+          // eslint-disable-next-line react-hooks/immutability -- Reanimated shared values are intentionally mutable.
           anim.value = withDecay(
             {
               velocity: -(direction === "horizontal"

@@ -9,6 +9,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Pressable,
   ScrollView,
+  ScrollViewInstance,
   Text,
   TouchableOpacity,
   View,
@@ -30,10 +31,7 @@ import { db } from "@/db";
 import {
   audioChapterSchemaType,
   libraryItemSchema,
-  libraryItemSchemaType,
-  libraryItemSeriesSchema,
   libraryItemWithFilesSchemaType,
-  seriesSchema,
 } from "@/db/schema";
 import { formatSecondsToTime } from "@/services/progressService";
 import { handleDownload, useDownloadStore } from "@/stores/download-store";
@@ -108,7 +106,7 @@ export default function MediaPage() {
 
   const [expandDescription, setExpandDescription] = useState(false);
 
-  const tracksScrollViewRef = useRef<ScrollView>(null);
+  const tracksScrollViewRef = useRef<ScrollViewInstance>(null);
   const scrollToTop = () => {
     tracksScrollViewRef.current?.scrollTo({
       y: 0,
@@ -160,7 +158,7 @@ export default function MediaPage() {
                 libraryItem.audioChapters.length > 0 && (
                   <MediaTracks libraryItem={libraryItem} />
                 )}
-              <Series libraryItemId={libraryItem.id} />
+              <Series />
 
               {/* scroll to top */}
               <View className="flex items-center justify-center pb-24">
@@ -184,36 +182,17 @@ const Controls = ({
   const { currentTrack, currentState } = useNowPlaying();
   const downloadStore = useDownloadStore();
 
-  const [isPlayable, setIsPlayable] = useState(false);
-  const [isResumable, setIsResumable] = useState(false);
-  const [isReadable, setIsReadable] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [isDownloadable, setIsDownloadable] = useState(false);
-
-  useEffect(() => {
-    if (!libraryItem) return;
-    setIsResumable(
-      libraryItem.id === currentTrack?.extraPayload?.libraryItemId &&
-        currentState === "playing",
-    );
-    setIsPlayable(
-      !isResumable && libraryItem.isAudiobook && libraryItem.downloaded,
-    );
-    setIsReadable(libraryItem.isEbook && libraryItem.downloaded);
-    setIsDownloading(downloadStore.isDownloading(libraryItem.id ?? ""));
-    setIsDownloadable(
-      !downloadStore.isDownloading(libraryItem.id) &&
-        !libraryItem.downloaded &&
-        (libraryItem.isAudiobook || libraryItem.isEbook),
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    currentState,
-    currentTrack,
-    libraryItem,
-    downloadStore,
-    downloadStore.isDownloading,
-  ]);
+  const isResumable =
+    libraryItem.id === currentTrack?.extraPayload?.libraryItemId &&
+    currentState === "playing";
+  const isPlayable =
+    !isResumable && libraryItem.isAudiobook && libraryItem.downloaded;
+  const isReadable = libraryItem.isEbook && libraryItem.downloaded;
+  const isDownloading = downloadStore.isDownloading(libraryItem.id);
+  const isDownloadable =
+    !isDownloading &&
+    !libraryItem.downloaded &&
+    (libraryItem.isAudiobook || libraryItem.isEbook);
 
   // toggle complete/unread status for the library item and audio files
   const [readStatus, setReadStatus] = useState<"complete" | "unread">(
@@ -462,57 +441,7 @@ const Chapter = ({
   );
 };
 
-const Series = ({ libraryItemId }: { libraryItemId: string }) => {
-  const [series, setSeries] = useState<
-    { libraryItems: libraryItemSchemaType }[]
-  >([]);
-
-  useEffect(() => {
-    const fetchSeries = async () => {
-      const seriesFromDB = await db
-        .select()
-        .from(libraryItemSeriesSchema)
-        .where(eq(libraryItemSeriesSchema.libraryItemId, libraryItemId))
-        .innerJoin(
-          seriesSchema,
-          eq(libraryItemSeriesSchema.seriesId, seriesSchema.id),
-        )
-        .innerJoin(
-          libraryItemSchema,
-          eq(libraryItemSeriesSchema.libraryItemId, libraryItemSchema.id),
-        )
-        .get({ libraryItemSchema });
-
-      // console.log({ series: seriesFromDB.map((s) => s.series.name) });
-      // setSeries(seriesFromDB);
-      // const seriesIds = await db.query.libraryItemSeriesSchema.findMany({
-      //   where: {
-      //     libraryItemId: libraryItemId,
-      //   },
-      //   columns: {
-      //     seriesId: true,
-      //   },
-      // });
-      // console.log({ seriesIds });
-      // const series = await db.query.seriesSchema.findMany({
-      //   with: {
-      //     libraryItems: {
-      //       columns: {
-
-      //       }
-      //     },
-      //   },
-      //   where: {
-      //     id: {
-      //       in: seriesIds.map((s) => s.seriesId),
-      //     },
-      //   },
-      // });
-      // console.log({ items: series[0].libraryItems });
-    };
-    fetchSeries();
-  }, [libraryItemId]);
-
+const Series = () => {
   return (
     <View>
       <Text className="mt-6 text-3xl font-bold text-white">Series</Text>

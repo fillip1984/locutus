@@ -1,6 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import {
   PlayerQueue,
@@ -235,28 +235,21 @@ export default function Player() {
 const MediaInfo = () => {
   const { track: currentTrack } = useOnChangeTrack();
   const { position: playbackPosition } = useOnPlaybackProgressChange();
-  // TODO: couldn't figure out how to update the title so having to resolve it myself
-  const [effectiveTitle, setEffectiveTitle] = useState("Loading...");
-  useEffect(() => {
+  const effectiveTitle = useMemo(() => {
     if (!currentTrack?.extraPayload) {
-      return;
+      return currentTrack?.title ?? "Loading...";
     }
-    const chapters = (currentTrack?.extraPayload as TrackPlayerExtraPayload)
+    const chapters = (currentTrack.extraPayload as TrackPlayerExtraPayload)
       .chapters;
     if (!chapters) {
-      setEffectiveTitle(currentTrack?.title ?? "Unknown Title");
-      return;
+      return currentTrack.title ?? "Unknown Title";
     }
-    const currentChapterIndex = chapters.findIndex(
+    const currentChapter = chapters.find(
       (chapter) =>
         chapter.start <= playbackPosition && chapter.end > playbackPosition,
     );
-    if (currentChapterIndex === -1) {
-      console.error("Current chapter not found");
-      return;
-    }
-    setEffectiveTitle(chapters[currentChapterIndex].title);
-  }, [currentTrack?.title, playbackPosition]);
+    return currentChapter?.title ?? currentTrack.title ?? "Unknown Title";
+  }, [currentTrack, playbackPosition]);
 
   return (
     <View className="flex">

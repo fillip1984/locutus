@@ -24,8 +24,6 @@ export default function RecentPage() {
   const [ebookItems, setEbookItems] = useState<libraryItemSchemaType[]>([]);
   const [revisitItems, setRevisitItems] = useState<libraryItemSchemaType[]>([]);
 
-  const [isViewEmpty, setIsViewEmpty] = useState(false);
-
   useFocusEffect(
     useCallback(() => {
       libraryStore.refetch();
@@ -165,14 +163,11 @@ export default function RecentPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [libraryStore.status]);
 
-  useEffect(() => {
-    setIsViewEmpty(
-      continueItems.length === 0 &&
-        newItems.length === 0 &&
-        downloadedItems.length === 0 &&
-        revisitItems.length === 0,
-    );
-  }, [continueItems, newItems, downloadedItems, revisitItems]);
+  const isViewEmpty =
+    continueItems.length === 0 &&
+    newItems.length === 0 &&
+    downloadedItems.length === 0 &&
+    revisitItems.length === 0;
 
   if (isViewEmpty) {
     return (

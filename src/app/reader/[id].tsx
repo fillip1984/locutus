@@ -10,15 +10,7 @@ import { db } from "@/db";
 import { libraryItemWithFilesSchemaType } from "@/db/schema";
 
 export default function Player() {
-  const {
-    id: libraryItemId,
-    eBookFileId,
-    mode,
-  } = useLocalSearchParams<{
-    id: string;
-    eBookFileId: string;
-    mode: "read" | "resume";
-  }>();
+  const { id: libraryItemId } = useLocalSearchParams<{ id: string }>();
   const [libraryItem, setLibraryItem] =
     useState<libraryItemWithFilesSchemaType | null>(null);
   useEffect(() => {

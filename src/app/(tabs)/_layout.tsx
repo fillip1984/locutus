@@ -1,6 +1,6 @@
 import { router } from "expo-router";
-import { NativeTabs } from "expo-router/build/native-tabs";
-import { useEffect, useState } from "react";
+import { NativeTabs } from "expo-router/native-tabs";
+import { useEffect, useMemo } from "react";
 import {
   useOnChangeTrack,
   useOnPlaybackProgressChange,
@@ -18,6 +18,24 @@ export default function TabLayout() {
   const { track: currentTrack } = useOnChangeTrack();
   const { position: playbackPosition } = useOnPlaybackProgressChange();
 
+  const effectiveTitle = useMemo(() => {
+    if (!currentTrack?.extraPayload) {
+      return currentTrack?.title ?? "Loading...";
+    }
+
+    const chapters = (currentTrack.extraPayload as TrackPlayerExtraPayload)
+      .chapters;
+    if (!chapters) {
+      return currentTrack.title ?? "Unknown Title";
+    }
+
+    const currentChapter = chapters.find(
+      (chapter) =>
+        chapter.start <= playbackPosition && chapter.end > playbackPosition,
+    );
+    return currentChapter?.title ?? currentTrack.title ?? "Unknown Title";
+  }, [currentTrack, playbackPosition]);
+
   useEffect(() => {
     if (!isAuthenticated) {
       router.replace("/");
@@ -25,29 +43,6 @@ export default function TabLayout() {
   }, [isAuthenticated]);
 
   const { currentPlaylist } = usePlaylist();
-
-  // TODO: couldn't figure out how to update the title so having to resolve it myself
-  const [effectiveTitle, setEffectiveTitle] = useState("Loading...");
-  useEffect(() => {
-    if (!currentTrack?.extraPayload) {
-      return;
-    }
-    const chapters = (currentTrack?.extraPayload as TrackPlayerExtraPayload)
-      .chapters;
-    if (!chapters) {
-      setEffectiveTitle(currentTrack?.title ?? "Unknown Title");
-      return;
-    }
-    const currentChapterIndex = chapters.findIndex(
-      (chapter) =>
-        chapter.start <= playbackPosition && chapter.end > playbackPosition,
-    );
-    if (currentChapterIndex === -1) {
-      console.error("Current chapter not found");
-      return;
-    }
-    setEffectiveTitle(chapters[currentChapterIndex].title);
-  }, [currentTrack?.title, playbackPosition]);
 
   return (
     <>

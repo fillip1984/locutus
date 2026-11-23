@@ -3,15 +3,14 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
-    "build": "pnpm lint",
+    "build": "pnpm lint && pnpm tsc --noEmit && pnpm build:production",
     "build:interactive": "eas build -p ios -e production --local",
     "build:production": "eas build -p ios -e production --local --non-interactive",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "dev": "expo run:ios",
     "lint": "expo lint",
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@expo/ui": "~58.0.29",

@@ -1,5 +1,5 @@
 import { useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -10,8 +10,6 @@ import { useLibraryStore } from "@/stores/library-store";
 export default function LibraryPage() {
   const { refetch, libraryItems } = useLibraryStore();
 
-  const [isViewEmpty, setIsViewEmpty] = useState(false);
-
   useFocusEffect(
     useCallback(() => {
       refetch();
@@ -19,13 +17,7 @@ export default function LibraryPage() {
     }, []),
   );
 
-  useEffect(() => {
-    if (libraryItems?.length === 0) {
-      setIsViewEmpty(true);
-    } else {
-      setIsViewEmpty(false);
-    }
-  }, [libraryItems]);
+  const isViewEmpty = libraryItems?.length === 0;
 
   if (isViewEmpty) {
     return (

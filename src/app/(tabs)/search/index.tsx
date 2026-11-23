@@ -1,5 +1,5 @@
 import { Stack, useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -9,9 +9,21 @@ import { useLibraryStore } from "@/stores/library-store";
 
 export default function SearchIndex() {
   const { refetch, libraryItems } = useLibraryStore();
-  const [filteredLibraryItems, setFilteredLibraryItems] =
-    useState(libraryItems);
   const [searchText, setSearchText] = useState("");
+
+  const filteredLibraryItems = useMemo(() => {
+    if (searchText === "") {
+      return libraryItems;
+    }
+
+    return (
+      libraryItems?.filter(
+        (item) =>
+          item.title.toLowerCase().includes(searchText.toLowerCase()) ||
+          item.authorName.toLowerCase().includes(searchText.toLowerCase()),
+      ) ?? []
+    );
+  }, [searchText, libraryItems]);
 
   useFocusEffect(
     useCallback(() => {
@@ -19,21 +31,6 @@ export default function SearchIndex() {
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []),
   );
-
-  useEffect(() => {
-    // TODO: debounce this
-    if (searchText === "") {
-      setFilteredLibraryItems(libraryItems);
-    } else {
-      const filtered =
-        libraryItems?.filter(
-          (item) =>
-            item.title.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.authorName.toLowerCase().includes(searchText.toLowerCase()),
-        ) ?? [];
-      setFilteredLibraryItems(filtered);
-    }
-  }, [searchText, libraryItems]);
 
   return (
     <>
