@@ -30,7 +30,7 @@ import {
   syncProgressWithServer,
 } from "@/services/progressService";
 import { HttpResponseError } from "@/services/typedFetch";
-import { useSessionStore } from "@/stores/session-store";
+import { getToken, useSessionStore } from "@/stores/session-store";
 
 export type TrackPlayerExtraPayload = {
   playlistType: "file-per-chapter" | "file-for-all-chapters";
@@ -212,37 +212,58 @@ const Login = () => {
 
   const handleLoginWithBiometrics = async () => {
     try {
-      if (!serverUrl) {
-        toast.warning("Please set server url first");
-        return;
-      }
-
       const bioAuthResult = await requestAndAuthenticateViaBiometrics();
       if (bioAuthResult) {
-        await logInWithBiometrics(bioAuthResult);
+        const loggedIn = await logInWithBiometrics(bioAuthResult);
+        if (!loggedIn) {
+          setCanLogInWithBiometrics(false);
+          toast.error("Please log in with your server credentials first");
+        }
       }
-    } catch {
-      toast.error("Unknown error");
+    } catch (error) {
+      console.error("Unable to log in with biometrics", error);
+      toast.error("Unable to log in with Face ID");
     }
   };
 
   useFocusEffect(
     useCallback(() => {
+      let isCancelled = false;
       const fetchData = async () => {
         const result = await db.query.userSettingsSchema.findFirst();
-        if (result && result.signInWithBiometrics) {
+        const token = result?.signInWithBiometrics ? await getToken() : null;
+        if (isCancelled) return;
+        if (result?.signInWithBiometrics && token) {
           setCanLogInWithBiometrics(true);
           const bioAuthResult = await requestAndAuthenticateViaBiometrics();
-          if (bioAuthResult) {
-            logInWithBiometrics(bioAuthResult);
-            await syncProgressWithServer().catch(() => {
-              // already logged, a failed sync shouldn't break login
-            });
+          if (bioAuthResult && !isCancelled) {
+            const loggedIn = await logInWithBiometrics(bioAuthResult);
+            if (!loggedIn && !isCancelled) {
+              setCanLogInWithBiometrics(false);
+              toast.error("Please log in with your server credentials first");
+            } else if (loggedIn) {
+              void syncProgressWithServer().catch((error) => {
+                console.error(
+                  "Unable to sync progress after Face ID login",
+                  error,
+                );
+              });
+            }
           }
+        } else {
+          setCanLogInWithBiometrics(false);
         }
       };
 
-      fetchData();
+      void fetchData().catch((error) => {
+        console.error("Unable to initialize Face ID login", error);
+        if (!isCancelled) {
+          toast.error("Unable to initialize Face ID login");
+        }
+      });
+      return () => {
+        isCancelled = true;
+      };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []),
   );
